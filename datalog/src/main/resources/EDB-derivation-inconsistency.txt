@@ -1,4 +1,0 @@
-wasDerivedFrom(e1,e2, nil,nil).
-wasDerivedFrom(e2,e3, nil,nil).
-wasDerivedFrom(e3,e4, nil,nil).
-wasDerivedFrom(e4,e1, nil,nil).

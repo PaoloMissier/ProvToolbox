@@ -20,13 +20,15 @@
 
 
   <modules>
-    <module>xml</module>    
     <module>asn</module>    
-    <module>dot</module>    
+    <!--
+    <module>xml</module>      
+    <module>dot</module>   
     <module>json</module>
 
     <module>interop</module>    
-    <module>rdf</module>    
+    <module>rdf</module>   
+--> 
     <module>toolbox</module>    
 
   </modules>

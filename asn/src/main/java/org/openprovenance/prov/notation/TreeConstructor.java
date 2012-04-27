@@ -1,6 +1,7 @@
 package org.openprovenance.prov.notation;
 import java.util.List;
 
+
 public interface TreeConstructor {
     /* Component 1 */
 
@@ -12,6 +13,7 @@ public interface TreeConstructor {
     public Object convertWasGeneratedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
     public Object convertWasStartedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
     public Object convertWasEndedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
+    public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
     public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs);
     public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs);
 
@@ -36,6 +38,14 @@ public interface TreeConstructor {
     public Object convertSpecializationOf(Object id2,Object id1);
 
     /* Component 5 */
+    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs);
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keyset, Object dAttrs);
+    public Object convertEntry(Object o1, Object o2);
+    public Object convertKeyEntitySet(List<Object> o);
+    public Object convertKeys(List<Object> o);
+    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs);
+
+
     /* Component 6 */
 
     public Object convertNote(Object id, Object attrs);

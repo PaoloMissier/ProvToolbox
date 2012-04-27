@@ -16,9 +16,9 @@
   -->
 
 
-<xs:schema targetNamespace="http://openprovenance.org/prov-xml#"
+<xs:schema targetNamespace="http://www.w3.org/ns/prov#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:prov="http://openprovenance.org/prov-xml#"
+           xmlns:prov="http://www.w3.org/ns/prov#"
            xmlns:cu="http://www.w3.org/1999/xhtml/datatypes/"
            elementFormDefault="qualified"
            attributeFormDefault="unqualified">
@@ -35,6 +35,7 @@
     <xs:sequence>
       <xs:element ref="prov:label" minOccurs="0"/> 
       <xs:element ref="prov:type"  minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="prov:location"  minOccurs="0" maxOccurs="unbounded"/>
  
       <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -48,6 +49,7 @@
       <xs:element name="endTime"      type="xs:dateTime" minOccurs="0"/> 
       <xs:element ref="prov:label" minOccurs="0"/> 
       <xs:element ref="prov:type"  minOccurs="0" maxOccurs="unbounded"/> 
+      <xs:element ref="prov:location"  minOccurs="0" maxOccurs="unbounded"/>
       
       <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -61,7 +63,7 @@
       <xs:element name="activity" type="prov:ActivityRef"/>
       <xs:element name="entity"   type="prov:EntityRef"/>
       <xs:element ref="prov:type"  minOccurs="0" maxOccurs="unbounded"/>
-
+      <xs:element ref="prov:location"  minOccurs="0" maxOccurs="unbounded"/>
       <xs:element ref="prov:role"  minOccurs="0" maxOccurs="unbounded"/> 
       <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -74,7 +76,9 @@
       <xs:element name="entity"   type="prov:EntityRef"/>
       <xs:element name="activity" type="prov:ActivityRef" minOccurs="0"/>
       <xs:element ref="prov:type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="prov:location"  minOccurs="0" maxOccurs="unbounded"/>
       <xs:element ref="prov:role"  minOccurs="0" maxOccurs="unbounded"/> 
+
       <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute ref="prov:id"/>
@@ -103,6 +107,19 @@
     </xs:sequence>
     <xs:attribute ref="prov:id"/>
   </xs:complexType>
+
+  <xs:complexType name="WasInvalidatedBy">
+    <xs:sequence>
+      <xs:element name="time"     type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="entity"   type="prov:EntityRef"/>
+      <xs:element name="activity" type="prov:ActivityRef" minOccurs="0"/>
+      <xs:element ref="prov:type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element ref="prov:role"  minOccurs="0" maxOccurs="unbounded"/> 
+      <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="prov:id"/>
+  </xs:complexType>
+
 
   <xs:complexType name="WasInformedBy">
     <xs:sequence>
@@ -255,6 +272,50 @@
   
   <!-- Component 5 -->
 
+  <xs:complexType name="DerivedByInsertionFrom">
+    <xs:sequence>
+      <xs:element name="after"           type="prov:EntityRef"/>
+      <xs:element name="before"          type="prov:EntityRef"/>
+      <xs:element name="complete"        type="xs:boolean"/>
+      <xs:element name="entry"           type="prov:Entry" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="prov:type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="prov:id"/>
+  </xs:complexType>
+
+  <xs:complexType name="DerivedByRemovalFrom">
+    <xs:sequence>
+      <xs:element name="after"    type="prov:EntityRef"/>
+      <xs:element name="before"   type="prov:EntityRef"/>
+      <xs:element name="key"      type="xs:anySimpleType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="prov:type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="prov:id"/>
+  </xs:complexType>
+
+  <xs:complexType name="MemberOf">
+    <xs:sequence>
+      <xs:element name="entity"          type="prov:EntityRef"/>
+      <xs:element name="complete"        type="xs:boolean"/>
+      <xs:element name="entry"           type="prov:Entry" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element ref="prov:type" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute ref="prov:id"/>
+  </xs:complexType>
+
+
+  <xs:element name="key"  type="xs:anySimpleType"/>
+
+  <xs:complexType name="Entry">
+    <xs:sequence>
+      <xs:element ref="prov:key"  minOccurs="1" maxOccurs="1"/>
+      <xs:element name="entity"   type="prov:EntityRef" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
 
   <!-- Component 6 -->
   
@@ -284,6 +345,7 @@
   <xs:element name="label" type="xs:string"/>
   <xs:element name="role"  type="xs:anySimpleType"/>
   <xs:element name="type"  type="xs:anySimpleType"/>
+  <xs:element name="location" type="xs:anySimpleType"/>
 
   <xs:attribute name="id"  type="xs:QName"/>
   <xs:attribute name="ref" type="xs:QName"/>
@@ -314,6 +376,7 @@
             <xs:element name="wasGeneratedBy"       type="prov:WasGeneratedBy"/>
             <xs:element name="wasStartedBy"         type="prov:WasStartedBy"/>
             <xs:element name="wasEndedBy"           type="prov:WasEndedBy"/>
+            <xs:element name="wasInvalidatedBy"     type="prov:WasInvalidatedBy"/>
             <xs:element name="wasInformedBy"        type="prov:WasInformedBy"/>
             <xs:element name="wasStartedByActivity" type="prov:WasStartedByActivity"/>
 
@@ -329,6 +392,11 @@
 
             <xs:element name="alternateOf"          type="prov:AlternateOf"/>
             <xs:element name="specializationOf"     type="prov:SpecializationOf"/>
+
+
+            <xs:element name="derivedByInsertionFrom" type="prov:DerivedByInsertionFrom"/>
+            <xs:element name="derivedByRemovalFrom"   type="prov:DerivedByRemovalFrom"/>
+            <xs:element name="memberOf"               type="prov:MemberOf"/>
 
             <xs:element name="hasAnnotation"        type="prov:HasAnnotation"/>
       </xs:choice>

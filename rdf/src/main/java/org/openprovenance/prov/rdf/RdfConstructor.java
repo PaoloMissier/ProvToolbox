@@ -145,6 +145,11 @@ public class RdfConstructor implements TreeConstructor {
         throw new UnsupportedOperationException();
     }
 
+    public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object aAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
     public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs) {
         //todo
         throw new UnsupportedOperationException();
@@ -266,6 +271,39 @@ public class RdfConstructor implements TreeConstructor {
 
     public String unwrap (String s) {
         return s.substring(1,s.length()-1);
+    }
+
+
+   /* Component 5 */
+
+    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertEntry(Object o1, Object o2) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertKeyEntitySet(List<Object> o) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keys, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertKeys(List<Object> keys) {
+        //todo
+        throw new UnsupportedOperationException();
     }
 
    /* Component 6 */

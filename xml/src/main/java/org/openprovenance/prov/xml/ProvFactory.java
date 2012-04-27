@@ -530,6 +530,83 @@ public class ProvFactory implements CommonURIs {
     }
 
 
+    public Entry newEntry(Object key,
+			  EntityRef entity) {
+        Entry res=of.createEntry();
+        res.setKey(key);
+        res.setEntity(entity);
+        return res;
+    }
+
+    public DerivedByInsertionFrom newDerivedByInsertionFrom(QName id,
+							    EntityRef after,
+							    EntityRef before,
+							    List<Entry> keyEntitySet) {
+        DerivedByInsertionFrom res=of.createDerivedByInsertionFrom();
+        res.setId(id);
+        res.setAfter(after);
+        res.setBefore(before);
+	if (keyEntitySet!=null) res.getEntry().addAll(keyEntitySet);
+        return res;
+    }
+
+
+    public DerivedByInsertionFrom newDerivedByInsertionFrom(String id,
+							    EntityRef after,
+							    EntityRef before,
+							    List<Entry> keyEntitySet) {
+        return newDerivedByInsertionFrom(stringToQName(id),
+					 after,
+					 before,
+					 keyEntitySet);
+    }
+
+
+
+    public DerivedByRemovalFrom newDerivedByRemovalFrom(QName id,
+							EntityRef after,
+							EntityRef before,
+							List<Object> keys) {
+        DerivedByRemovalFrom res=of.createDerivedByRemovalFrom();
+        res.setId(id);
+        res.setAfter(after);
+        res.setBefore(before);
+	if (keys!=null) res.getKey().addAll(keys);
+        return res;
+    }
+
+
+    public DerivedByRemovalFrom newDerivedByRemovalFrom(String id,
+							EntityRef after,
+							EntityRef before,
+							List<Object> keys) {
+        return newDerivedByRemovalFrom(stringToQName(id),
+				       after,
+				       before,
+				       keys);
+    }
+
+
+    public MemberOf newMemberOf(QName id,
+				EntityRef after,
+				List<Entry> keyEntitySet) {
+        MemberOf res=of.createMemberOf();
+        res.setId(id);
+        res.setEntity(after);
+	if (keyEntitySet!=null) res.getEntry().addAll(keyEntitySet);
+        return res;
+    }
+
+
+    public MemberOf newMemberOf(String id,
+				EntityRef after,
+				List<Entry> keyEntitySet) {
+        return newMemberOf(stringToQName(id),
+					 after,
+					 keyEntitySet);
+    }
+
+
     public void addRole(HasRole a,                                  
                         Object role) {
         if (role!=null) {
@@ -630,6 +707,22 @@ public class ProvFactory implements CommonURIs {
                                         ActivityRef aid,
                                         EntityRef eid) {
         return newWasStartedBy(stringToQName(id),aid,eid);
+    }
+
+    public WasInvalidatedBy newWasInvalidatedBy(QName id,
+                                                EntityRef eid,
+                                                ActivityRef aid) {
+        WasInvalidatedBy res=of.createWasInvalidatedBy();
+        res.setId(id);
+        res.setEntity(eid);
+        res.setActivity(aid);
+        return res;
+    }
+
+    public WasInvalidatedBy newWasInvalidatedBy(String id,
+                                                EntityRef eid,
+                                                ActivityRef aid) {
+        return newWasInvalidatedBy(stringToQName(id),eid,aid);
     }
 
 

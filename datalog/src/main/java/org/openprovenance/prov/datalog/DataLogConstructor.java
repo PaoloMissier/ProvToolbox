@@ -110,6 +110,12 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
+    public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object aAttrs ) {
+        String s="wasInvalidatedBy(" + optionalId(id) + id2 + "," + id1 +
+            optionalTime(time) + optionalAttributes(aAttrs) +  ")";
+        return s;
+    }
+
     public Object convertWasStartedBy(Object id, Object id2,Object id1, Object time, Object aAttrs ) {
         String s="wasStartedBy(" + optionalId(id) + id2 + "," + id1 +
             optionalTime(time) + optionalAttributes(aAttrs) +  ")";
@@ -210,6 +216,39 @@ public class DataLogConstructor implements TreeConstructor {
     public Object convertPrefix(String pre) {
         return pre;
     }
+
+   /* Component 5 */
+
+    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertEntry(Object o1, Object o2) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertKeyEntitySet(List<Object> o) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keys, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertKeys(List<Object> keys) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
 
    /* Component 6 */
 

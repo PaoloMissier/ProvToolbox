@@ -12,6 +12,8 @@ import org.openprovenance.prov.xml.ActivityRef;
 import org.openprovenance.prov.xml.Entity;
 import org.openprovenance.prov.xml.Agent;
 import org.openprovenance.prov.xml.EntityRef;
+import org.openprovenance.prov.xml.HasExtensibility;
+import org.openprovenance.prov.xml.HasType;
 import org.openprovenance.prov.xml.AgentRef;
 import org.openprovenance.prov.xml.NoteRef;
 import org.openprovenance.prov.xml.Agent;
@@ -19,6 +21,7 @@ import org.openprovenance.prov.xml.Account;
 import org.openprovenance.prov.xml.Container;
 import org.openprovenance.prov.xml.Used;
 import org.openprovenance.prov.xml.WasGeneratedBy;
+import org.openprovenance.prov.xml.WasInvalidatedBy;
 import org.openprovenance.prov.xml.WasStartedBy;
 import org.openprovenance.prov.xml.WasStartedByActivity;
 import org.openprovenance.prov.xml.WasInformedBy;
@@ -28,6 +31,10 @@ import org.openprovenance.prov.xml.WasDerivedFrom;
 import org.openprovenance.prov.xml.WasAttributedTo;
 import org.openprovenance.prov.xml.WasRevisionOf;
 import org.openprovenance.prov.xml.WasQuotedFrom;
+import org.openprovenance.prov.xml.DerivedByInsertionFrom;
+import org.openprovenance.prov.xml.DerivedByRemovalFrom;
+import org.openprovenance.prov.xml.MemberOf;
+import org.openprovenance.prov.xml.Entry;
 import org.openprovenance.prov.xml.HadOriginalSource;
 import org.openprovenance.prov.xml.TracedTo;
 import org.openprovenance.prov.xml.AlternateOf;
@@ -96,8 +103,28 @@ public  class ProvConstructor implements TreeConstructor {
         List attrs=(List)eAttrs;
         Entity e=pFactory.newEntity(s_id);
         entityTable.put(s_id,e);
-        e.getAny().addAll(attrs);
+        addAllAttributes(e,(List)attrs);
         return e;
+    }
+
+    /* Recognize prov attributes and insert them in the appropriate fields.
+     TODO: done for type, only*/
+    
+    public void addAllAttributes(HasExtensibility e, List attributes) {
+        for (Object o: attributes) {
+            if (o instanceof JAXBElement) {
+                JAXBElement je=(JAXBElement) o;
+                QName q=je.getName();
+                if ("type".equals(q.getLocalPart())) {
+                    HasType eWithType=(HasType) e;
+                    eWithType.getType().add(je.getValue());
+                } else {
+                    e.getAny().add(o);
+                }
+            } else {
+                e.getAny().add(o);
+            }
+        }
     }
 
     public Object convertAgent(Object id, Object eAttrs) {
@@ -308,6 +335,29 @@ public  class ProvConstructor implements TreeConstructor {
             
         return s;
     }
+
+    public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object gAttrs) {
+        String s_id=(String)id;
+        String s_id2=(String)id2;
+        String s_id1=(String)id1;
+        Activity a1=(s_id1==null)? null: activityTable.get(s_id1);  //id1 may be null
+        ActivityRef a1r=null;
+        if (a1!=null) a1r=pFactory.newActivityRef(a1);
+        Entity e2=entityTable.get(s_id2);
+        EntityRef e2r=pFactory.newEntityRef(e2);
+
+        WasInvalidatedBy g=pFactory.newWasInvalidatedBy(s_id,
+                                                        e2r,
+                                                        a1r);
+        List attrs=(List)gAttrs;
+        if (attrs!=null) g.getAny().addAll(attrs);
+        if (time!=null) {
+            g.setTime(pFactory.newISOTime((String)time));
+        }
+            
+        return g;
+    }
+
 
     public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs) {
         String s_id=(String)id;
@@ -651,6 +701,96 @@ public  class ProvConstructor implements TreeConstructor {
     public Object convertPrefix(String pre) {
         return pre;
     }
+
+
+    /* Component 5 */
+
+    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
+        String s_id=(String)id;
+        String s_id2=(String)id2;
+        String s_id1=(String)id1;
+
+        Entity e2=entityTable.get(s_id2);
+        EntityRef e2r=pFactory.newEntityRef(e2);
+        Entity e1=entityTable.get(s_id1);
+        EntityRef e1r=pFactory.newEntityRef(e1);
+
+        DerivedByInsertionFrom dbif=pFactory.newDerivedByInsertionFrom(s_id,
+                                                                       e2r,
+                                                                       e1r,
+                                                                       null);
+        List attrs=(List)dAttrs;
+        dbif.getAny().addAll(attrs);
+
+        List entries=(List)map;
+        for (Object o: entries) {
+            Entry entry=(Entry) o;
+            dbif.getEntry().add(entry);
+        }
+
+        return dbif;
+    }
+
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keyset, Object dAttrs) {
+
+    String s_id=(String)id;
+        String s_id2=(String)id2;
+        String s_id1=(String)id1;
+
+        Entity e2=entityTable.get(s_id2);
+        EntityRef e2r=pFactory.newEntityRef(e2);
+        Entity e1=entityTable.get(s_id1);
+        EntityRef e1r=pFactory.newEntityRef(e1);
+
+    DerivedByRemovalFrom dbrf=pFactory.newDerivedByRemovalFrom(s_id,
+                                   e2r,
+                                   e1r,
+                                   null);
+    List attrs=(List)dAttrs;
+        dbrf.getAny().addAll(attrs);
+
+    return dbrf;
+    }
+
+
+    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+        String s_id=(String)id;
+        String s_id2=(String)id2;
+
+        Entity e2=entityTable.get(s_id2);
+        EntityRef e2r=pFactory.newEntityRef(e2);
+
+    MemberOf mo=pFactory.newMemberOf(s_id,
+                       e2r,
+                       null);
+    List attrs=(List)dAttrs;
+        if (attrs!=null) mo.getAny().addAll(attrs);
+
+    return mo;
+    }
+
+
+
+    public Object convertEntry(Object o1, Object o2) {
+        String s_id=(String)o2;
+
+        Entity e=entityTable.get(s_id);
+        EntityRef er=pFactory.newEntityRef(e);
+    
+    return pFactory.newEntry(o1,er);
+    }
+
+
+    public Object convertKeyEntitySet(List<Object> entries) {
+    return entries;
+    }
+
+    public Object convertKeys(List<Object> keys) {
+    return keys;
+    }
+
+    /* Component 6 */
 
     public Object convertNote(Object id, Object attrs) {
         String s_id=(String)id;

@@ -13,7 +13,7 @@ tokens {
     CONTAINER; NAMESPACE; DEFAULTNAMESPACE; NAMESPACES; PREFIX; 
 
     /* Component 1 */
-    ENTITY; ACTIVITY; WGB; USED; WSB; WEB; WIB; WSBA;
+    ENTITY; ACTIVITY; WGB; USED; WSB; WEB; WINVB; WIB; WSBA;
     TIME; START; END;
 
     /* Component 2 */
@@ -23,6 +23,7 @@ tokens {
     /* Component 4 */
     SPECIALIZATION; ALTERNATE; 
     /* Component 5 */
+    DBIF; DBRF; KES; KEYS; VALUES; MEM; TRUE; FALSE; UNKNOWN;
     /* Component 6 */
     NOTE; HAN;
 }
@@ -87,7 +88,7 @@ record
         (   /* component 1 */
 
            entityExpression | activityExpression | generationExpression  | usageExpression
-         | startExpression | endExpression | communicationExpression | startByActivityExpression
+         | startExpression | endExpression | invalidationExpression | communicationExpression | startByActivityExpression
 
             /* component 2 */
         
@@ -102,6 +103,10 @@ record
         | alternateExpression | specializationExpression
 
             /* component 5 */
+
+        | insertionExpression | removalExpression | membershipExpression 
+
+
             /* component 6 */ 
         | noteExpression | hasAnnotationExpression
         )
@@ -144,6 +149,12 @@ endExpression
 	:	'wasEndedBy' '(' ((id0=identifier | '-') ',')? id2=identifier ',' ((id1=identifier) | '-') ',' ( time | '-' ) optionalAttributeValuePairs ')'
       -> {$id1.tree==null}? ^(WEB ^(ID $id0?) $id2 ^(ID)  ^(TIME time?) optionalAttributeValuePairs)
       -> ^(WEB ^(ID $id0?) $id2 $id1  ^(TIME time?) optionalAttributeValuePairs)
+	;
+
+invalidationExpression
+	:	'wasInvalidatedBy' '(' ((id0=identifier | '-') ',')? id2=identifier ',' ((id1=identifier) | '-') ',' ( time | '-' ) optionalAttributeValuePairs ')'
+      -> {$id1.tree==null}? ^(WINVB ^(ID $id0?) $id2 ^(ID)  ^(TIME time?) optionalAttributeValuePairs)
+      -> ^(WINVB ^(ID $id0?) $id2 $id1  ^(TIME time?) optionalAttributeValuePairs)
 	;
 
 
@@ -258,7 +269,37 @@ specializationExpression
 /*
         Component 5: Collections
 
+TODO: literal used in these production needs to disable qname, to allow for intliteral
+
 */
+
+insertionExpression
+	:	'derivedByInsertionFrom' '('  ((id0=identifier | '-') ',')? id2=identifier ',' id1=identifier ',' keyEntitySet optionalAttributeValuePairs ')'
+      -> ^(DBIF ^(ID $id0?) $id2 $id1 keyEntitySet  optionalAttributeValuePairs)
+	;
+
+removalExpression
+	:	'derivedByRemovalFrom' '('  ((id0=identifier | '-') ',')? id2=identifier ',' id1=identifier ',' '{' literal (',' literal)* '}' optionalAttributeValuePairs ')'
+      -> ^(DBRF ^(ID $id0?) $id2 $id1 ^(KEYS literal*)  optionalAttributeValuePairs)
+	;
+
+/* TODO: specify complete as optional boolean */
+membershipExpression
+	:	( 'memberOf' '('  ((id0=identifier | '-') ',')?  id1=identifier ',' keyEntitySet ',' 'true' optionalAttributeValuePairs ')'
+      -> ^(MEM ^(ID $id0?) $id1 keyEntitySet  ^(TRUE) optionalAttributeValuePairs)
+         |          
+          'memberOf' '('  ((id0=identifier | '-') ',')?  id1=identifier ',' keyEntitySet ',' 'false' optionalAttributeValuePairs ')'
+      -> ^(MEM ^(ID $id0?) $id1 keyEntitySet  ^(FALSE) optionalAttributeValuePairs)
+         |          
+          'memberOf' '('  ((id0=identifier | '-') ',')?  id1=identifier ',' keyEntitySet optionalAttributeValuePairs ')'
+      -> ^(MEM ^(ID $id0?) $id1 keyEntitySet  ^(UNKNOWN) optionalAttributeValuePairs)
+        )
+	;
+
+keyEntitySet
+    : '{'  '(' literal ',' val=identifier  ')' ( ','  '(' literal ',' val=identifier  ')' )* '}'
+      -> ^(KES ^(KEYS literal+) ^(VALUES identifier+))
+    ;
 
 /* TODO */
 
@@ -332,7 +373,8 @@ time
 literal :
         (STRINGLITERAL -> ^(STRING STRINGLITERAL) |
          INTLITERAL -> ^(INT INTLITERAL) |
-         STRINGLITERAL { qnameDisabled = false; } '%%' datatype -> ^(TYPEDLITERAL STRINGLITERAL datatype))
+         STRINGLITERAL { qnameDisabled = false; } '%%' datatype -> ^(TYPEDLITERAL STRINGLITERAL datatype) |
+         { qnameDisabled = false; } '\'' QNAME '\'' -> ^(TYPEDLITERAL QNAME) | )
 	;
 
 datatype:

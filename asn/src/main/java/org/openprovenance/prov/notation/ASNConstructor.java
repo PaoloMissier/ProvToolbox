@@ -120,6 +120,11 @@ public class ASNConstructor implements TreeConstructor {
         return s;
     }
 
+    public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object aAttrs ) {
+        String s="wasInvalidatedBy(" + optionalId(id) + id2 + "," + optional(id1) + "," +
+            optional(time) + optionalAttributes(aAttrs) +  ")";
+        return s;
+    }
 
 
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object aAttrs ) {
@@ -188,7 +193,12 @@ public class ASNConstructor implements TreeConstructor {
     }
 
     public Object convertTypedLiteral(String datatype, Object value) {
-        return value + "%%" + datatype;
+        if ("xsd:QName".equals(datatype)) {
+            String val=(String)value;
+            return "'" + val.substring(1, val.length() -1 ) + "'";
+        } else {
+            return value + "%%" + datatype;
+        }
     }
 
    public Object convertNamespace(Object pre, Object iri) {
@@ -210,6 +220,75 @@ public class ASNConstructor implements TreeConstructor {
     public Object convertPrefix(String pre) {
         return pre;
     }
+
+    /* Component 5 */
+
+    public Object convertInsertion(Object id, Object id2, Object id1, Object kes, Object iAttrs) {
+        String s="derivedByInsertionFrom(" + optionalId(id) + id2 + ", " + id1 + ", "
+	    + kes + optionalAttributes(iAttrs) +  ")";
+	return s;
+    }
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keyset, Object rAttrs) {
+        String s="derivedByRemovalFrom(" + optionalId(id) + id2 + ", " + id1 + ", "
+	    + keyset + optionalAttributes(rAttrs) +  ")";
+	return s;
+
+    }
+
+    public Object convertMemberOf(Object id, Object id2, Object kes, Object complete, Object mAttrs) {
+
+        String s="memberOf(" + optionalId(id) + id2 + ", "
+	    + kes + ((complete==null)? "" : ", "+complete) + optionalAttributes(mAttrs) +  ")";
+	return s;
+
+    }
+
+    public Object convertEntry(Object o1, Object o2) {
+        String s="{" + o1 + ", " + o2 + "}";
+	return s;
+    }
+
+    public Object convertKeyEntitySet(List<Object> entries) {
+        String s="{";
+
+	boolean first=true;
+
+	for (Object entry: entries) {
+	    if (!first) {
+		s=s+", ";
+	    } else {
+		first=false;
+	    }
+
+
+	    s=s + entry;
+	}
+	s=s+"}";
+	return s;
+    }
+
+
+    public Object convertKeys(List<Object> keys) {
+        String s="{";
+
+	boolean first=true;
+
+	for (Object key: keys) {
+	    if (!first) {
+		s=s+", ";
+	    } else {
+		first=false;
+	    }
+
+
+	    s=s + key;
+	}
+	s=s+"}";
+	return s;
+    }
+
+
 
     /* Component 6 */
 

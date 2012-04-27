@@ -34,6 +34,10 @@ public class NullConstructor implements TreeConstructor {
         return null;
     }
 
+    public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object aAttrs) {
+        return null;
+    }
+
     public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs) {
         return null;
     }
@@ -87,6 +91,31 @@ public class NullConstructor implements TreeConstructor {
         return null;
     }
     /* Component 5 */
+
+    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
+	return null;
+    }
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keyset, Object dAttrs) {
+	return null;
+    }
+
+    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+	return null;
+    }
+    
+    public Object convertEntry(Object o1, Object o2) {
+	return null;
+    }
+
+    public Object convertKeyEntitySet(List<Object> o) {
+	return null;
+    }
+
+    public Object convertKeys(List<Object> o) {
+	return null;
+    }
+
     /* Component 6 */
 
     public Object convertNote(Object id, Object attrs) {

@@ -46,6 +46,13 @@ public class ProvUtilities {
         if (r instanceof SpecializationOf) {
             return ((SpecializationOf)r).getGeneralEntity().getRef();
         }
+        if (r instanceof WasInformedBy) {
+            return ((WasInformedBy)r).getEffect().getRef();
+        }
+
+        if (r instanceof DerivedByInsertionFrom) {
+            return ((DerivedByInsertionFrom)r).getAfter().getRef();
+        }
         System.out.println("Unknow relation " + r);
         throw new NullPointerException();
     }
@@ -69,15 +76,31 @@ public class ProvUtilities {
         if (r instanceof SpecializationOf) {
             return ((SpecializationOf)r).getSpecializedEntity().getRef();
         }
-
+        if (r instanceof WasInformedBy) {
+            return ((WasInformedBy)r).getCause().getRef();
+        }
+        if (r instanceof DerivedByInsertionFrom) {
+            return ((DerivedByInsertionFrom)r).getBefore().getRef();
+        }
         throw new NullPointerException();
     }
 
-    public QName getOtherCause(Relation0 r) {
-        if (r instanceof WasAssociatedWith) { 
+    
+    public List<QName> getOtherCauses(Relation0 r) {
+        if (r instanceof WasAssociatedWith) {
+            List<QName> res=new LinkedList<QName>();
             EntityRef e=((WasAssociatedWith)r).getPlan();
             if (e==null) return null;
-            return e.getRef();
+            res.add(e.getRef());
+            return res;
+        }
+        if (r instanceof DerivedByInsertionFrom) {
+            List<QName> res=new LinkedList<QName>();
+            DerivedByInsertionFrom dbif=((DerivedByInsertionFrom)r);
+            for (Entry entry: dbif.getEntry()) {
+                res.add(entry.getEntity().getRef());
+            }
+            return res;
         }
         return null;
     }

@@ -1,0 +1,66 @@
+%%% 
+% all test queries
+%%%
+
+
+precedes(X,Y) ?
+
+% entity(E,Attrs)?
+
+% inCollection(c7, K,V) ?
+
+% activitiesWithResponsibilities(A) ?
+
+% which agents are involved in which activity, either directly or indirectly?
+
+% headOfChain(Ag) ?
+%responsible(Ag, Act)?
+
+%wasInformedBy(A2,A1,_)?
+
+%used(A,E,_,_)?
+
+%usedGeneratedPath(E2, E1)?
+
+%relatedAgents(Ag2, Ag1, N) ?
+
+%tracedTo(A,B) ?
+
+%ungenerated(E) ?
+
+% usedGeneratedPath(EUsed, EGen, N) ?
+
+%entity(draftV1, Attrs), attrList(Attrs,Name,Value) ?
+
+%entity(X,Attrs), agent(X,Attrs)?
+
+%%%% used for temporal inconsistencies
+%precedes(A,B) ?
+
+%tracedTo(A,B)?
+
+% derivability -- constraint checking
+%derivable(A,B) ?
+
+%%% 
+% TODO
+%%%
+
+
+% weak dependencies:  
+
+%  entity-entity:  tracedTo is transitive -- see traceability inference constraint
+
+% find all entities that can be traced to E
+
+
+
+% activity-activity:  wasInformedBy, wasStartedBy
+
+ 
+% either through wdf or used+genby pairs . but this is weak in that none of the involved relations are transitive. so the meaning of the path is not clear.
+
+% entity-activity queries:  trace a path through the graph that includes both entities and activities: 
+%   - either through a used-genby path, or 
+ %  - tracedTo
+

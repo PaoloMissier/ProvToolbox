@@ -1,0 +1,14 @@
+
+
+derivedByInsertionFrom(c1, c0, k0, v0).
+derivedByInsertionFrom(c2, c1, k1, v1).
+derivedByRemovalFrom(c3,c2,k0).
+derivedByInsertionFrom(c4, c3, k2, v2).
+derivedByRemovalFrom(c5,c4,k1).
+derivedByInsertionFrom(c6, c5, k0, v0).
+derivedByInsertionFrom(c7, c6, k1, v1).
+
+%derivedByInsertionFrom(c7, c6, k2, v2).
+%derivedByInsertionFrom(c7, c6, k1, v1).
+
+%derivedByInsertionFrom(c7, c5, k1, v1).

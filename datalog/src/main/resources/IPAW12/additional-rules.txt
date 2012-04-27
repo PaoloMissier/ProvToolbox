@@ -1,0 +1,73 @@
+#maxint=100.
+
+%%%%%%%%%%%%%%
+% traversal of used-wasGeneratedBy paths
+%%%%%%%%%%%%%%
+
+% elementatry pattern block
+%usedGeneratedPath0(EUsed,EGen) :-  used(A, EUsed, _, Attrs), wasGeneratedBy(EGen, A, _,_), not wasDerivedFrom(EUsed, EGen, A, Attrs).
+
+% repeated pattern
+usedGeneratedPathN(EUsed,EGen, 1)  :- usedGeneratedPath0(EUsed,EGen).
+usedGeneratedPathN(EUsed,EGen, N)  :- usedGeneratedPath0(EUsed,EGen1), usedGeneratedPathN(EGen1, EGen, M), #succ(M,N).
+
+%%%%%%%%%%%%%%
+% agents: who did what (when). degrees of separation amongst agents
+%%%%%%%%%%%%%%
+
+relatedAgents0(Ag2, Ag1) :- wasInformedBy(A2, A1,_), wasAssociatedWith(A2,Ag2,_,_), wasAssociatedWith(A1,Ag1,_,_). 
+relatedAgents(Ag2, Ag1, 1)  :- relatedAgents0(Ag2, Ag1).
+relatedAgents(Ag3, Ag1, N) :- relatedAgents0(Ag3, Ag2), relatedAgents(Ag2, Ag1, M),   #succ(M,N).
+
+%%%%%%%%%%%%%%
+% overall responsibility: head of a chain
+%%%%%%%%%%%%%%
+headOfChain(Ag) :- agent(Ag,_),  wasAssociatedWith(A,Ag,_,_), #count{ Ag2:  actedOnBehalfOf(Ag,Ag2,A,_)} = 0.
+% 
+
+%%%%%%%%%%%%%%
+% follow chain of responsibility
+%%%%%%%%%%%%%%
+responsible(Ag, Act) :- wasAssociatedWith(Act,Ag,_,_), Act !=nil.
+responsible(Ag, Act) :- specializationOf(Ag1, Ag),  responsible(Ag1, Act).
+responsible(Ag1, Act) :- actedOnBehalfOf(Ag,Ag1,_,_), responsible(Ag, Act).
+
+%%%%%%%%%%%%%%
+% activities with > 1 agent
+%%%%%%%%%%%%%% 
+activitiesWithResponsibilities(A) :-   activity(A,_,_,_),  #count{Ag : wasAssociatedWith(A,Ag,_,_)} >1.
+
+%activitiesWithResponsibilities(A) ?
+
+%%%%%%%%%%%%%%
+% entities that are used but are not known to have been generated
+%%%%%%%%%%%%%% 
+ungenerated(E) :- used(_, E, _, _),  #count{ A:  wasGeneratedBy(E, A, _,_)} = 0.
+% ungenerated1(E,T,Attrs) :- used(_, E, _, _),  not wasGeneratedBy(E, A, T,Attrs), activity(A,_,_,_).  % unsafe
+
+
+%%%%%%%%%%%%%%
+% entities that have been generated but are not known to have been used
+%%%%%%%%%%%%%% 
+unused(E) :- wasGeneratedBy(E, _, _,_),  #count{ A: used(A, E, _, _) } = 0.
+
+% unused(E) ?
+
+%%%%%%%%%%%%%%
+% specialization hierarchies
+%%%%%%%%%%%%%% 
+
+% specializationOf(E2,E1)?
+
+
+%%%%%%%%%%%%%%
+%  is an element part of a collection?
+%%%%%%%%%%%%%%%
+
+% infer entities as  arguments of a collection relation  (no attributes though)
+
+inCollection(C, K, V) :-  derivedByInsertionFrom(C, _, K, V).                                             % baseline: this insertion is the last thing that happened
+inCollection(C, K, V)  :- derivedByInsertionFrom(C,C1,_,_), inCollection(C1,K,V).             % insertion step with recursion
+inCollection(C, K, V)  :- derivedByRemovalFrom(C,C1,K1), K1 != K, inCollection(C1,K,V). % removal step with recursion 
+
+

@@ -1,0 +1,51 @@
+%%%%%%%%%%%
+%% 
+%%  encoding of resp. chan example
+%% 
+%%%%%%%%%%%%
+
+%Activities (In the order they occur)
+activity(act1, "Check purchase order request",  t1,nil,nil).
+
+activity(act2, "Verify supply in stock",  t2,nil,nil).
+activity(act3, "Check availability with the vendor",  t3,nil,nil).
+activity(act4, "Replenish stock level",  t4,nil,nil).
+activity(act5, "Arrange delivery",  t5,nil,nil).
+
+% Agents
+agent(jane, al_ag1).
+attrList(al_ag1, "prov:type", "Seller").
+
+agent(michael, al_ag2).
+attrList(al_ag2, "prov:type", "Stock manager").
+
+agent(paul, al_ag3).
+agent(smith, al_ag4).
+
+% agents delegation
+actedOnBehalfOf(michael, jane, act1).
+actedOnBehalfOf(paul, michael, act1).
+actedOnBehalfOf(smith, paul, act1).
+
+% agents responsibilities
+wasAssociatedWith(act1, jane,nil).
+wasAssociatedWith(act5, jane,nil).
+wasAssociatedWith(act2, michael,nil).
+wasAssociatedWith(act3, paul,nil).
+wasAssociatedWith(act4, smith,nil).
+
+% activity-activity
+wasInformedBy(act5, act2,nil).
+wasInformedBy(act1, act3,nil).
+wasInformedBy(act3, act4,nil).
+
+
+%The agent-agent association can  be relevant to queries such as:
+%- What is the agent that is responsible for the process?
+%Jane
+% se "headOfChain" in additional-rules.txt
+
+%- What are the agents to be notified with problems related to failure in replenshing the stock?
+%Smith, Paul, Michael and Jane
+% follow the chain of responsibility from the activity
+

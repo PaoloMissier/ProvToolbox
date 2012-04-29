@@ -4,7 +4,12 @@ import  org.openprovenance.prov.notation.TreeConstructor;
 import  org.antlr.runtime.tree.CommonTree;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /** For testing purpose, conversion back to ASN. */
 
@@ -48,6 +53,28 @@ public class DataLogConstructor implements TreeConstructor {
     }
 
     
+    public String keyEntitySet(Map<String, String> keSetMap, String keSetId) {
+        
+    	StringBuffer keSetOut = new StringBuffer();	
+
+    	for (Map.Entry<String, String> entry: keSetMap.entrySet()) {
+    		
+    		keSetOut.append("keSet("+keSetId+","+entry.getKey()+","+entry.getValue()+").\n");
+    	}    	
+         return keSetOut.toString();
+    }
+
+    
+    public String keySet(List<String> keySet, String keySetId) {
+        
+    	StringBuffer keSetOut = new StringBuffer();	
+    	
+    	for (String entry: keySet) {
+    		keSetOut.append("keySet("+keySetId+","+entry+").\n");
+    	}    	
+         return keSetOut.toString();
+    }
+
     
     String constructRelation(String predName, Object id, List<String> restArgs, Object attrs) {
     	
@@ -68,6 +95,7 @@ public class DataLogConstructor implements TreeConstructor {
     			first = false;
     		}	
     	}
+    	
     	if (attrs.equals(""))
     		 return s.append(").").toString();
     	else {
@@ -79,6 +107,61 @@ public class DataLogConstructor implements TreeConstructor {
     	}
     }
 
+    
+    String constructRelation(String predName, Object id, List<String> restArgs, Object keSet, Object attrs) {
+    	
+    	String convertedAttrs = new String();
+    	String convertedKeSet = new String();
+    	
+    	Map<String, String> keSetMap = null;
+    	List<String> keySet= null;
+    	
+    	if (keSet instanceof Map<?, ?>)
+    	{
+    		keSetMap = (Map<String, String>) keSet;
+    	} else // expect List<Object>
+    		keySet = (List<String>) keSet;
+    	
+    	boolean first = true;
+    	StringBuffer s = new StringBuffer();
+    	if (id == null) {
+    		s.append(predName + "(" );
+    	}
+    	else {
+    		s.append(predName + "(" + id);
+    		first = false;
+    	}
+    	
+    	if (restArgs != null) {
+    		for (String arg : restArgs) {
+    			if (!first) s.append(",");
+    			s.append(arg);    		
+    			first = false;
+    		}	
+    	}
+    	
+    	if (keSetMap != null && !keSetMap.isEmpty()) {
+    		String keSetId = genId();
+    		if (! first) s.append(",");
+    		s.append(keSetId);
+    		convertedKeSet = keyEntitySet(keSetMap,keSetId);
+    	} else if (keySet != null && !keySet.isEmpty()) {
+    		String keSetId = genId();
+    		if (! first) s.append(",");
+    		s.append(keSetId);
+    		convertedKeSet = keySet(keySet,keSetId);
+    	}
+
+    	if (!attrs.equals("") ) {
+    		String val = genId();
+    		if (! first) s.append(",");
+    		s.append(val+").\n");
+    		convertedAttrs = optionalAttributes(attrs,val);
+    	}
+		return s+").\n"+convertedAttrs+convertedKeSet;
+    }
+
+    
     public String optionalTime(Object time) {
         return ((time==null)? ", nil" : (", " + time));
     }            
@@ -186,6 +269,69 @@ public class DataLogConstructor implements TreeConstructor {
     }
 
     
+
+    public Object convertInsertion(Object id, Object id2, Object id1, Object kes, Object iAttrs) {
+    	
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id2));
+    	optionals.add(optional(id1));
+    	
+    	return constructRelation("derivedByInsertionFrom", id, optionals, kes, iAttrs);
+    }	
+
+    
+    
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keyset, Object rAttrs) {
+
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id2));
+    	optionals.add(optional(id1));
+    	
+    	return constructRelation("derivedByRemovalFrom", id, optionals, keyset, rAttrs);
+
+//    	String s="derivedByRemovalFrom(" + optionalId(id) + id2 + ", " + id1 + ", "
+//	    + keyset + optionalAttributes(rAttrs) +  ")";
+//	return s;
+
+    }
+    
+    
+    public Object convertMemberOf(Object id, Object id2, Object kes, Object complete, Object mAttrs) {
+    	
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id2));
+    	optionals.add(optional(complete));
+
+    	return constructRelation("memberOf", id, optionals, kes, mAttrs);
+
+//        String s="memberOf(" + optionalId(id) + id2 + ", "
+//	    + kes + ((complete==null)? "" : ", "+complete) + optionalAttributes(mAttrs) +  ")";
+//	return s;
+
+    }
+
+    
+    
+    public Object convertKeys(List<Object> keys) {
+    	return keys;  // ID mapping
+    }
+
+    public Map<String, String>  convertKeyEntitySet(List<Object> entries) {
+    	
+    	Map<String, String> keSet = new HashMap<String, String>();
+    	for (Object entry:entries) {
+    		String strEntry = (String) entry;
+    		String pairs = strEntry.substring(1, strEntry.length()-1);
+    		java.util.StringTokenizer tok = new java.util.StringTokenizer(pairs, ",");
+    		if (tok.countTokens()==2) {
+    			keSet.put(tok.nextToken(), tok.nextToken());
+    		}
+    	}
+    	return keSet;
+    }
+
+    
     /*****
      * OLD IMPLEMENTATION
      */
@@ -261,8 +407,9 @@ public class DataLogConstructor implements TreeConstructor {
 
 
     public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
+        String s="wasStartedByActivity(" + optionalId(id) + id2 + "," + optional(id1)
+                + optionalAttributes(aAttrs) +  ")";
+            return s;
     }
 
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
@@ -281,24 +428,31 @@ public class DataLogConstructor implements TreeConstructor {
     }
 
 	public Object convertActedOnBehalfOf(Object id, Object id2,Object id1, Object a, Object aAttrs) {
-        throw new UnsupportedOperationException();
+        String s="actedOnBehalfOf(" + optionalId(id) + id2 + "," + id1 + "," +
+                optional(a) +
+                optionalAttributes(aAttrs) + ")";
+            return s;
     }
 
     public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object ag, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
+        String s="wasRevisionOf(" + optionalId(id) + id2 + ", " + id1 + ", " + optional(ag) + optionalAttributes(dAttrs) +  ")";
+        return s;    
     }
+    
+    
     public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object ag2, Object ag1, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
+        String s="wasQuotedFrom(" + optionalId(id) + id2 + ", " + id1 + ", " + optional(ag2) + ", " + optional(ag1) + optionalAttributes(dAttrs) +  ")";
+        return s;
     }
+    
     public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
+        String s="hadOriginalSource(" + optionalId(id) + id2 + ", " + id1 + optionalAttributes(dAttrs) +  ")";
+        return s;
     }
+    
     public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
+        String s="tracedTo(" + optionalId(id) + id2 + ", " + id1 + optionalAttributes(dAttrs) +  ")";
+        return s;
     }
 
     public Object convertQNAME(String qname) {
@@ -333,49 +487,25 @@ public class DataLogConstructor implements TreeConstructor {
     }
 
    /* Component 5 */
-
-    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertEntry(Object o1, Object o2) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertKeyEntitySet(List<Object> o) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertRemoval(Object id, Object id2, Object id1, Object keys, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertKeys(List<Object> keys) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
+        
+        public Object convertEntry(Object o1, Object o2) {
+            String s="{" + o1 + ", " + o2 + "}";
+    	return s;
+        }
+        
 
 
-   /* Component 6 */
+        /* Component 6 */
 
-    public Object convertNote(Object id, Object attrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-    public Object convertHasAnnotation(Object something, Object note) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
+        public Object convertNote(Object id, Object attrs) {
+            String s="note(" + id  + optionalAttributes(attrs) + ")";
+            return s;
+        }
 
+        public Object convertHasAnnotation(Object something, Object note) {
+            String s="hasAnnotation(" + something  + "," + note + ")";
+            return s;
+        }
 
 
 }

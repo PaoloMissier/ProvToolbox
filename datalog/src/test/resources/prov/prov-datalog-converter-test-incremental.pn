@@ -124,12 +124,15 @@ entity(ex:family6, [ prov:type='prov:Dictionary' ])
 //derivedByInsertionFrom(ex:family4, ex:family3, {('tr:prov-primer', tr2012:WD-prov-primer-20120110),
 //                                                ('tr:prov-aq',     tr2012:WD-prov-aq-20120110)})
 //derivedByInsertionFrom(ex:family5, ex:family4, {('tr:prov-dm',     tr2012:WD-prov-dm-20120202)})
-//derivedByInsertionFrom(ex:family6, ex:family5, {('tr:prov-dm',     tr2012:WD-prov-dm-20120503),
-//                                                ('tr:prov-o',      tr2012:WD-prov-o-20120503),            
-//                                                ('tr:prov-n',      tr2012:WD-prov-n-20120503),            
-//                                                ('tr:prov-primer', tr2012:WD-prov-primer-20120503),            
-//                                                ('tr:prov-constraints', tr2012:WD-prov-constraints-20120503)})
+derivedByInsertionFrom(ex:family6, ex:family5, {('tr:prov-dm',     tr2012:WD-prov-dm-20120503),
+                                                ('tr:prov-o',      tr2012:WD-prov-o-20120503),            
+                                                ('tr:prov-n',      tr2012:WD-prov-n-20120503),            
+                                                ('tr:prov-primer', tr2012:WD-prov-primer-20120503),            
+                                                ('tr:prov-constraints', tr2012:WD-prov-constraints-20120503)})
 
+derivedByRemovalFrom(ex:family7, ex:family6, {'tr:prov-dm','tr:prov-o','tr:prov-primer'})
+
+memberOf(mid1, ex:family8, {('tr:prov-aq', tr2012:WD-prov-aq-20120110), ('tr:prov-primer', tr2012:WD-prov-primer-20120110)})
 
 endContainer
 

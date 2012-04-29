@@ -21,15 +21,16 @@
 
   <modules>
     <module>asn</module>    
-    <!--
     <module>xml</module>      
+    
     <module>dot</module>   
     <module>json</module>
 
     <module>interop</module>    
     <module>rdf</module>   
---> 
-    <module>toolbox</module>    
+
+    <module>toolbox</module>  
+    <module>datalog</module>  
 
   </modules>
 

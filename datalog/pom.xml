@@ -21,6 +21,16 @@
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
+
+
+    <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-n</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <scope>test</scope>
+      <classifier>tests</classifier>
+    </dependency>
+
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr-runtime</artifactId>
@@ -97,4 +107,6 @@
 
 
 
+  <groupId>org.openprovenance.prov</groupId>
+  <version>0.0.1-SNAPSHOT</version>
 </project>

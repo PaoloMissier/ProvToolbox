@@ -127,8 +127,13 @@ class JSONConstructor implements TreeConstructor {
 		result.add(attr);
 		return result;
 	}
-
-	public Object convertActivity(Object id, Object startTime, Object endTime, Object aAttrs) {
+	
+	/* Component 1 */
+    public Object convertEntity(Object id, Object attrs) {
+		return new ProvRecord("entity", id, attrs);
+	}
+	
+    public Object convertActivity(Object id, Object startTime, Object endTime, Object aAttrs) {
 		List<Object> attrs = new ArrayList<Object>();
     	if (startTime != null) {
     		attrs.add(tuple("prov:startTime", startTime));
@@ -141,16 +146,392 @@ class JSONConstructor implements TreeConstructor {
     	}
     	return new ProvRecord("activity", id, attrs);
 	}
-
-	public Object convertEntity(Object id, Object attrs) {
-		return new ProvRecord("entity", id, attrs);
+    
+    public Object convertUsed(Object id, Object id2, Object id1, Object time, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:activity", id2));
+    	attrs.add(tuple("prov:entity", id1));
+    	if (time != null) {
+    		attrs.add(tuple("prov:time", time));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("u");
+    	
+    	return new ProvRecord("used", id , attrs);
 	}
 
-	public Object convertAgent(Object id, Object attrs) {
-		return new ProvRecord("entity", id, addAttribute(attrs, tuple("prov:type", "prov:agent")));
+	public Object convertWasGeneratedBy(Object id, Object id2, Object id1,
+			Object time, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:entity", id2));
+    	if (id1 != null) {
+    		attrs.add(tuple("prov:activity", id1));
+    	}
+    	if (time != null) {
+    		attrs.add(tuple("prov:time", time));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wGB");
+
+    	return new ProvRecord("wasGeneratedBy", id, attrs);
 	}
 
-	public Object convertBundle(Object nss, List<Object> records) {
+	public Object convertWasStartedBy(Object id, Object id2, Object id1, Object id3,
+			Object time, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:activity", id2));
+    	if (id1 != null) {
+    		attrs.add(tuple("prov:trigger", id1));
+    	}
+    	if (time != null) {
+    		attrs.add(tuple("prov:time", time));
+    	}
+    	if (id3 != null) {
+    		attrs.add(tuple("prov:starter", id3));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wSB");
+
+    	return new ProvRecord("wasStartedBy", id, attrs);
+    }
+
+	public Object convertWasEndedBy(Object id, Object id2, Object id1, Object id3,
+			Object time, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:activity", id2));
+    	if (id1 != null) {
+    		attrs.add(tuple("prov:trigger", id1));
+    	}
+    	if (time != null) {
+    		attrs.add(tuple("prov:time", time));
+    	}
+    	if (id3 != null) {
+    		attrs.add(tuple("prov:ender", id3));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wEB");
+
+    	return new ProvRecord("wasEndedBy", id, attrs);
+    }
+
+	public Object convertWasInvalidatedBy(Object id, Object id2, Object id1,
+			Object time, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:entity", id2));
+    	if (id1 != null) {
+    		attrs.add(tuple("prov:activity", id1));
+    	}
+    	if (time != null) {
+    		attrs.add(tuple("prov:time", time));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wINVB");
+
+    	return new ProvRecord("wasInvalidatedBy", id, attrs);
+	}
+	
+	public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:informed", id2));
+    	attrs.add(tuple("prov:informant", id1));
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wIB");
+
+    	return new ProvRecord("wasInformedBy", id, attrs);
+    }
+
+
+	
+    /* Component 2 */
+    public Object convertAgent(Object id, Object attrs) {
+		return new ProvRecord("agent", id, attrs);
+	}
+
+    public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:entity", id2));
+    	attrs.add(tuple("prov:agent", id1));
+    	if (gAttrs != null) {
+    		attrs.addAll((List<Object>)gAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wAT");
+
+    	return new ProvRecord("wasAttributedTo", id, attrs);
+    }
+
+    public Object convertWasAssociatedWith(Object id, Object id2, Object id1,
+			Object pl, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:activity", id2));
+    	if (id1 != null) {
+    		attrs.add(tuple("prov:agent", id1));
+    	}
+    	if (pl != null) {
+    		attrs.add(tuple("prov:plan", pl));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wAW");
+
+    	return new ProvRecord("wasAssociatedWith", id, attrs);
+	}
+
+    public Object convertActedOnBehalfOf(Object id, Object id2,Object id1, Object a, Object aAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:subordinate", id2));
+    	attrs.add(tuple("prov:responsible", id1));
+    	if (a != null) {
+    		attrs.add(tuple("prov:activity", a));
+    	}
+    	if (aAttrs != null) {
+    		attrs.addAll((List<Object>)aAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("aOBO");
+
+    	return new ProvRecord("actedOnBehalfOf", id, attrs);
+	}
+
+
+    /* Component 3 */
+    public Object convertWasDerivedFrom(Object id, Object id2, Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:generatedEntity", id2));
+    	attrs.add(tuple("prov:usedEntity", id1));
+    	if (pe != null) {
+    		attrs.add(tuple("prov:activity", pe));
+    	}
+    	if (q2 != null) {
+    		attrs.add(tuple("prov:generation", q2));
+    	}
+    	if (q1 != null) {
+    		attrs.add(tuple("prov:usage", q1));
+    	}
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+    		id = getBlankID("wDF");
+
+    	return new ProvRecord("wasDerivedFrom", id, attrs);
+	}
+
+
+    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs)
+    {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:newer", id2));
+    	attrs.add(tuple("prov:older", id1));
+    	if (pe != null) {
+    		attrs.add(tuple("prov:activity", pe));
+    	}
+    	if (q2 != null) {
+    		attrs.add(tuple("prov:generation", q2));
+    	}
+    	if (q1 != null) {
+    		attrs.add(tuple("prov:usage", q1));
+    	}
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+    		id = getBlankID("wRO");
+
+    	return new ProvRecord("wasRevisionOf", id, attrs);
+    }
+
+    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:quote", id2));
+    	attrs.add(tuple("prov:original", id1));
+    	if (pe != null) {
+    		attrs.add(tuple("prov:activity", pe));
+    	}
+    	if (q2 != null) {
+    		attrs.add(tuple("prov:generation", q2));
+    	}
+    	if (q1 != null) {
+    		attrs.add(tuple("prov:usage", q1));
+    	}
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	if (id == null)
+    		id = getBlankID("wQF");
+
+    	return new ProvRecord("wasQuotedFrom", id, attrs);
+    }
+    
+	public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:derived", id2));
+    	attrs.add(tuple("prov:source", id1));
+    	if (pe != null) {
+    		attrs.add(tuple("prov:activity", pe));
+    	}
+    	if (q2 != null) {
+    		attrs.add(tuple("prov:generation", q2));
+    	}
+    	if (q1 != null) {
+    		attrs.add(tuple("prov:usage", q1));
+    	}
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+    		id = getBlankID("hOS");
+
+    	return new ProvRecord("hadOriginalSource", id, attrs);
+    }
+
+	public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:entity", id2));
+    	attrs.add(tuple("prov:ancestor", id1));
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+    		id = getBlankID("tT");
+
+    	return new ProvRecord("tracedTo", id, attrs);
+    }
+
+	/* Component 4 */
+	public Object convertAlternateOf(Object id2, Object id1) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:alternate1", id1));
+    	attrs.add(tuple("prov:alternate2", id2));
+    	Object id = getBlankID("aO");
+
+    	return new ProvRecord("alternateOf", id, attrs);
+	}
+
+	public Object convertSpecializationOf(Object id2, Object id1) {
+		List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:specializedEntity", id2));
+    	attrs.add(tuple("prov:generalEntity", id1));
+        Object id = getBlankID("sO");
+
+    	return new ProvRecord("specializationOf", id, attrs);
+	}
+
+	/* Component 5 */
+    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:after", id2));
+    	attrs.add(tuple("prov:before", id1));
+    	attrs.add(tuple("prov:key-entity-set", map));
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+        	id = getBlankID("dBIF");
+
+    	return new ProvRecord("derivedByInsertionFrom", id, attrs);
+    }
+
+    public Object convertEntry(Object o1, Object o2) {
+        return tuple(o1, o2);
+    }
+
+    public Object convertKeyEntitySet(List<Object> o) {
+        return o;
+    }
+
+    public Object convertRemoval(Object id, Object id2, Object id1, Object keys, Object dAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:after", id2));
+    	attrs.add(tuple("prov:before", id1));
+    	attrs.add(tuple("prov:key-set", keys));
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+        	id = getBlankID("dBIF");
+
+    	return new ProvRecord("derivedByRemovalFrom", id, attrs);
+    }
+
+    public Object convertMembership(Object id, Object id2, Object keys, Object dAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:after", id2));
+    	attrs.add(tuple("prov:key-entity-set", keys));
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+        	id = getBlankID("mO");
+
+    	return new ProvRecord("memberOf", id, attrs);
+    }
+
+    public Object convertKeys(List<Object> keys) {
+        return keys;
+    }
+
+    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:after", id2));
+    	attrs.add(tuple("prov:key-entity-set", map));
+    	attrs.add(tuple("prov:complete", complete));
+    	if (dAttrs != null) {
+    		attrs.addAll((List<Object>)dAttrs);
+    	}
+    	
+    	if (id == null)
+        	id = getBlankID("mO");
+
+    	return new ProvRecord("memberOf", id, attrs);
+    }
+
+   /* Component 6 */
+    public Object convertNote(Object id, Object attrs) {
+    	return new ProvRecord("note", id, attrs);
+    }
+    public Object convertHasAnnotation(Object something, Object note) {
+    	List<Object> attrs = new ArrayList<Object>();
+    	attrs.add(tuple("prov:something", something));
+    	attrs.add(tuple("prov:note", note));
+        Object id = getBlankID("sO");
+
+    	return new ProvRecord("specializationOf", id, attrs);
+    }
+
+
+    /* Other conversions */    
+	public Object convertBundle(Object nss, List<Object> records, List<Object> bundles) {
 		Map<String,Object> bundle = new HashMap<String, Object>();
 		bundle.put("prefix", nss);
 		List<Object> agents = new ArrayList<Object>();
@@ -186,6 +567,9 @@ class JSONConstructor implements TreeConstructor {
         return bundle;
 	}
 
+	public Object convertNamedBundle(Object id, Object nss, List<Object> records) {
+        return null;
+    }
 	public Object convertAttributes(List<Object> attributes) {
 		return attributes;
 	}
@@ -221,265 +605,7 @@ class JSONConstructor implements TreeConstructor {
 		return value;
 	}
 
-	public Object convertUsed(Object id, Object id2, Object id1, Object time, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:activity", id2));
-    	attrs.add(tuple("prov:entity", id1));
-    	if (time != null) {
-    		attrs.add(tuple("prov:time", time));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("u");
-    	
-    	return new ProvRecord("used", id , attrs);
-	}
-
-	public Object convertWasGeneratedBy(Object id, Object id2, Object id1,
-			Object time, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:entity", id2));
-    	if (id2 != null) {
-    		attrs.add(tuple("prov:activity", id1));
-    	}
-    	if (time != null) {
-    		attrs.add(tuple("prov:time", time));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("wGB");
-
-    	return new ProvRecord("wasGeneratedBy", id, attrs);
-	}
-
-	public Object convertWasStartedBy(Object id, Object id2, Object id1,
-			Object time, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:activity", id2));
-    	if (id1 != null) {
-    		attrs.add(tuple("prov:trigger", id1));
-    	}
-    	if (time != null) {
-    		attrs.add(tuple("prov:time", time));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("wSB");
-
-    	return new ProvRecord("wasStartedBy", id, attrs);
-    }
-
-	public Object convertWasEndedBy(Object id, Object id2, Object id1,
-			Object time, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:activity", id2));
-    	if (id1 != null) {
-    		attrs.add(tuple("prov:trigger", id1));
-    	}
-    	if (time != null) {
-    		attrs.add(tuple("prov:time", time));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("wEB");
-
-    	return new ProvRecord("wasEndedBy", id, attrs);
-    }
-
-	public Object convertWasInvalidatedBy(Object id, Object id2, Object id1,
-			Object time, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:entity", id2));
-    	if (id2 != null) {
-    		attrs.add(tuple("prov:activity", id1));
-    	}
-    	if (time != null) {
-    		attrs.add(tuple("prov:time", time));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("wINVB");
-
-    	return new ProvRecord("wasInvalidatedBy", id, attrs);
-	}
-
-
-
-    public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
-    	List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:entity", id2));
-    	attrs.add(tuple("prov:agent", id1));
-    	if (gAttrs != null) {
-    		attrs.addAll((List<Object>)gAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("wAT");
-
-    	return new ProvRecord("wasAttributedTo", id, attrs);
-    }
-
-	public Object convertWasDerivedFrom(Object id, Object id2, Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:generatedEntity", id2));
-    	attrs.add(tuple("prov:usedEntity", id1));
-    	if (pe != null) {
-    		attrs.add(tuple("prov:activity", pe));
-    	}
-    	if (q2 != null) {
-    		attrs.add(tuple("prov:generation", q2));
-    	}
-    	if (q1 != null) {
-    		attrs.add(tuple("prov:usage", q1));
-    	}
-    	if (dAttrs != null) {
-    		attrs.addAll((List<Object>)dAttrs);
-    	}
-    	
-    	if (id == null)
-    		id = getBlankID("wDF");
-
-    	return new ProvRecord("wasDerivedFrom", id, attrs);
-	}
-
-	public Object convertWasAssociatedWith(Object id, Object id2, Object id1,
-			Object pl, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:activity", id2));
-    	if (id1 != null) {
-    		attrs.add(tuple("prov:agent", id1));
-    	}
-    	if (pl != null) {
-    		attrs.add(tuple("prov:plan", pl));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("wAW");
-
-    	return new ProvRecord("wasAssociatedWith", id, attrs);
-	}
-
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object ag, Object dAttrs) {
-    	List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:newer", id2));
-    	attrs.add(tuple("prov:older", id1));
-    	if (ag != null) {
-    		attrs.add(tuple("prov:responsibility", ag));
-    	}
-    	if (dAttrs != null) {
-    		attrs.addAll((List<Object>)dAttrs);
-    	}
-    	
-    	if (id == null)
-    		id = getBlankID("wRO");
-
-    	return new ProvRecord("wasRevisionOf", id, attrs);
-    }
-
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object ag2, Object ag1, Object dAttrs) {
-    	List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:quote", id2));
-    	attrs.add(tuple("prov:original", id1));
-    	if (ag2 != null) {
-    		attrs.add(tuple("prov:quotedAgent", ag2));
-    	}
-    	if (ag1 != null) {
-    		attrs.add(tuple("prov:originalAgent", ag1));
-    	}
-    	if (dAttrs != null) {
-    		attrs.addAll((List<Object>)dAttrs);
-    	}
-    	
-    	if (id == null)
-    		id = getBlankID("wQF");
-
-    	return new ProvRecord("wasQuotedFrom", id, attrs);
-    }
-    
-	public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object dAttrs) {
-    	List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:derived", id2));
-    	attrs.add(tuple("prov:source", id1));
-    	if (dAttrs != null) {
-    		attrs.addAll((List<Object>)dAttrs);
-    	}
-    	
-    	if (id == null)
-    		id = getBlankID("hOS");
-
-    	return new ProvRecord("hadOriginalSource", id, attrs);
-    }
-
-	public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:entity", id2));
-    	attrs.add(tuple("prov:ancestor", id1));
-    	if (dAttrs != null) {
-    		attrs.addAll((List<Object>)dAttrs);
-    	}
-    	
-    	if (id == null)
-    		id = getBlankID("tT");
-
-    	return new ProvRecord("tracedTo", id, attrs);
-    }
-
-	public Object convertActedOnBehalfOf(Object id, Object id2,Object id1, Object a, Object aAttrs) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:subordinate", id2));
-    	attrs.add(tuple("prov:responsible", id1));
-    	if (a != null) {
-    		attrs.add(tuple("prov:activity", a));
-    	}
-    	if (aAttrs != null) {
-    		attrs.addAll((List<Object>)aAttrs);
-    	}
-    	if (id == null)
-    		id = getBlankID("aOBO");
-
-    	return new ProvRecord("actedOnBehalfOf", id, attrs);
-	}
-
-	public Object convertAlternateOf(Object id2, Object id1) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:entity", id1));
-    	attrs.add(tuple("prov:alternate", id2));
-    	Object id = getBlankID("aO");
-
-    	return new ProvRecord("alternateOf", id, attrs);
-	}
-
-	public Object convertSpecializationOf(Object id2, Object id1) {
-		List<Object> attrs = new ArrayList<Object>();
-    	attrs.add(tuple("prov:entity", id1));
-    	attrs.add(tuple("prov:specialization", id2));
-        Object id = getBlankID("sO");
-
-    	return new ProvRecord("specializationOf", id, attrs);
-	}
-
-	public Object convertQNAME(String qname) {
+	public Object convertQualifiedName(String qname) {
 		return unwrap(qname);
 	}
 
@@ -512,56 +638,5 @@ class JSONConstructor implements TreeConstructor {
 		}
 		return nss;
 	}
-
-   /* Component 5 */
-
-    public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertEntry(Object o1, Object o2) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertKeyEntitySet(List<Object> o) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertRemoval(Object id, Object id2, Object id1, Object keys, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertMembership(Object id, Object id2, Object keys, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertKeys(List<Object> keys) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-   /* Component 6 */
-
-    public Object convertNote(Object id, Object attrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-    public Object convertHasAnnotation(Object something, Object note) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-
-
-
 }
 	

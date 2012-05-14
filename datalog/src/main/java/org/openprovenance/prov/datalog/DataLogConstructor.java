@@ -249,8 +249,11 @@ public class DataLogConstructor implements TreeConstructor {
 //        return s;
     }
 
-    public Object convertBundle(Object namespaces, List<Object> records) {
+    public Object convertNamedBundle(Object id, Object nss, List<Object> records) {
+        return null;
+    }
 
+    public Object convertBundle(Object namespaces, List<Object> records, List<Object> bundles) {
         String s="";
         for (Object o: records) {
             s=s+o+"\n";
@@ -394,24 +397,28 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
-    public Object convertWasStartedBy(Object id, Object id2,Object id1, Object time, Object aAttrs ) {
-        String s="wasStartedBy(" + optionalId(id) + id2 + "," + id1 +
+    public Object convertWasStartedBy(Object id, Object id2,Object id1, Object id3, Object time, Object aAttrs ) {
+        String s="wasStartedBy(" + optionalId(id) + id2 + "," + id1 + "," + id3 +
             optionalTime(time) + optionalAttributes(aAttrs) +  ")";
         return s;
     }
 
-    public Object convertWasEndedBy(Object id, Object id2,Object id1, Object time, Object aAttrs ) {
-        String s="wasEndedBy(" + optionalId(id) + id2 + "," + id1 +
+    public Object convertWasEndedBy(Object id, Object id2,Object id1, Object id3, Object time, Object aAttrs ) {
+        String s="wasEndedBy(" + optionalId(id) + id2 + "," + id1 + "," + id3 +
             optionalTime(time) + optionalAttributes(aAttrs) +  ")";
         return s;
     }
 
 
+<<<<<<< HEAD
     public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs) {
         String s="wasStartedByActivity(" + optionalId(id) + id2 + "," + optional(id1)
                 + optionalAttributes(aAttrs) +  ")";
             return s;
     }
+=======
+
+>>>>>>> upstream/master
 
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
         String s="wasAttributedTo(" + optionalId(id) + id2 + "," + id1 + optionalAttributes(gAttrs) +  ")";
@@ -435,6 +442,7 @@ public class DataLogConstructor implements TreeConstructor {
             return s;
     }
 
+<<<<<<< HEAD
     public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object ag, Object dAttrs) {
         String s="wasRevisionOf(" + optionalId(id) + id2 + ", " + id1 + ", " + optional(ag) + optionalAttributes(dAttrs) +  ")";
         return s;    
@@ -449,6 +457,25 @@ public class DataLogConstructor implements TreeConstructor {
     public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object dAttrs) {
         String s="hadOriginalSource(" + optionalId(id) + id2 + ", " + id1 + optionalAttributes(dAttrs) +  ")";
         return s;
+=======
+    public Object convertWasAssociatedWith(Object id, Object id2,Object id1, Object pl, Object aAttrs) {
+        String s="wasAssociatedWith(" + optionalId(id) + id2 + "," + id1 
+            + ((pl==null)? "" : " , " + pl) +
+            optionalAttributes(aAttrs) + ")";
+        return s;
+    }
+    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+>>>>>>> upstream/master
     }
     
     public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
@@ -456,7 +483,7 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
-    public Object convertQNAME(String qname) {
+    public Object convertQualifiedName(String qname) {
         return qname;
     }
     public Object convertIRI(String iri) {

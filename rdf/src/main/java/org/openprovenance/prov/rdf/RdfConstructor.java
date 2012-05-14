@@ -46,7 +46,10 @@ public class RdfConstructor implements TreeConstructor {
         return ag;
     }
 
-    public Object convertBundle(Object nss, List<Object> records) {
+    public Object convertBundle(Object nss, List<Object> records, List<Object> bundles) {
+        return null;
+    }
+    public Object convertNamedBundle(Object id, Object nss, List<Object> records) {
         return null;
     }
     public Object convertAttributes(List<Object> attributes) {
@@ -133,13 +136,13 @@ public class RdfConstructor implements TreeConstructor {
         return g;
     }
 
-	public Object convertWasStartedBy(Object id, Object id2, Object id1,
+	public Object convertWasStartedBy(Object id, Object id2, Object id1, Object id3,
 			Object time, Object aAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
 
-	public Object convertWasEndedBy(Object id, Object id2, Object id1,
+	public Object convertWasEndedBy(Object id, Object id2, Object id1, Object id3,
 			Object time, Object aAttrs) {
         //todo
         throw new UnsupportedOperationException();
@@ -155,10 +158,6 @@ public class RdfConstructor implements TreeConstructor {
         throw new UnsupportedOperationException();
     }
 
-    public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
 
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
         //todo
@@ -177,15 +176,15 @@ public class RdfConstructor implements TreeConstructor {
         return null;
     }
 
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object ag, Object dAttrs) {
+    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object ag2, Object ag1, Object dAttrs) {
+    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object dAttrs) {
+    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
@@ -230,7 +229,7 @@ public class RdfConstructor implements TreeConstructor {
 
     }
 
-    public Object convertQNAME(String qname) {
+    public Object convertQualifiedName(String qname) {
         return qname;
     }
     public Object convertIRI(String iri) {

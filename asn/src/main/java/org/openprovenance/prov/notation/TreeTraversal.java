@@ -91,9 +91,10 @@ public class TreeTraversal {
             uid=convert(uidTree);
             id2=convert(ast.getChild(1));
             id1=convert(ast.getChild(2));
-            time=convert(ast.getChild(3));
-            rAttrs=convert(ast.getChild(4));
-            return c.convertWasStartedBy(uid,id2,id1,time,rAttrs);
+            Object id3=convert(ast.getChild(3));
+            time=convert(ast.getChild(4));
+            rAttrs=convert(ast.getChild(5));
+            return c.convertWasStartedBy(uid,id2,id1,id3,time,rAttrs);
 
 
         case PROV_NParser.WEB:
@@ -104,9 +105,10 @@ public class TreeTraversal {
             uid=convert(uidTree);
             id2=convert(ast.getChild(1));
             id1=convert(ast.getChild(2));
-            time=convert(ast.getChild(3));
-            rAttrs=convert(ast.getChild(4));
-            return c.convertWasEndedBy(uid,id2,id1,time,rAttrs);
+            id3=convert(ast.getChild(3));
+            time=convert(ast.getChild(4));
+            rAttrs=convert(ast.getChild(5));
+            return c.convertWasEndedBy(uid,id2,id1,id3,time,rAttrs);
 
         case PROV_NParser.TIME:
             if (ast.getChildCount()==0) return null;
@@ -137,17 +139,6 @@ public class TreeTraversal {
             id1=convert(ast.getChild(2));
             rAttrs=convert(ast.getChild(3));
             return c.convertWasInformedBy(uid,id2,id1,rAttrs);
-
-        case PROV_NParser.WSBA:
-            uidTree=ast.getChild(0);
-            if (uidTree.getChildCount()>0) {
-                uidTree=uidTree.getChild(0);
-            }
-            uid=convert(uidTree);
-            id2=convert(ast.getChild(1));
-            id1=convert(ast.getChild(2));
-            rAttrs=convert(ast.getChild(3));
-            return c.convertWasStartedByActivity(uid,id2,id1,rAttrs);
 
 
             /* Component 2 */
@@ -226,9 +217,11 @@ public class TreeTraversal {
             uid=convert(uidTree);
             id2=convert(ast.getChild(1));
             id1=convert(ast.getChild(2));
-            Object ag=convert(ast.getChild(3));
-            dAttrs=convert(ast.getChild(4));
-            return c.convertWasRevisionOf(uid,id2,id1,ag,dAttrs);
+            pe=convert(ast.getChild(3));
+            q2=convert(ast.getChild(4));
+            q1=convert(ast.getChild(5));
+            dAttrs=convert(ast.getChild(6));
+            return c.convertWasRevisionOf(uid,id2,id1,pe,q2,q1,dAttrs);
 
         case PROV_NParser.WQF:
             uidTree=ast.getChild(0);
@@ -238,10 +231,11 @@ public class TreeTraversal {
             uid=convert(uidTree);
             id2=convert(ast.getChild(1));
             id1=convert(ast.getChild(2));
-            Object ag2=(ast.getChild(3)==null)?null:convert(ast.getChild(3));
-            Object ag1=(ast.getChild(4)==null)?null:convert(ast.getChild(4));
-            dAttrs=convert(ast.getChild(5));
-            return c.convertWasQuotedFrom(uid,id2,id1,ag2,ag1,dAttrs);
+            pe=convert(ast.getChild(3));
+            q2=convert(ast.getChild(4));
+            q1=convert(ast.getChild(5));
+            dAttrs=convert(ast.getChild(6));
+            return c.convertWasQuotedFrom(uid,id2,id1,pe,q2,q1,dAttrs);
 
         case PROV_NParser.ORIGINALSOURCE:
             uidTree=ast.getChild(0);
@@ -251,8 +245,11 @@ public class TreeTraversal {
             uid=convert(uidTree);
             id2=convert(ast.getChild(1));
             id1=convert(ast.getChild(2));
-            dAttrs=convert(ast.getChild(3));
-            return c.convertHadOriginalSource(uid,id2,id1,dAttrs);
+            pe=convert(ast.getChild(3));
+            q2=convert(ast.getChild(4));
+            q1=convert(ast.getChild(5));
+            dAttrs=convert(ast.getChild(6));
+            return c.convertHadOriginalSource(uid,id2,id1,pe,q2,q1,dAttrs);
 
         case PROV_NParser.TRACEDTO:
             uidTree=ast.getChild(0);
@@ -367,14 +364,30 @@ public class TreeTraversal {
 
             /* Miscellaneous Constructs */
 
-        case PROV_NParser.BUNDLE:
+        case PROV_NParser.EXPRESSIONS:
+        case PROV_NParser.BUNDLES:
             List<Object> records=new LinkedList();
-            Object nss=convert(ast.getChild(0));
-            for (int i=1; i< ast.getChildCount(); i++) {
+            for (int i=0; i< ast.getChildCount(); i++) {
                 Object o=convert(ast.getChild(i));
                 records.add(o);
             }
-            return c.convertBundle(nss,records);
+            return records;
+
+        case PROV_NParser.BUNDLE:
+            Object nss=convert(ast.getChild(0));
+	    records=(List<Object>)convert(ast.getChild(1));
+	    List<Object> bundles=null;
+	    if (ast.getChild(2)!=null)
+		bundles=(List<Object>)convert(ast.getChild(2));
+            return c.convertBundle(nss,records, bundles);
+
+        case PROV_NParser.NAMEDBUNDLE:
+            id=convert(ast.getChild(0));
+            nss=convert(ast.getChild(1));
+	    records=null;
+	    if (ast.getChild(2)!=null)
+		records=(List<Object>)convert(ast.getChild(2));
+            return c.convertNamedBundle(id,nss,records);
 
         case PROV_NParser.ATTRIBUTES:
             List<Object> attributes=new LinkedList();
@@ -399,7 +412,7 @@ public class TreeTraversal {
             return c.convertInt(convertInt(getTokenString(ast.getChild(0))));
         
         case PROV_NParser.QNAM:
-            return c.convertQNAME(convertToken(getTokenString(ast.getChild(0))));
+            return c.convertQualifiedName(convertToken(getTokenString(ast.getChild(0))));
 
         case PROV_NParser.IRI:
             String iri=convertToken(getTokenString(ast.getChild(0)));

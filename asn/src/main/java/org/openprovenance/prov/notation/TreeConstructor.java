@@ -11,11 +11,11 @@ public interface TreeConstructor {
     public Object convertEnd(String end);
     public Object convertUsed(Object id, Object id2,Object id1, Object time, Object aAttrs);
     public Object convertWasGeneratedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
-    public Object convertWasStartedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
-    public Object convertWasEndedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
+    public Object convertWasStartedBy(Object id, Object id2,Object id1, Object id3, Object time, Object aAttrs);
+    public Object convertWasEndedBy(Object id, Object id2,Object id1, Object id3, Object time, Object aAttrs);
     public Object convertWasInvalidatedBy(Object id, Object id2,Object id1, Object time, Object aAttrs);
     public Object convertWasInformedBy(Object id, Object id2, Object id1, Object aAttrs);
-    public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs);
+
 
 
     /* Component 2 */
@@ -27,9 +27,9 @@ public interface TreeConstructor {
 
     /* Component 3 */
     public Object convertWasDerivedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object ag, Object dAttrs);
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object ag2, Object ag1, Object dAttrs);
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object dAttrs);
+    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
+    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
+    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
     public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs);
 
 
@@ -53,13 +53,14 @@ public interface TreeConstructor {
 
     /* Other conversions */
 
-    public Object convertBundle(Object nss, List<Object> records);
+    public Object convertBundle(Object nss, List<Object> records, List<Object> bundles);
+    public Object convertNamedBundle(Object id, Object nss, List<Object> records);
     public Object convertAttributes(List<Object> attributes);
     public Object convertId(String id);
     public Object convertAttribute(Object name, Object value);
     public Object convertString(String s);
     public Object convertInt(int i);
-    public Object convertQNAME(String qname);
+    public Object convertQualifiedName(String qname);
     public Object convertIRI(String iri);
     public Object convertPrefix(String pre);
     public Object convertTypedLiteral(String datatype, Object value);

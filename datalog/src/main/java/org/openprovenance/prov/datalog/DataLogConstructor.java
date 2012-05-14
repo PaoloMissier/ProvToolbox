@@ -248,12 +248,9 @@ public class DataLogConstructor implements TreeConstructor {
 //            optionalAttributes(aAttrs) + ")";
 //        return s;
     }
-<<<<<<< HEAD
 
-    public Object convertContainer(Object namespaces, List<Object> records) {
-=======
     public Object convertBundle(Object namespaces, List<Object> records) {
->>>>>>> upstream/master
+
         String s="";
         for (Object o: records) {
             s=s+o+"\n";

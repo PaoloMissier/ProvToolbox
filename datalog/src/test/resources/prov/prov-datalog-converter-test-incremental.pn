@@ -1,6 +1,6 @@
 
 
-container
+bundle b1
 
 prefix ex  <http://example.org/>
 
@@ -134,6 +134,6 @@ derivedByRemovalFrom(ex:family7, ex:family6, {'tr:prov-dm','tr:prov-o','tr:prov-
 
 memberOf(mid1, ex:family8, {('tr:prov-aq', tr2012:WD-prov-aq-20120110), ('tr:prov-primer', tr2012:WD-prov-primer-20120110)})
 
-endContainer
+endBundle
 
 

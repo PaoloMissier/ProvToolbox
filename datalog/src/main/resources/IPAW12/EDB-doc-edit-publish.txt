@@ -112,6 +112,17 @@ wasAssociatedWith(publication, charlie, pubGuidelinesV1, nil).
 wasAssociatedWith(guideline_update, w3c_consortium, nil, waw5_attrs).
 attrList(waw5_attrs, "prov:role", "issuer").
 
+%%%%%%%%%%%%
+%%  association
+%%  wasAttributedTo ( aidentifier, agidentifier, planidentifier, attribute_values )
+%%%%%%%%%%%%
+
+wasAttributedTo(draftV1, bob_1, nil). 
+
+%%%%%%%%%%%%
+%%  delegation
+%%   actedOnBehalfOf( agidentifier, agidentifier, aidentifier, attribute_values )
+%%%%%%%%%%%%
 
 actedOnBehalfOf(bob, alice, nil, nil).
 actedOnBehalfOf(bob_1, alice, drafting, nil).

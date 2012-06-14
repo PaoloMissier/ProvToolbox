@@ -2,7 +2,7 @@ examples on invoking DLV on these files:
 
 queries:
 
-dlv -cautious IDB.txt additional-rules.txt EDB-doc-edit-publish queries.txt
+dlv -cautious IDB.txt additional-rules.txt EDB-doc-edit-publish.txt queries.txt
 
 where queries.txt contains exactly one uncommented query (!!)
 

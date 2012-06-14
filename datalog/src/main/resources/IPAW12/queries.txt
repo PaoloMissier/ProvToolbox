@@ -3,7 +3,7 @@
 %%%
 
 
-precedes(X,Y) ?
+% precedes(X,Y) ?
 
 % entity(E,Attrs)?
 
@@ -40,7 +40,7 @@ precedes(X,Y) ?
 %tracedTo(A,B)?
 
 % derivability -- constraint checking
-%derivable(A,B) ?
+derivable(A,B) ?
 
 %%% 
 % TODO

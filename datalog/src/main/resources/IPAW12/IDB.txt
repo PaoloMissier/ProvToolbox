@@ -87,7 +87,7 @@ precedes(ST1, ST2) :- wasStartedBy(A2,A1,_), activity(A1, ST1,_,_), activity(A2,
 :- activity(A1,_, _, _), activity(A2,_,_,_), wasGeneratedBy( E, A1, _,_),  wasGeneratedBy( E, A2, _,_), A1 != A2.
 
 % derivation-use
-used(A,E1, Attrs, T)  :- wasDerivedFrom(E2, E1,_, Attrs), wasGeneratedBy( E2, A, Attrs, T).	
+used(A,E1, nil, T)  :- wasDerivedFrom(E2, E1,_, Attrs1), wasGeneratedBy( E2, A, Attrs2, T).	
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Element-specific rules        
@@ -116,10 +116,12 @@ specializationOf(E3,E1) :- specializationOf(E3,E2), specializationOf(E2,E1).
 tracedTo(E2, E1) :- wasDerivedFrom(E2,E1,_,_).   
 
 % Traceability of agent for a generating activity (3)
-tracedTo(E2, Agent) :- wasGeneratedBy( E2,A,_,_), wasAssociatedWith(A,Agent,_,_).  
+tracedTo(E, Ag) :- wasAttributedTo( E,Ag,_).
+%tracedTo(E2, Agent) :- wasGeneratedBy( E2,A,_,_), wasAssociatedWith(A,Agent,_,_).  
 
 % Traceability of a delegated agent for a generating activity (4)
-tracedTo(Ag2, Ag1) :- wasGeneratedBy( E2,A,_,_), wasAssociatedWith(A,Ag1,_,_), actedOnBehalfOf(Ag2,Ag1,A,_).
+tracedTo(E, Ag1) :- wasGeneratedBy(E,A,_,_), wasAttributedTo(E,Ag2,_), actedOnBehalfOf(Ag2,Ag1,A,_).
+%tracedTo(Ag2, Ag1) :- wasGeneratedBy( E2,A,_,_), wasAssociatedWith(A,Ag1,_,_), actedOnBehalfOf(Ag2,Ag1,A,_).
 
 % Traceability by starting and generating activities (5)
 tracedTo(E2, E1) :- wasStartedBy(A,E1,_), wasGeneratedBy( E2,A,_,_).

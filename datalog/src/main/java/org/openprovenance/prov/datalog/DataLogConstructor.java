@@ -249,6 +249,7 @@ public class DataLogConstructor implements TreeConstructor {
 //        return s;
     }
 
+
     public Object convertNamedBundle(Object id, Object nss, List<Object> records) {
         return null;
     }
@@ -397,10 +398,12 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
-    public Object convertWasStartedBy(Object id, Object id2,Object id1, Object id3, Object time, Object aAttrs ) {
-        String s="wasStartedBy(" + optionalId(id) + id2 + "," + id1 + "," + id3 +
-            optionalTime(time) + optionalAttributes(aAttrs) +  ")";
-        return s;
+
+    // FIXME
+    public Object convertWasStartedBy(Object id, Object id2, Object id1, Object id3, Object time, Object aAttrs) {
+        String s="wasStartedBy(" + optionalId(id) + id2 + "," + optional(id1)
+                + optionalAttributes(aAttrs) +  ")";
+            return s;
     }
 
     public Object convertWasEndedBy(Object id, Object id2,Object id1, Object id3, Object time, Object aAttrs ) {
@@ -409,16 +412,6 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
-
-<<<<<<< HEAD
-    public Object convertWasStartedByActivity(Object id, Object id2, Object id1, Object aAttrs) {
-        String s="wasStartedByActivity(" + optionalId(id) + id2 + "," + optional(id1)
-                + optionalAttributes(aAttrs) +  ")";
-            return s;
-    }
-=======
-
->>>>>>> upstream/master
 
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
         String s="wasAttributedTo(" + optionalId(id) + id2 + "," + id1 + optionalAttributes(gAttrs) +  ")";
@@ -442,41 +435,24 @@ public class DataLogConstructor implements TreeConstructor {
             return s;
     }
 
-<<<<<<< HEAD
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object ag, Object dAttrs) {
-        String s="wasRevisionOf(" + optionalId(id) + id2 + ", " + id1 + ", " + optional(ag) + optionalAttributes(dAttrs) +  ")";
-        return s;    
-    }
     
-    
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object ag2, Object ag1, Object dAttrs) {
-        String s="wasQuotedFrom(" + optionalId(id) + id2 + ", " + id1 + ", " + optional(ag2) + ", " + optional(ag1) + optionalAttributes(dAttrs) +  ")";
-        return s;
-    }
-    
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object dAttrs) {
-        String s="hadOriginalSource(" + optionalId(id) + id2 + ", " + id1 + optionalAttributes(dAttrs) +  ")";
-        return s;
-=======
-    public Object convertWasAssociatedWith(Object id, Object id2,Object id1, Object pl, Object aAttrs) {
-        String s="wasAssociatedWith(" + optionalId(id) + id2 + "," + id1 
-            + ((pl==null)? "" : " , " + pl) +
-            optionalAttributes(aAttrs) + ")";
-        return s;
-    }
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
-        //todo
-        throw new UnsupportedOperationException();
->>>>>>> upstream/master
-    }
+	// FIXME
+		public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+			String s="wasRevisionOf(" + optionalId(id) + id2 + ", " + pe + ", " + optional(pe) + optionalAttributes(dAttrs) +  ")";
+			return s;    
+	}
+
+
+	// FIXME
+		public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+		String s="wasQuotedFrom(" + optionalId(id) + id2 + ", " + id1 + ", " + optional(pe) + ", " + optional(q2) + optionalAttributes(dAttrs) +  ")";
+	        return s;
+	    }
+	    
+		public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+			String s="hadOriginalSource(" + optionalId(id) + id2 + ", " + id1 + optionalAttributes(dAttrs) +  ")";
+	        return s;
+	    }
     
     public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
         String s="tracedTo(" + optionalId(id) + id2 + ", " + id1 + optionalAttributes(dAttrs) +  ")";

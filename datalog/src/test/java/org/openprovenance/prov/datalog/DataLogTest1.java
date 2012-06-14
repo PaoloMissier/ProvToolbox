@@ -8,7 +8,7 @@ public class DataLogTest1 extends TestCase
 
 //	DataLogUtility u=new DataLogUtility();
 
-	String s=DataLogUtility.asn2datalog("../asn/src/test/resources/prov/w3c-publication1.prov-asn",null);
+	String s=DataLogUtility.asn2datalog("../asn/src/test/resources/prov/w3c-publication1.prov-asn");
 
 	System.out.println("=============");
 	System.out.println(s);

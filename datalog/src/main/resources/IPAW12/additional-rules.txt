@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%
 
 % elementatry pattern block
-%usedGeneratedPath0(EUsed,EGen) :-  used(A, EUsed, _, Attrs), wasGeneratedBy(EGen, A, _,_), not wasDerivedFrom(EUsed, EGen, A, Attrs).
+%usedGeneratedPath0(EUsed,EGen) :-  used(A, EUsed, _, Attrs), wasGeneratedBy(EGen, A, _,_), not wasDerivedFrom(EUsed, EGen, A, _,_, Attrs).
 
 % repeated pattern
 usedGeneratedPathN(EUsed,EGen, 1)  :- usedGeneratedPath0(EUsed,EGen).

@@ -14,7 +14,7 @@ entity(wd1, wd1_attrs).
 
 attrList(draftV1_attrs, "distribution", "internal").
 attrList(draftV1_attrs, "status", "draft").
-attrList(draftV2_attrs, "version", "0.1").
+attrList(draftV1_attrs, "version", "0.1").
 
 attrList(draftV2_attrs, "distribution", "internal").
 attrList(draftV2_attrs, "status", "draft").
@@ -86,12 +86,12 @@ attrList(w3c_attrs, "prov:type", "institution").
 
 %%%%%%%%%%%%
 %% derivation
-%% wasDerivedFrom(toEid, fromEid, actId, attribute_values)   (simplified - no relation ids)
+%% wasDerivedFrom(toEid, fromEid, actId, gid, uid, attribute_values)   (simplified - no relation ids)
 %%%%%%%%%%%%
 
-wasDerivedFrom(draftV2, draftV1, nil,  nil).
-wasDerivedFrom( bob_2, bob_1, nil, nil).
-wasDerivedFrom(pubGuidelinesV2, pubGuidelinesV1, nil, nil).
+wasDerivedFrom(draftV2, draftV1, nil,  nil, nil, nil).
+wasDerivedFrom( bob_2, bob_1, nil, nil, nil, nil).
+wasDerivedFrom(pubGuidelinesV2, pubGuidelinesV1, nil, nil, nil, nil).
 
 %%%%%%%%%%%%
 %%  association

@@ -1,0 +1,77 @@
+entity(paper1, nil).
+entity(paper2, nil).
+entity(paper3, nil).
+entity(draftV1,al_0).
+attrList(al_0,distribution,"internal").
+attrList(al_0,status,"draft").
+attrList(al_0,version,"0.1").
+
+entity(draftV2,al_1).
+attrList(al_1,distribution,"internal").
+attrList(al_1,status,"draft").
+attrList(al_1,version,"0.2").
+
+entity(draftComments, nil).
+entity(pubGuidelinesV1, nil).
+entity(pubGuidelinesV2, nil).
+entity(wd1,al_2).
+attrList(al_2,distribution,"public").
+attrList(al_2,status,"draft").
+attrList(al_2,release,"1.0").
+
+activity(drafting,2012-06-18T11:10:00,2012-06-18T11:10:10, nil).
+activity(reading,nil,nil, nil).
+activity(commenting,2012-06-18T11:20:00,2012-06-18T11:30:00, nil).
+activity(editing,2012-06-18T11:35:00,2012-06-18T11:45:00, nil).
+activity(publication,2012-06-19T11:00:00,nil, nil).
+activity(guideline_update,2012-07-19T11:00:00,2012-07-21T11:00:00, nil).
+used(drafting,paper1,2012-06-18T11:10:00, nil).
+used(drafting,paper2,2012-06-18T11:10:00, nil).
+wasGeneratedBy(draftV1,drafting,2012-06-18T11:10:00, nil).
+used(commenting,draftV1,2012-06-18T11:10:00, nil).
+wasGeneratedBy(draftComments,commenting,2012-06-18T11:10:00, nil).
+used(editing,draftComments,2012-06-18T11:10:00, nil).
+wasGeneratedBy(draftV2,editing,2012-06-18T11:10:00, nil).
+used(reading,paper3,2012-06-18T11:10:00, nil).
+used(publication,draftV2,2012-06-18T11:10:00, nil).
+wasGeneratedBy(wd1,publication,2012-06-18T11:10:00, nil).
+agent(alice,al_3).
+attrList(al_3,prov:type,"prov:Person").
+attrList(al_3,role,"main_editor").
+
+agent(bob,al_4).
+attrList(al_4,prov:type,"prov:Person").
+attrList(al_4,role,"jr_editor").
+
+agent(bob_1, nil).
+agent(bob_2, nil).
+agent(charlie,al_5).
+attrList(al_5,prov:type,"prov:Person").
+attrList(al_5,role,"head_of_pub").
+
+agent(w3c_consortium,al_6).
+attrList(al_6,prov:type,"institution").
+
+wasDerivedFrom(draftV2,draftV1,nil,nil,nil, nil).
+wasDerivedFrom(bob_2,bob_1,nil,nil,nil, nil).
+wasDerivedFrom(pubGuidelinesV2,pubGuidelinesV1,nil,nil,nil, nil).
+wasAssociatedWith(drafting,bob_1,nil,al_7).
+attrList(al_7,prov:role,"author").
+
+wasAssociatedWith(commenting,alice,nil,al_8).
+attrList(al_8,prov:role,"editor").
+
+wasAssociatedWith(editing,bob_2,nil,al_9).
+attrList(al_9,prov:role,"author").
+
+wasAssociatedWith(publication,charlie,pubGuidelinesV1, nil).
+wasAssociatedWith(guideline_update,w3c_consortium,nil,al_10).
+attrList(al_10,prov:role,"issuer").
+
+wasAttributedTo(nil, draftV1,bob_1)
+actedOnBehalfOf(nil, bob,alice,nil)
+actedOnBehalfOf(nil, bob_1,alice,drafting)
+actedOnBehalfOf(nil, bob_2,alice,editing)
+actedOnBehalfOf(nil, charlie,alice,publication)
+specializationOf(bob_1,bob)
+specializationOf(bob_2,bob)

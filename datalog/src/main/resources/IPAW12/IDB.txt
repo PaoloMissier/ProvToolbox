@@ -13,7 +13,7 @@
 % wasGeneratedBy(Entity, Activity, Attrs, Time)
 %  wasStartedBy(Activity, Entity, Attrs)
 % actedOnBehalfOf(Ag2,Ag1,Activity,Attrs).
-% wasDerivedFrom(toEid, fromEid, actId, attribute_values) 
+% wasDerivedFrom(toEid, fromEid, actId, gid, uid, attribute_values)  // gid, uid not used 
 % wasAssociatedWith ( aidentifier, agidentifier, planidentifier, attribute_values )
 
 % note: for all elements that admit a list of attribute value pairs, the ID is not optional, 
@@ -63,14 +63,14 @@ precedes(GT, T2) :- activity(A, _, T2, _), wasGeneratedBy(_,A,_, GT),  T2 != nil
 
 :- derivable(E2, E1), derivable(E1, E2).  % trivial loop
 
- derivable(E2, E1) :- wasDerivedFrom(E2, E1,_,_) , E1 != E2.
+ derivable(E2, E1) :- wasDerivedFrom(E2, E1,_,_,_,_) , E1 != E2.
  derivable(E2, E1) :-  derivable(E2, E0),  derivable(E0, E1).
 
 % derivation-usage-generation-ordering
-precedes(T2,T1)  :- wasDerivedFrom(E2, E1,_,_), used(_,E1, _,T2), wasGeneratedBy( E2, _, _, T1), T1 != nil, T2 != nil.
+precedes(T2,T1)  :- wasDerivedFrom(E2, E1,_,_,_,_), used(_,E1, _,T2), wasGeneratedBy( E2, _, _, T1), T1 != nil, T2 != nil.
 
 % derivation-generation-generation-ordering   
-precedes(T1,T2)  :- wasDerivedFrom(E2, E1, _,_), wasGeneratedBy( E2, _, _, T2), wasGeneratedBy( E1, _, _, T1), T1 != nil, T2 != nil.
+precedes(T1,T2)  :- wasDerivedFrom(E2, E1, _,_,_,_), wasGeneratedBy( E2, _, _, T2), wasGeneratedBy( E1, _, _, T1), T1 != nil, T2 != nil.
 
 % wasInformedBy-ordering
 precedes(ST1, ET2) :-  wasInformedBy(A2, A1,_), activity(A1, ST1, _, _), activity(A2, _, ET2, _), ST1 != nil, ET2 != nil.
@@ -87,7 +87,7 @@ precedes(ST1, ST2) :- wasStartedBy(A2,A1,_), activity(A1, ST1,_,_), activity(A2,
 :- activity(A1,_, _, _), activity(A2,_,_,_), wasGeneratedBy( E, A1, _,_),  wasGeneratedBy( E, A2, _,_), A1 != A2.
 
 % derivation-use
-used(A,E1, nil, T)  :- wasDerivedFrom(E2, E1,_, Attrs1), wasGeneratedBy( E2, A, Attrs2, T).	
+used(A,E1, nil, T)  :- wasDerivedFrom(E2, E1,_, _,_, Attrs1), wasGeneratedBy( E2, A, Attrs2, T).	
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Element-specific rules        
@@ -97,7 +97,7 @@ used(A,E1, nil, T)  :- wasDerivedFrom(E2, E1,_, Attrs1), wasGeneratedBy( E2, A, 
 agent(E, Attrs) :- entity(E, Attrs), wasAssociatedWith(_,E,_,Attrs).
 
 % derivation-implication  (activity specification)
-wasDerivedFrom(E2, E1, A, Attrs)  :-  wasDerivedFrom(E2, E1,_, Attrs), wasGeneratedBy( E2, A, _, _), used( A,E1,_,_).
+wasDerivedFrom(E2, E1, A, nil, nil, Attrs)  :-  wasDerivedFrom(E2, E1,_, _,_, Attrs), wasGeneratedBy( E2, A, _, _), used( A,E1,_,_).
 
 % specializationOf is transitive
 specializationOf(E3,E1) :- specializationOf(E3,E2), specializationOf(E2,E1).
@@ -113,7 +113,7 @@ specializationOf(E3,E1) :- specializationOf(E3,E2), specializationOf(E2,E1).
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 % Derivation implies traceability (1,2)
-tracedTo(E2, E1) :- wasDerivedFrom(E2,E1,_,_).   
+tracedTo(E2, E1) :- wasDerivedFrom(E2,E1,_,_,_,_).   
 
 % Traceability of agent for a generating activity (3)
 tracedTo(E, Ag) :- wasAttributedTo( E,Ag,_).
@@ -138,7 +138,7 @@ wasStartedBy(A2,A1, Attrs) :-  wasGeneratedBy(E,A1,_,_), wasStartedBy(A2,E,Attrs
 % Delegation implies association
 wasAssociatedWith(A, Ag, nil, Attrs) :- actedOnBehalfOf(Ag, _, A, Attrs).
 
-wasDerivedFrom(E2, E1, nil,nil) :- wasRevisionOf(E2, E1, _).
+wasDerivedFrom(E2, E1, nil,nil, nil, nil) :- wasRevisionOf(E2, E1, _).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% collections

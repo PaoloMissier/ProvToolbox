@@ -46,7 +46,7 @@ public class DataLogConstructor implements TreeConstructor {
 	    		}
 	    		String attr = attrValue.nextToken();
 	    		String value = attrValue.nextToken();
-	    		attrsOut.append("attrList("+attrId+","+attr+","+value+").\n");
+	    		attrsOut.append("attrList("+attrId+","+"\""+attr+"\""+","+value+").\n");
 	    	}
             return attrsOut.toString();
         }
@@ -96,8 +96,12 @@ public class DataLogConstructor implements TreeConstructor {
     		}	
     	}
     	
+    	if (attrs == null)
+   		 return s.append(").").toString();
+
+    	
     	if (attrs.equals(""))
-    		 return s.append(").").toString();
+    		 return s.append(", nil).").toString();
     	else {
     		String val = genId();
     		if (! first) s.append(",");
@@ -163,7 +167,7 @@ public class DataLogConstructor implements TreeConstructor {
 
     
     public String optionalTime(Object time) {
-        return ((time==null)? ", nil" : (", " + time));
+        return ((time==null)? ", nil" : (", " + "\"" +time +"\""));
     }            
 
     public String optional(Object str) {
@@ -174,8 +178,8 @@ public class DataLogConstructor implements TreeConstructor {
     public Object convertActivity(Object id,Object startTime,Object endTime, Object aAttrs) {
     	
     	List<String> optionals = new ArrayList<String>();
-    	optionals.add(optional(startTime));
-    	optionals.add(optional(endTime));
+    	optionals.add("\""+optional(startTime)+"\"");
+    	optionals.add("\""+optional(endTime)+"\"");
     	
     	return constructRelation("activity", id, optionals, aAttrs);
     }
@@ -211,7 +215,7 @@ public class DataLogConstructor implements TreeConstructor {
     	List<String> optionals = new ArrayList<String>();
     	optionals.add(optional(id2));
     	optionals.add(optional(id1));
-    	optionals.add(optional(time));
+    	optionals.add("\""+optional(time)+"\"");
 
     	return constructRelation("wasGeneratedBy", id, optionals, aAttrs);
     	
@@ -225,7 +229,7 @@ public class DataLogConstructor implements TreeConstructor {
     	List<String> optionals = new ArrayList<String>();
     	optionals.add(optional(id2));
     	optionals.add(optional(id1));
-    	optionals.add(optional(time));
+    	optionals.add("\""+optional(time)+"\"");
 
     	return constructRelation("used", id, optionals, aAttrs);
 
@@ -249,7 +253,48 @@ public class DataLogConstructor implements TreeConstructor {
 //        return s;
     }
 
+    public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
+    	
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id2));
+    	optionals.add(optional(id1));
 
+    	return constructRelation("wasAttributedTo", id, optionals, gAttrs);
+
+    }
+
+    
+	public Object convertActedOnBehalfOf(Object id, Object id2,Object id1, Object a, Object aAttrs) {
+
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id2));
+    	optionals.add(optional(id1));
+    	optionals.add(optional(a));
+
+    	return constructRelation("actedOnBehalfOf", id, optionals, aAttrs);
+
+    }
+
+
+    public Object convertAlternateOf(Object id2, Object id1) {
+
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id1));
+
+    	return constructRelation("alternateOf", id2, optionals, null);
+
+    }
+
+    public Object convertSpecializationOf(Object id2, Object id1) {
+
+    	List<String> optionals = new ArrayList<String>();
+    	optionals.add(optional(id1));
+
+    	return constructRelation("specializationOf", id2, optionals, null);
+    }
+
+	
+    
     public Object convertNamedBundle(Object id, Object nss, List<Object> records) {
         return null;
     }
@@ -413,27 +458,7 @@ public class DataLogConstructor implements TreeConstructor {
     }
 
 
-    public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
-        String s="wasAttributedTo(" + optionalId(id) + id2 + "," + id1 + optionalAttributes(gAttrs) +  ")";
-        return s;
-    }
 
-    public Object convertAlternateOf(Object id2, Object id1) {
-        String s="alternateOf(" + id2 + "," + id1 + ")";
-        return s;
-    }
-
-    public Object convertSpecializationOf(Object id2, Object id1) {
-        String s="specializationOf(" + id2 + "," + id1 + ")";
-        return s;
-    }
-
-	public Object convertActedOnBehalfOf(Object id, Object id2,Object id1, Object a, Object aAttrs) {
-        String s="actedOnBehalfOf(" + optionalId(id) + id2 + "," + id1 + "," +
-                optional(a) +
-                optionalAttributes(aAttrs) + ")";
-            return s;
-    }
 
     
 	// FIXME

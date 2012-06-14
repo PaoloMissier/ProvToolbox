@@ -103,7 +103,7 @@ public class ASNConstructor implements TreeConstructor {
     }
 
     public String optionalId(Object id) {
-        return ((id==null)? "" : (id + ","));
+        return ((id==null)? "" : (id + ";"));
     }            
 
     public Object convertUsed(Object id, Object id2,Object id1, Object time, Object aAttrs) {
@@ -322,5 +322,11 @@ public class ASNConstructor implements TreeConstructor {
         String s="hasAnnotation(" + something  + "," + note + ")";
         return s;
     }
+
+    public Object convertHasProvenanceIn(Object uid,Object su, Object bu, Object ta, Object se, Object pr, Object dAttrs) {
+        String s="hasProvenanceIn(" + optionalId(uid) + "," + su + optional(bu) + optional(ta) + optional(se) + optional(pr) + optionalAttributes(dAttrs) + ")";
+        return s;
+    }
+
 
 }

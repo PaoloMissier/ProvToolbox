@@ -50,11 +50,14 @@ public interface TreeConstructor {
 
     public Object convertNote(Object id, Object attrs);
     public Object convertHasAnnotation(Object something, Object note);
+    public Object convertHasProvenanceIn(Object uid,Object su, Object bu, Object ta, Object se, Object pr, Object dAttrs);
+
 
     /* Other conversions */
 
     public Object convertBundle(Object nss, List<Object> records, List<Object> bundles);
     public Object convertNamedBundle(Object id, Object nss, List<Object> records);
+
     public Object convertAttributes(List<Object> attributes);
     public Object convertId(String id);
     public Object convertAttribute(Object name, Object value);

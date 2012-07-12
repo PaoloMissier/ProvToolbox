@@ -1,0 +1,51 @@
+
+bundle 
+
+//
+// entities
+//
+entity(paper1)
+entity(paper2)
+entity(draftV1, [ distribution="internal", status="draft", version="0.1"])
+entity(draftComments)
+entity(draftV2,  [ distribution="internal", status="draft", version="0.2"])
+
+
+entity(paper3)
+entity(pubGuidelinesV1)
+entity(pubGuidelinesV2)
+entity(wd1, [distribution="public", status="draft", release="1.0"])
+
+//
+// activities
+//
+activity(drafting, 2012-06-18T11:10:00,2012-06-18T11:10:10)
+activity(commenting, 2012-06-18T11:20:00, 2012-06-18T11:30:00)
+activity(editing, 2012-06-18T11:35:00, 2012-06-18T11:45:00)
+
+//
+// produce-consume
+//
+used(drafting, paper1,2012-06-18T11:10:00)
+used(drafting, paper2, 2012-06-18T11:10:00)
+wasGeneratedBy(draftV1, drafting, 2012-06-18T11:10:00)
+used(commenting, draftV1,  2012-06-18T11:10:00)
+wasGeneratedBy(draftComments, commenting, 2012-06-18T11:10:00)
+wasGeneratedBy(draftV2, editing, 2012-06-18T11:10:00)
+used(editing, draftComments, 2012-06-18T11:10:00)
+
+//
+// Who did what
+//
+agent(alice, [prov:type="prov:Person", role="main_editor"])
+agent(bob,  [prov:type="prov:Person", role="jr_editor"])
+wasAssociatedWith(drafting, bob, -, [prov:role="author"])
+wasAssociatedWith(commenting, alice, -, [prov:role="editor"])
+wasAssociatedWith(editing, bob, -, [prov:role="author"])
+wasAttributedTo(draftV1, bob)
+actedOnBehalfOf(bob, alice,-)
+
+// explicit derivation
+wasDerivedFrom(draftV2, draftV1)
+
+endBundle

@@ -555,4 +555,32 @@ public class DataLogConstructor implements TreeConstructor {
 	}
 
 
+	public Object convertHadPrimarySource(Object id, Object id2, Object id1,
+			Object pe, Object q2, Object q1, Object dAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public Object convertWasInfluencedBy(Object id, Object id2, Object id1,
+			Object dAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public Object convertCollectionMemberOf(Object id, Object id2, Object map,
+			Object complete, Object dAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public Object convertDictionaryMemberOf(Object id, Object id2, Object map,
+			Object complete, Object dAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 }

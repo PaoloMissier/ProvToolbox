@@ -70,10 +70,10 @@ public class NullConstructor implements TreeConstructor {
     public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
         return null;
     }
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+    public Object convertHadPrimarySource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
         return null;
     }
-    public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
+    public Object convertWasInfluencedBy(Object id, Object id2, Object id1, Object dAttrs) {
         return null;
     }
 
@@ -97,7 +97,11 @@ public class NullConstructor implements TreeConstructor {
 	return null;
     }
 
-    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+    public Object convertCollectionMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+	return null;
+    }
+
+    public Object convertDictionaryMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
 	return null;
     }
     
@@ -115,17 +119,13 @@ public class NullConstructor implements TreeConstructor {
 
     /* Component 6 */
 
-    public Object convertNote(Object id, Object attrs) {
-        return null;
-    }
-    public Object convertHasAnnotation(Object something, Object note) {
+    public Object convertMentionOf(Object su, Object bu, Object ta) {
         return null;
     }
 
-    public Object convertHasProvenanceIn(Object uid,Object su, Object bu, Object ta, Object se, Object pr, Object dAttrs) {
-        return null;
+    public Object convertExtension(Object name, Object args, Object dAttrs) {
+	return null;
     }
-
 
     /* Others */
 

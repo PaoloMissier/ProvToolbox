@@ -484,6 +484,9 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
+    public Object convertExtension(Object name, Object args, Object dAttrs) {
+	return null;
+    }
     public Object convertQualifiedName(String qname) {
         return qname;
     }
@@ -524,6 +527,7 @@ public class DataLogConstructor implements TreeConstructor {
         
 
 
+
         /* Component 6 */
 
         public Object convertNote(Object id, Object attrs) {
@@ -536,10 +540,19 @@ public class DataLogConstructor implements TreeConstructor {
             return s;
         }
 
-    public Object convertHasProvenanceIn(Object uid,Object su, Object bu, Object ta, Object se, Object pr, Object dAttrs) {
+
+
+    public Object convertMentionOf(Object su, Object bu, Object ta) {
         //todo
         throw new UnsupportedOperationException();
     }
+
+
+	public Object convertHasProvenanceIn(Object uid, Object su, Object bu,
+			Object ta, Object se, Object pr, Object dAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 
 }

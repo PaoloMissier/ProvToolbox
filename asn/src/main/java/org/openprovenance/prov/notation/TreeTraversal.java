@@ -231,7 +231,7 @@ public class TreeTraversal {
             dAttrs=convert(ast.getChild(6));
             return c.convertWasQuotedFrom(uid,id2,id1,pe,q2,q1,dAttrs);
 
-        case PROV_NParser.ORIGINALSOURCE:
+        case PROV_NParser.PRIMARYSOURCE:
             uidTree=ast.getChild(0);
             if (uidTree.getChildCount()>0) {
                 uidTree=uidTree.getChild(0);
@@ -243,9 +243,9 @@ public class TreeTraversal {
             q2=convert(ast.getChild(4));
             q1=convert(ast.getChild(5));
             dAttrs=convert(ast.getChild(6));
-            return c.convertHadOriginalSource(uid,id2,id1,pe,q2,q1,dAttrs);
+            return c.convertHadPrimarySource(uid,id2,id1,pe,q2,q1,dAttrs);
 
-        case PROV_NParser.TRACEDTO:
+        case PROV_NParser.INFL:
             uidTree=ast.getChild(0);
             if (uidTree.getChildCount()>0) {
                 uidTree=uidTree.getChild(0);
@@ -254,9 +254,11 @@ public class TreeTraversal {
             id2=convert(ast.getChild(1));
             id1=convert(ast.getChild(2));
             dAttrs=convert(ast.getChild(3));
-            return c.convertTracedTo(uid,id2,id1,dAttrs);
+            return c.convertWasInfluencedBy(uid,id2,id1,dAttrs);
 
             /* Component 4 */
+
+            /* Component 5 */
 
         case PROV_NParser.ALTERNATE:
             id2=convert(ast.getChild(0));
@@ -268,7 +270,15 @@ public class TreeTraversal {
             id1=convert(ast.getChild(1));
             return c.convertSpecializationOf(id2,id1);
 
-            /* Component 5 */
+        case PROV_NParser.CTX:
+            Object su=convert(ast.getChild(0));
+            Object bu=convert(ast.getChild(1));
+            Object ta=convert(ast.getChild(2));
+            return c.convertMentionOf(su,bu,ta);
+
+
+
+            /* Component 6 */
 
         case PROV_NParser.DBIF:
             uidTree=ast.getChild(0);
@@ -296,7 +306,7 @@ public class TreeTraversal {
             dAttrs=convert(ast.getChild(4));
             return c.convertRemoval(uid,id2,id1,keylist,dAttrs);
 
-        case PROV_NParser.MEM:
+        case PROV_NParser.DMEM:
             uidTree=ast.getChild(0);
             if (uidTree.getChildCount()>0) {
                 uidTree=uidTree.getChild(0);
@@ -306,7 +316,19 @@ public class TreeTraversal {
             keymap=convert(ast.getChild(2));
             Object complete=convert(ast.getChild(3));
             dAttrs=convert(ast.getChild(4));
-            return c.convertMemberOf(uid,id2,keymap,complete,dAttrs);
+            return c.convertDictionaryMemberOf(uid,id2,keymap,complete,dAttrs);
+
+        case PROV_NParser.CMEM:
+            uidTree=ast.getChild(0);
+            if (uidTree.getChildCount()>0) {
+                uidTree=uidTree.getChild(0);
+            }
+            uid=convert(uidTree);
+            id2=convert(ast.getChild(1));
+            Object cmemEntities=convert(ast.getChild(2));
+            complete=convert(ast.getChild(3));
+            dAttrs=convert(ast.getChild(4));
+            return c.convertCollectionMemberOf(uid,id2,cmemEntities,complete,dAttrs);
 
 
         case PROV_NParser.KEYS:
@@ -342,34 +364,25 @@ public class TreeTraversal {
 
             return c.convertKeyEntitySet(entries);
 
+        case PROV_NParser.ES:
+            List<Object> listOfEntities=new LinkedList();
+            for (int i=0; i< ast.getChildCount(); i++) {
+                Object o=convert(ast.getChild(i));
+                listOfEntities.add(o);
+            }
+            return listOfEntities;
 
             /* Component 6 */
 
-        case PROV_NParser.NOTE:
-            id=convert(ast.getChild(0));
-            Object nAttrs=convert(ast.getChild(1));
-            return c.convertNote(id,nAttrs);
-
-
-        case PROV_NParser.HAN:
-            id2=convert(ast.getChild(0));
-            id1=convert(ast.getChild(1));
-            return c.convertHasAnnotation(id2,id1);
-
-
-        case PROV_NParser.HPI:
-            uidTree=ast.getChild(0);
-            if (uidTree.getChildCount()>0) {
-                uidTree=uidTree.getChild(0);
+        case PROV_NParser.EXT:
+	    Object extName=ast.getChild(0);
+	    Object optionalAttributes=ast.getChild(ast.getChildCount()-1);
+            List<Object> args=new LinkedList();
+            for (int i=1; i< ast.getChildCount()-1; i++) {
+                Object o=convert(ast.getChild(i));
+                args.add(o);
             }
-            uid=convert(uidTree);
-            Object su=convert(ast.getChild(1));
-            Object bu=convert(ast.getChild(2));
-            Object ta=convert(ast.getChild(3));
-            Object se=convert(ast.getChild(4));
-            Object pr=convert(ast.getChild(5));
-            dAttrs=convert(ast.getChild(6));
-            return c.convertHasProvenanceIn(uid,su,bu,ta,se,pr,dAttrs);
+            return c.convertExtension(extName, args, optionalAttributes);
 
 
             /* Miscellaneous Constructs */

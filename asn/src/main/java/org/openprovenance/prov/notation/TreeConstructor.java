@@ -19,38 +19,40 @@ public interface TreeConstructor {
 
 
     /* Component 2 */
+    public Object convertWasDerivedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
+    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
+    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
+    public Object convertHadPrimarySource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
+
+
+    /* Component 3 */
 
     public Object convertAgent(Object id, Object attrs);
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object aAttrs);
     public Object convertWasAssociatedWith(Object id, Object id2,Object id1, Object pl, Object aAttrs);
     public Object convertActedOnBehalfOf(Object id, Object id2,Object id1, Object a, Object aAttrs);
 
-    /* Component 3 */
-    public Object convertWasDerivedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs);
+    public Object convertWasInfluencedBy(Object id, Object id2, Object id1, Object dAttrs);
 
-
-    /* Component 4 */
-    public Object convertAlternateOf(Object id2,Object id1);
-    public Object convertSpecializationOf(Object id2,Object id1);
 
     /* Component 5 */
+    public Object convertAlternateOf(Object id2,Object id1);
+    public Object convertSpecializationOf(Object id2,Object id1);
+    public Object convertMentionOf(Object su, Object bu, Object ta);
+
+
+    /* Component 6 */
     public Object convertInsertion(Object id, Object id2, Object id1, Object map, Object dAttrs);
     public Object convertRemoval(Object id, Object id2, Object id1, Object keyset, Object dAttrs);
     public Object convertEntry(Object o1, Object o2);
     public Object convertKeyEntitySet(List<Object> o);
     public Object convertKeys(List<Object> o);
-    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs);
+    public Object convertCollectionMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs);
+    public Object convertDictionaryMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs);
 
 
-    /* Component 6 */
 
-    public Object convertNote(Object id, Object attrs);
-    public Object convertHasAnnotation(Object something, Object note);
-    public Object convertHasProvenanceIn(Object uid,Object su, Object bu, Object ta, Object se, Object pr, Object dAttrs);
+    public Object convertExtension(Object name, Object args, Object dAttrs);
 
 
     /* Other conversions */

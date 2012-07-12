@@ -9,6 +9,11 @@ prefix ex <http://example>  /* a single prefix declaration */
           entity(ex:e1, [ex:param="a"])
           entity(ex:e2, [ex:param="a"])
           entity(ex:e3, [ex:param="a"])
+          entity(ex:e3, [ex:param="aWithTag" @ENGLISHTAG ])
+          entity(ex:e3, [ex:param="""b"""])
+          entity(ex:e3, [ex:param="""c
+                                     c
+                                     c"""])
           entity(tr:WD-prov-dm-20111215)
           entity(tr:WD-prov-dm-20111215, [ prov:type="document" ])
           entity(tr:WD-prov-dm-20111215, [ prov:type="document", ex:version=2 ])
@@ -20,6 +25,14 @@ prefix ex <http://example>  /* a single prefix declaration */
           activity(ex:a10, -, -)
           activity(ex:a10, -, -, [prov:type="edit"])
           activity(ex:a10, -, 2011-11-16T16:00:00)
+          activity(ex:a10, -, 2011-11-16T16:00:00.0)
+          activity(ex:a10, -, 2011-11-16T16:00:00.1)
+          activity(ex:a10, -, 2011-11-16T16:00:00.01)
+          activity(ex:a10, -, 2011-11-16T16:00:00.012)
+          activity(ex:a10, -, 2011-11-16T16:00:00.0123)
+          activity(ex:a10, -, 2011-11-16T16:00:00.01234)
+          activity(ex:a10, -, 2011-11-16T16:00:00.012345)
+
           activity(ex:a10, 2011-11-16T16:00:00, -)
           activity(ex:a10, 2011-11-16T16:00:00, -, [prov:type="createFile"])
           activity(ex:a10, 2011-11-16T16:00:00, 2011-11-16T16:00:01, [prov:type="createFile"])
@@ -279,6 +292,9 @@ prefix ex <http://example>  /* a single prefix declaration */
           wasAssociatedWith(-; ex:a1, ex:ag1, ex:e1)
           wasAssociatedWith(-; ex:a1, ex:ag1, ex:e1, [ex:param1="a", ex:param2="b"])
 
+          actedOnBehalfOf(ex:ag1,ex:ag2)
+          actedOnBehalfOf(ex:ag1,ex:ag2,[prov:type="delegation"])
+
           actedOnBehalfOf(ex:ag1,ex:ag2, -)
           actedOnBehalfOf(ex:ag1,ex:ag2, -,[prov:type="delegation"])
           actedOnBehalfOf(ex:ag1,ex:ag2,ex:a1)
@@ -528,111 +544,106 @@ prefix ex <http://example>  /* a single prefix declaration */
           wasQuotedFrom(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
 
 
-          hadOriginalSource(ex:e1, ex:e2)
-          hadOriginalSource(ex:e1, ex:e2, -, -, -)
-          hadOriginalSource(ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2)
+          hadPrimarySource(ex:e1, ex:e2, -, -, -)
+          hadPrimarySource(ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
 
-          hadOriginalSource(ex:e1, ex:e2, -, -, -)
-          hadOriginalSource(ex:e1, ex:e2, -, -, ex:u1)
-          hadOriginalSource(ex:e1, ex:e2, -, ex:g2, -)
-          hadOriginalSource(ex:e1, ex:e2, -, ex:g2, ex:u1)
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, -, -)
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, -, ex:u1)
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, ex:g2, -)
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
+          hadPrimarySource(ex:e1, ex:e2, -, -, -)
+          hadPrimarySource(ex:e1, ex:e2, -, -, ex:u1)
+          hadPrimarySource(ex:e1, ex:e2, -, ex:g2, -)
+          hadPrimarySource(ex:e1, ex:e2, -, ex:g2, ex:u1)
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, -, -)
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, -, ex:u1)
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, ex:g2, -)
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
 
-          hadOriginalSource(ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, -, -, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, -, ex:g2, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, -, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, -, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, ex:g2, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-
-
-          hadOriginalSource(r0; ex:e1, ex:e2)
-          hadOriginalSource(r0; ex:e1, ex:e2, -, -, -)
-          hadOriginalSource(r0; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-
-          hadOriginalSource(r0; ex:e1, ex:e2, -, -, -)
-          hadOriginalSource(r0; ex:e1, ex:e2, -, -, ex:u1)
-          hadOriginalSource(r0; ex:e1, ex:e2, -, ex:g2, -)
-          hadOriginalSource(r0; ex:e1, ex:e2, -, ex:g2, ex:u1)
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, -, -)
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, -, ex:u1)
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, ex:g2, -)
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
-
-          hadOriginalSource(r0; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, -, -, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, -, ex:g2, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, -, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, -, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, ex:g2, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-
-          hadOriginalSource(-; ex:e1, ex:e2)
-          hadOriginalSource(-; ex:e1, ex:e2, -, -, -)
-          hadOriginalSource(-; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-
-          hadOriginalSource(-; ex:e1, ex:e2, -, -, -)
-          hadOriginalSource(-; ex:e1, ex:e2, -, -, ex:u1)
-          hadOriginalSource(-; ex:e1, ex:e2, -, ex:g2, -)
-          hadOriginalSource(-; ex:e1, ex:e2, -, ex:g2, ex:u1)
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, -, -)
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, -, ex:u1)
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, ex:g2, -)
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
-
-          hadOriginalSource(-; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, -, -, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, -, ex:g2, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, -, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, -, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, -, ex:u1, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, ex:g2, -, [ex:param1="a", ex:param2="b"])
-          hadOriginalSource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, -, -, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, -, ex:g2, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, -, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, -, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, ex:g2, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
 
 
-          tracedTo(ex:e1, ex:e2)
-          tracedTo(ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
-          tracedTo(t; ex:e1, ex:e2)
-          tracedTo(t; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
-          tracedTo(-; ex:e1, ex:e2)
-          tracedTo(-; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2)
+          hadPrimarySource(r0; ex:e1, ex:e2, -, -, -)
+          hadPrimarySource(r0; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
 
-/* component 4 */
+          hadPrimarySource(r0; ex:e1, ex:e2, -, -, -)
+          hadPrimarySource(r0; ex:e1, ex:e2, -, -, ex:u1)
+          hadPrimarySource(r0; ex:e1, ex:e2, -, ex:g2, -)
+          hadPrimarySource(r0; ex:e1, ex:e2, -, ex:g2, ex:u1)
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, -, -)
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, -, ex:u1)
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, ex:g2, -)
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
+
+          hadPrimarySource(r0; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, -, -, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, -, ex:g2, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, -, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, -, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, ex:g2, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(r0; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+
+          hadPrimarySource(-; ex:e1, ex:e2)
+          hadPrimarySource(-; ex:e1, ex:e2, -, -, -)
+          hadPrimarySource(-; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+
+          hadPrimarySource(-; ex:e1, ex:e2, -, -, -)
+          hadPrimarySource(-; ex:e1, ex:e2, -, -, ex:u1)
+          hadPrimarySource(-; ex:e1, ex:e2, -, ex:g2, -)
+          hadPrimarySource(-; ex:e1, ex:e2, -, ex:g2, ex:u1)
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, -, -)
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, -, ex:u1)
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, ex:g2, -)
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1)
+
+          hadPrimarySource(-; ex:e1, ex:e2, -, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, -, -, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, -, ex:g2, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, -, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, -, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, -, ex:u1, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, ex:g2, -, [ex:param1="a", ex:param2="b"])
+          hadPrimarySource(-; ex:e1, ex:e2, ex:a1, ex:g2, ex:u1, [ex:param1="a", ex:param2="b"])
+
+
+          wasInfluencedBy(ex:e1, ex:e2)
+          wasInfluencedBy(ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+          wasInfluencedBy(t; ex:e1, ex:e2)
+          wasInfluencedBy(t; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+          wasInfluencedBy(-; ex:e1, ex:e2)
+          wasInfluencedBy(-; ex:e1, ex:e2, [ex:param1="a", ex:param2="b"])
+
+/* component 5 */
 
           alternateOf(ex:e1, ex:e2)
           specializationOf(ex:e1, ex:e2)
 
-/* component 5 */
+          mentionOf(ex:e1, ex2:e1, ex:b1 )
+
+/* component 6 */
 
           derivedByInsertionFrom(ex:e1, ex:e2, {("k1", ex:e2)})
 
 
-/* component 6 */
 
-          note(ex:n1, [ex:param="a"])
-          hasAnnotation(ex:ag1, ex:n1)
-          hasAnnotation(ex:e1, ex:n1)
-          hasAnnotation(ex:n1, ex:n1)
 
-          hasProvenanceIn(ex:e1, ex:bundle4, -, -, -)
-          hasProvenanceIn(ex:e1, ex:bundle4, ex:e1, -, -)
-          hasProvenanceIn(ex:e1, ex:bundle4, ex:e1, <http://service/endpoint>, -)
-          hasProvenanceIn(ex:e1, ex:bundle4, ex:e1, -, <http://service/location.pn>)
+
+
 
 
 /* Other testing of grammar */
@@ -752,6 +763,8 @@ prefix ex <http://example>  /* a single prefix declaration */
 	  memberOf(ex:e1, {("k1", ex:e2), ("k2", ex:e3)}, [ex:param="a"])
 	  memberOf(ex:e1, {("k1", ex:e2), ("k2", ex:e3)}, true, [ex:param="a"])
 	  memberOf(ex:e1, {("k1", ex:e2), ("k2", ex:e3)}, false, [ex:param="a"])
+
+
 
 
 /* bundles  What is the scope of ex:? Problem, with XML Convertion. Namespace declaration lost? */

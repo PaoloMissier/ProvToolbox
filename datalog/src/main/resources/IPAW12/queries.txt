@@ -22,7 +22,7 @@
 
 %usedGeneratedPath(E2, E1)?
 
-%relatedAgents(Ag2, Ag1, N) ?
+relatedAgents(Ag2, Ag1, N) ?
 
 %tracedTo(A,B) ?
 
@@ -40,7 +40,7 @@
 %tracedTo(A,B)?
 
 % derivability -- constraint checking
-derivable(A,B) ?
+% derivable(A,B) ?
 
 %%% 
 % TODO

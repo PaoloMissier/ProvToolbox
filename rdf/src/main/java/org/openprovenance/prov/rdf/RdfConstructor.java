@@ -184,11 +184,11 @@ public class RdfConstructor implements TreeConstructor {
         //todo
         throw new UnsupportedOperationException();
     }
-    public Object convertHadOriginalSource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
+    public Object convertHadPrimarySource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
-    public Object convertTracedTo(Object id, Object id2, Object id1, Object dAttrs) {
+    public Object convertWasInfluencedBy(Object id, Object id2, Object id1, Object dAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
@@ -229,6 +229,9 @@ public class RdfConstructor implements TreeConstructor {
 
     }
 
+    public Object convertExtension(Object name, Object args, Object dAttrs) {
+	return null;
+    }
     public Object convertQualifiedName(String qname) {
         return qname;
     }
@@ -295,7 +298,12 @@ public class RdfConstructor implements TreeConstructor {
         throw new UnsupportedOperationException();
     }
 
-    public Object convertMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+    public Object convertDictionaryMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
+        //todo
+        throw new UnsupportedOperationException();
+    }
+
+    public Object convertCollectionMemberOf(Object id, Object id2, Object map, Object complete, Object dAttrs) {
         //todo
         throw new UnsupportedOperationException();
     }
@@ -307,17 +315,9 @@ public class RdfConstructor implements TreeConstructor {
 
    /* Component 6 */
 
-    public Object convertNote(Object id, Object attrs) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
-    public Object convertHasAnnotation(Object something, Object note) {
-        //todo
-        throw new UnsupportedOperationException();
-    }
 
 
-    public Object convertHasProvenanceIn(Object uid,Object su, Object bu, Object ta, Object se, Object pr, Object dAttrs) {
+    public Object convertMentionOf(Object su, Object bu, Object ta) {
         //todo
         throw new UnsupportedOperationException();
     }

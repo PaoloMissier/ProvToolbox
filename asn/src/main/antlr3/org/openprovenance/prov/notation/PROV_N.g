@@ -17,19 +17,22 @@ tokens {
     TIME; START; END;
 
     /* Component 2 */
-    AGENT; WAT; WAW; AOBO; 
+    WDF; WRO; PRIMARYSOURCE; WQF; INFL; 
+
     /* Component 3 */
-    WDF; WRO; ORIGINALSOURCE; WQF; TRACEDTO; 
+    AGENT; WAT; WAW; AOBO; 
+
     /* Component 4 */
-    SPECIALIZATION; ALTERNATE; 
+    BUNDLE; BUNDLES; NAMEDBUNDLE;
+
     /* Component 5 */
-    DBIF; DBRF; KES; KEYS; VALUES; MEM; TRUE; FALSE; UNKNOWN;
+    SPECIALIZATION; ALTERNATE; CTX;
+
     /* Component 6 */
-    NOTE; HAN; HPI; BUNDLE; BUNDLES; NAMEDBUNDLE;
+    DBIF; DBRF; KES; ES; KEYS; VALUES; DMEM; CMEM; TRUE; FALSE; UNKNOWN;
 
-
-
-                   
+    /* Extensibility */
+    EXT;
 }
 
 @header {
@@ -110,7 +113,7 @@ expression
 
             /* component 3 */
 
-        | derivationExpression | tracedToExpression | hadOriginalSourceExpression | quotationExpression | revisionExpression
+        | derivationExpression | influenceExpression | hadPrimarySourceExpression | quotationExpression | revisionExpression
 
             /* component 4 */
 
@@ -122,7 +125,10 @@ expression
 
 
             /* component 6 */ 
-        | noteExpression | hasAnnotationExpression | hasProvenanceInExpression
+         | mentionExpression
+
+            /* extensibility */
+         | extensibilityExpression
         )
 	;
 
@@ -217,7 +223,8 @@ associationExpression
 
 responsibilityExpression
 	:	'actedOnBehalfOf' '('   id0=optionalIdentifier ag2=identifier ',' ag1=identifier (','  a=identifierOrMarker)? optionalAttributeValuePairs ')'
-      -> ^(AOBO  ^(ID $id0?) $ag2 $ag1 $a? optionalAttributeValuePairs)
+      -> {$a.tree==null}? ^(AOBO  ^(ID $id0?) $ag2 $ag1 ^(ID) optionalAttributeValuePairs)
+      -> ^(AOBO  ^(ID $id0?) $ag2 $ag1 $a optionalAttributeValuePairs)
 	;
 
 
@@ -253,23 +260,28 @@ quotationExpression
 	;
 
 
-hadOriginalSourceExpression
-	:	'hadOriginalSource' '('  id0=optionalIdentifier id2=identifier ',' id1=identifier (',' a=identifierOrMarker ',' g2=identifierOrMarker ',' u1=identifierOrMarker )?	optionalAttributeValuePairs ')'
+hadPrimarySourceExpression
+	:	'hadPrimarySource' '('  id0=optionalIdentifier id2=identifier ',' id1=identifier (',' a=identifierOrMarker ',' g2=identifierOrMarker ',' u1=identifierOrMarker )?	optionalAttributeValuePairs ')'
       -> {$a.tree==null && $g2.tree==null && $u1.tree==null}?
-          ^(ORIGINALSOURCE ^(ID $id0?) $id2 $id1 ^(ID) ^(ID) ^(ID) optionalAttributeValuePairs)
-      -> ^(ORIGINALSOURCE ^(ID $id0?) $id2 $id1 $a $g2 $u1 optionalAttributeValuePairs)
+          ^(PRIMARYSOURCE ^(ID $id0?) $id2 $id1 ^(ID) ^(ID) ^(ID) optionalAttributeValuePairs)
+      -> ^(PRIMARYSOURCE ^(ID $id0?) $id2 $id1 $a $g2 $u1 optionalAttributeValuePairs)
 	;
 
 
 
-tracedToExpression
-	:	'tracedTo' '('  id0=optionalIdentifier id2=identifier ',' id1=identifier optionalAttributeValuePairs ')'
-      -> ^(TRACEDTO ^(ID $id0?) $id2 $id1 optionalAttributeValuePairs)
+influenceExpression
+	:	'wasInfluencedBy' '('  id0=optionalIdentifier id2=identifier ',' id1=identifier optionalAttributeValuePairs ')'
+      -> ^(INFL ^(ID $id0?) $id2 $id1 optionalAttributeValuePairs)
 	;
 
 
 /*
-        Component 4: Alternate entities
+        Component 4: 
+
+*/
+
+/*
+        Component 5: Alternate entities
 
 */
 
@@ -283,8 +295,14 @@ specializationExpression
       -> ^(SPECIALIZATION identifier+)
 	;
 
+mentionExpression
+	:	'mentionOf' '(' su=identifier ',' en=identifier ',' bu=identifier ')' 
+        -> ^(CTX $su $bu $en)
+	;
+
+
 /*
-        Component 5: Collections
+        Component 6: Collections
 
 TODO: literal used in these production needs to disable qname, to allow for intliteral
 
@@ -303,13 +321,23 @@ removalExpression
 /* TODO: specify complete as optional boolean */
 membershipExpression
 	:	( 'memberOf' '('  id0=optionalIdentifier  id1=identifier ',' keyEntitySet ',' 'true' optionalAttributeValuePairs ')'
-      -> ^(MEM ^(ID $id0?) $id1 keyEntitySet  ^(TRUE) optionalAttributeValuePairs)
+      -> ^(DMEM ^(ID $id0?) $id1 keyEntitySet  ^(TRUE) optionalAttributeValuePairs)
          |          
           'memberOf' '('  id0=optionalIdentifier  id1=identifier ',' keyEntitySet ',' 'false' optionalAttributeValuePairs ')'
-      -> ^(MEM ^(ID $id0?) $id1 keyEntitySet  ^(FALSE) optionalAttributeValuePairs)
+      -> ^(DMEM ^(ID $id0?) $id1 keyEntitySet  ^(FALSE) optionalAttributeValuePairs)
          |          
           'memberOf' '('  id0=optionalIdentifier  id1=identifier ',' keyEntitySet optionalAttributeValuePairs ')'
-      -> ^(MEM ^(ID $id0?) $id1 keyEntitySet  ^(UNKNOWN) optionalAttributeValuePairs)
+      -> ^(DMEM ^(ID $id0?) $id1 keyEntitySet  ^(UNKNOWN) optionalAttributeValuePairs)
+         |
+         'memberOf' '('  id0=optionalIdentifier  id1=identifier ',' entitySet ',' 'true' optionalAttributeValuePairs ')'
+      -> ^(CMEM ^(ID $id0?) $id1 entitySet  ^(TRUE) optionalAttributeValuePairs)
+         |
+         'memberOf' '('  id0=optionalIdentifier  id1=identifier ',' entitySet ',' 'false' optionalAttributeValuePairs ')'
+      -> ^(CMEM ^(ID $id0?) $id1 entitySet  ^(FALSE) optionalAttributeValuePairs)
+         |
+         'memberOf' '('  id0=optionalIdentifier  id1=identifier ',' entitySet optionalAttributeValuePairs ')'
+      -> ^(CMEM ^(ID $id0?) $id1 entitySet  ^(UNKNOWN) optionalAttributeValuePairs)
+
         )
 	;
 
@@ -318,29 +346,37 @@ keyEntitySet
       -> ^(KES ^(KEYS literal+) ^(VALUES identifier+))
     ;
 
-/* TODO */
+
+entitySet
+    : '{'  identifier* '}'
+      -> ^(ES  identifier?)
+    ;
+
+
 
 /*
-        Component 6: Annotations
+        Component: Extensibility
 
 */
 
-noteExpression
-	:	'note' '(' identifier optionalAttributeValuePairs	')' 
-        -> ^(NOTE identifier optionalAttributeValuePairs )
-	;
-
-hasAnnotationExpression
-	:	'hasAnnotation' '(' identifier ',' identifier	')' 
-        -> ^(HAN identifier+ )
-	;
 
 
-hasProvenanceInExpression
-	:	'hasProvenanceIn' '(' id0=optionalIdentifier  su=identifier ',' bu=identifierOrMarker ',' ta=identifierOrMarker
-         ',' se=iriOrMarker ',' pr=iriOrMarker   optionalAttributeValuePairs ')' 
-        -> ^(HPI ^(ID $id0?) $su $bu $ta $se $pr  optionalAttributeValuePairs )
+
+extensibilityExpression
+	:	name=QUALIFIED_NAME '(' extensibilityArgument ( (',' | ';') extensibilityArgument)* attr=optionalAttributeValuePairs ')'
+      -> {$attr.tree==null}?
+         ^(EXT $name extensibilityArgument* ^(ATTRIBUTES))
+      -> ^(EXT $name extensibilityArgument* optionalAttributeValuePairs)
 	;
+
+extensibilityArgument
+    : ( identifierOrMarker | literal | time  | extensibilityExpression | extensibilityRecord ) 
+;
+
+extensibilityRecord:
+ '{' extensibilityArgument (',' extensibilityArgument)* '}' |  '(' extensibilityArgument (',' extensibilityArgument)* ')'
+;
+
 
 
 iriOrMarker
@@ -403,6 +439,8 @@ time
 
 literal :
         (STRING_LITERAL -> ^(STRING STRING_LITERAL) |
+         STRING_LITERAL LANGTAG -> ^(STRING STRING_LITERAL LANGTAG) |
+         STRING_LITERAL_LONG2 -> ^(STRING STRING_LITERAL_LONG2) |
          INT_LITERAL -> ^(INT INT_LITERAL) |
          STRING_LITERAL { qnameDisabled = false; } '%%' datatype -> ^(TYPEDLITERAL STRING_LITERAL datatype) |
          { qnameDisabled = false; } '\'' QUALIFIED_NAME '\'' -> ^(TYPEDLITERAL QUALIFIED_NAME) | )
@@ -428,6 +466,9 @@ INT_LITERAL:
 
 STRING_LITERAL : '"' (options {greedy=false;} : ~('"' | '\\' | EOL) | ECHAR)* '"';
 
+STRING_LITERAL_LONG2 : '"""' (options {greedy=false;} : ('"' | '""')? (~('"'|'\\') | ECHAR))* '"""';
+
+
 
 /* This production uses a "Disambiguating Semantic Predicates"
    checking whether we are in scope of a declaration/literal or not. If so,
@@ -438,6 +479,8 @@ QUALIFIED_NAME:
     (PN_PREFIX ':')? PN_LOCAL | PN_PREFIX ':'
         
   ;
+
+
 
 /* The order of the two rules (QUALIFIED_NAME/PREFX) is crucial. By default, QUALIFIED_NAME should be used
    unless we are in the context of a declaration. */
@@ -542,6 +585,10 @@ fragment DIGIT: '0'..'9';
 fragment
 EOL : '\n' | '\r';
 	
+
+LANGTAG : '@' ('A'..'Z'|'a'..'z')+ (MINUS ('A'..'Z'|'a'..'z'|DIGIT)+)*;
+
+
 DOT : '.';
 
 MINUS : '-';
@@ -607,12 +654,12 @@ CLOSE_CURLY_BRACE
 
 
 
+/* Need to implement fully http://www.w3.org/TR/xmlschema11-2/#nt-dateTimeRep */
 
-xsdDateTime: IsoDateTime;
+xsdDateTime: DateTime;
 
-
-
-IsoDateTime: (DIGIT DIGIT DIGIT DIGIT '-' DIGIT DIGIT '-' DIGIT DIGIT 'T' DIGIT DIGIT ':' DIGIT DIGIT ':' DIGIT DIGIT ('.' DIGIT (DIGIT DIGIT?)?)? ('Z' | TimeZoneOffset)?)
+DateTime: 
+(DIGIT DIGIT DIGIT DIGIT '-' DIGIT DIGIT '-' DIGIT DIGIT 'T' DIGIT DIGIT ':' DIGIT DIGIT ':' DIGIT DIGIT ('.' DIGIT DIGIT*)? ('Z' | TimeZoneOffset)?)
     ;
 
 

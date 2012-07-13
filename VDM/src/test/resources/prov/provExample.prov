@@ -10,12 +10,6 @@ entity(draftV1, [ distribution="internal", status="draft", version="0.1"])
 entity(draftComments)
 entity(draftV2,  [ distribution="internal", status="draft", version="0.2"])
 
-
-entity(paper3)
-entity(pubGuidelinesV1)
-entity(pubGuidelinesV2)
-entity(wd1, [distribution="public", status="draft", release="1.0"])
-
 //
 // activities
 //
@@ -43,7 +37,8 @@ wasAssociatedWith(drafting, bob, -, [prov:role="author"])
 wasAssociatedWith(commenting, alice, -, [prov:role="editor"])
 wasAssociatedWith(editing, bob, -, [prov:role="author"])
 wasAttributedTo(draftV1, bob)
-actedOnBehalfOf(bob, alice,-)
+
+// actedOnBehalfOf(bob, alice,-)   
 
 // explicit derivation
 wasDerivedFrom(draftV2, draftV1)

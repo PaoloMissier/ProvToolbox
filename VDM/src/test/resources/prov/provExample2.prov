@@ -1,0 +1,36 @@
+
+bundle 
+
+//
+// entities
+//
+entity(e1)
+entity(e2)
+entity(e3)
+entity(e4)
+entity(e5)
+entity(e6)
+
+//
+// activities
+//
+activity(a1)
+activity(a2)
+activity(a3)
+
+//
+// produce-consume
+//
+used(a1,e1)
+used(a1,e2)
+used(a2,e1)
+used(a2,e2)
+used(a3,e3)
+used(a3,e4)
+
+wasGeneratedBy(e5,a3,2012-06-18T11:10:00)
+wasGeneratedBy(e6,a3,2012-06-18T11:10:00)
+wasGeneratedBy(e3,a1,2012-06-18T11:10:00)
+wasGeneratedBy(e4,a2,2012-06-18T11:10:00)
+
+endBundle

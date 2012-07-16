@@ -1,6 +1,6 @@
 
 
-bundle b1
+bundle
 
 prefix ex  <http://example.org/>
 
@@ -132,7 +132,7 @@ derivedByInsertionFrom(ex:family6, ex:family5, {('tr:prov-dm',     tr2012:WD-pro
 
 derivedByRemovalFrom(ex:family7, ex:family6, {'tr:prov-dm','tr:prov-o','tr:prov-primer'})
 
-memberOf(mid1, ex:family8, {('tr:prov-aq', tr2012:WD-prov-aq-20120110), ('tr:prov-primer', tr2012:WD-prov-primer-20120110)})
+// memberOf(mid1, {('tr:prov-aq', tr2012:WD-prov-aq-20120110), ('tr:prov-primer', tr2012:WD-prov-primer-20120110)})
 
 endBundle
 

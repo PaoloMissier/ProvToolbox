@@ -8,7 +8,7 @@ public class VDMTest1 extends TestCase
 
 //	DataLogUtility u=new DataLogUtility();
 
-	String s=VDMUtility.asn2VDM("src/test/resources/prov/provExample.prov");
+	String s=VDMUtility.asn2VDM("src/test/resources/prov/provExample-ProPub.prov");
 
 	System.out.println("=============");
 	System.out.println(s);

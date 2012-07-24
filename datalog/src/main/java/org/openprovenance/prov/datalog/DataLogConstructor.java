@@ -252,6 +252,7 @@ public class DataLogConstructor implements TreeConstructor {
 //            optionalAttributes(aAttrs) + ")";
 //        return s;
     }
+    
 
     public Object convertWasAttributedTo(Object id, Object id2,Object id1, Object gAttrs) {
     	
@@ -428,6 +429,11 @@ public class DataLogConstructor implements TreeConstructor {
         return s;
     }
 
+	public Object convertString(String s, String lang) {
+		return s + "@" + lang;
+	}
+
+
     public Object convertInt(int i) {
         return i;
     }
@@ -486,6 +492,12 @@ public class DataLogConstructor implements TreeConstructor {
 
     public Object convertExtension(Object name, Object args, Object dAttrs) {
 	return null;
+    }
+
+
+
+    public Object convertExtension(Object name, Object id, Object args, Object dAttrs) {
+        return null;
     }
     public Object convertQualifiedName(String qname) {
         return qname;

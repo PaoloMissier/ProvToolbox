@@ -254,5 +254,16 @@ public class VDMConstructor implements TreeConstructor {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public Object convertExtension(Object name, Object id, Object args,
+			Object dAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object convertString(String s, String lang) {
+		// TODO Auto-generated method stub
+		return null;
+	}
  
 }

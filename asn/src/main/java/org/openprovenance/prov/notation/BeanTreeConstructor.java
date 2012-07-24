@@ -239,5 +239,23 @@ public class BeanTreeConstructor implements BeanConstructor{
         return c.convertNamedBundle(namespaces,ll,null);
     }
 
+	public Object convertEntity(Object id, List<Object> tAttrs, Object lAttr,
+			List<Object> otherAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object convertAgent(Object id, List<Object> tAttrs, Object lAttr,
+			List<Object> otherAttrs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object convertActivity(Object id, List<Object> tAttrs, Object lAttr,
+			List<Object> otherAttrs, Object startTime, Object endTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

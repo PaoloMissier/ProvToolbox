@@ -121,7 +121,26 @@ public class ProvSerialiser {
     }
 
 
+    /** This code is to be moved to the validator */
+
+    public Document serialiseValidationReport (ValidationReport request) throws JAXBException {
+        return (Document) serialiseValidationReport (defaultEmptyDocument(), request);
+    }
     
+    public Node serialiseValidationReport (Node addTo, ValidationReport graph)
+        throws JAXBException {
+        Marshaller m=jc.createMarshaller();
+        m.marshal(of.createValidationReport(graph),addTo);
+        return addTo;
+    }
+    
+    public void serialiseValidationReport (File file, ValidationReport graph, boolean format)
+        throws JAXBException {
+        Marshaller m=jc.createMarshaller();
+        m.setProperty("jaxb.formatted.output",format);
+        //configurePrefixes(m,graph.getNss());
+        m.marshal(of.createValidationReport(graph),file);
+    }
 
 }
 

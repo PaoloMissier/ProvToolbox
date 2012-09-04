@@ -291,6 +291,117 @@ public class ProvFactory {
         return id;
     }
 
+    public Entity addAttributes(Entity from, Entity to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public Activity addAttributes(Activity from, Activity to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+    public Agent addAttributes(Agent from, Agent to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	//	to.getLocation().addAll(from.getLocation());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public Used addAttributes(Used from, Used to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getRole().addAll(from.getRole());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public WasGeneratedBy addAttributes(WasGeneratedBy from, WasGeneratedBy to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getRole().addAll(from.getRole());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public WasInvalidatedBy addAttributes(WasInvalidatedBy from, WasInvalidatedBy to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getRole().addAll(from.getRole());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+
+    public WasStartedBy addAttributes(WasStartedBy from, WasStartedBy to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getRole().addAll(from.getRole());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+    public WasEndedBy addAttributes(WasEndedBy from, WasEndedBy to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getLocation().addAll(from.getLocation());
+	to.getRole().addAll(from.getRole());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public WasDerivedFrom addAttributes(WasDerivedFrom from, WasDerivedFrom to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+    public WasInformedBy addAttributes(WasInformedBy from, WasInformedBy to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public ActedOnBehalfOf addAttributes(ActedOnBehalfOf from, ActedOnBehalfOf to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+
+    public WasAssociatedWith addAttributes(WasAssociatedWith from, WasAssociatedWith to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getRole().addAll(from.getRole());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public WasAttributedTo addAttributes(WasAttributedTo from, WasAttributedTo to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
+    public WasInfluencedBy addAttributes(WasInfluencedBy from, WasInfluencedBy to) {
+	to.getLabel().addAll(from.getLabel());
+	to.getType().addAll(from.getType());
+	to.getAny().addAll(from.getAny());
+	return to;
+    }
+
 
     public Entity newEntity(Entity a) {
         Entity res=newEntity(a.getId());
@@ -327,6 +438,12 @@ public class ProvFactory {
         return newEntity(stringToQName(id),label);
     }
 
+    public Used newUsed(QName id) {
+        return newUsed(id,null,null,null);
+    }
+    public WasGeneratedBy newWasGeneratedBy(QName id) {
+        return newWasGeneratedBy(id,null,null,(org.openprovenance.prov.xml.ActivityRef)null);
+    }
 
 
     public Used newUsed(String id,
@@ -997,6 +1114,49 @@ public class ProvFactory {
     }
     */
 
+    public JAXBElement<Entity> newElement(Entity u) {
+	return of.createEntity(u);
+    }
+    public JAXBElement<Activity> newElement(Activity u) {
+	return of.createActivity(u);
+    }
+    public JAXBElement<Agent> newElement(Agent u) {
+	return of.createAgent(u);
+    }
+    public JAXBElement<Used> newElement(Used u) {
+	return of.createUsed(u);
+    }
+    public JAXBElement<WasGeneratedBy> newElement(WasGeneratedBy u) {
+	return of.createWasGeneratedBy(u);
+    }
+    public JAXBElement<WasStartedBy> newElement(WasStartedBy u) {
+	return of.createWasStartedBy(u);
+    }
+    public JAXBElement<WasEndedBy> newElement(WasEndedBy u) {
+	return of.createWasEndedBy(u);
+    }
+    public JAXBElement<WasInvalidatedBy> newElement(WasInvalidatedBy u) {
+	return of.createWasInvalidatedBy(u);
+    }
+    public JAXBElement<WasInformedBy> newElement(WasInformedBy u) {
+	return of.createWasInformedBy(u);
+    }
+    public JAXBElement<WasDerivedFrom> newElement(WasDerivedFrom u) {
+	return of.createWasDerivedFrom(u);
+    }
+    public JAXBElement<ActedOnBehalfOf> newElement(ActedOnBehalfOf u) {
+	return of.createActedOnBehalfOf(u);
+    }
+    public JAXBElement<WasAttributedTo> newElement(WasAttributedTo u) {
+	return of.createWasAttributedTo(u);
+    }
+    public JAXBElement<WasAssociatedWith> newElement(WasAssociatedWith u) {
+	return of.createWasAssociatedWith(u);
+    }
+    public JAXBElement<WasInfluencedBy> newElement(WasInfluencedBy u) {
+	return of.createWasInfluencedBy(u);
+    }
+
 
     public void addTypeOLD(HasExtensibility a,
                         URI type) {
@@ -1129,10 +1289,10 @@ public class ProvFactory {
     }
 
     public NamedBundle newNamedBundle(QName id,
-                                  Collection<Activity> ps,
-                                  Collection<Entity> as,
-                                  Collection<Agent> ags,
-                                  Collection<Object> lks)
+				      Collection<Activity> ps,
+				      Collection<Entity> as,
+				      Collection<Agent> ags,
+				      Collection<Object> lks)
     {
         NamedBundle res=of.createNamedBundle();
         res.setRecords(of.createRecords());

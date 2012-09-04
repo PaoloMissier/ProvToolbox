@@ -22,8 +22,16 @@ import org.openprovenance.prov.xml.Relation;
 import org.openprovenance.prov.xml.Agent;
 import org.openprovenance.prov.xml.Used;
 import org.openprovenance.prov.xml.HasType;
+import org.openprovenance.prov.xml.AlternateOf;
+import org.openprovenance.prov.xml.SpecializationOf;
 import org.openprovenance.prov.xml.WasGeneratedBy;
 import org.openprovenance.prov.xml.WasDerivedFrom;
+import org.openprovenance.prov.xml.WasInvalidatedBy;
+import org.openprovenance.prov.xml.WasInformedBy;
+import org.openprovenance.prov.xml.WasInfluencedBy;
+import org.openprovenance.prov.xml.WasStartedBy;
+import org.openprovenance.prov.xml.WasEndedBy;
+import org.openprovenance.prov.xml.ActedOnBehalfOf;
 import org.openprovenance.prov.xml.WasAttributedTo;
 import org.openprovenance.prov.xml.WasAssociatedWith;
 import org.openprovenance.prov.xml.DerivedByInsertionFrom;
@@ -91,6 +99,11 @@ public class ProvToDot {
     public ProvToDot(String configurationFile) {
         this();
         init(configurationFile);
+    }
+
+    public ProvToDot(String configurationFile, String other) {
+        InputStream is=this.getClass().getClassLoader().getResourceAsStream(configurationFile);
+        init(is);
     }
 
     public ProvPrinterConfigDeserialiser getDeserialiser() {
@@ -453,7 +466,6 @@ public class ProvToDot {
            return name.getLocalPart();
        }
        String label=getPropertyValueFromAny(v);
-       System.out.println("Foudn value " + label);
        int i=label.lastIndexOf("#");
        int j=label.lastIndexOf("/");
        return label.substring(Math.max(i,j)+1, label.length());
@@ -547,7 +559,6 @@ public class ProvToDot {
         if (displayEntityValue) {
             return convertEntityName(""+of.getLabel(p));
         } else {
-            System.out.println(" ----> " + qnameToString(p.getId()) + "    " + of.getLabel(p));
             return qnameToString(p.getId());
         }
     }
@@ -618,16 +629,6 @@ public class ProvToDot {
     public void emitDependency(Relation0 e, PrintStream out) {
         HashMap<String,String> properties=new HashMap();
 
-        // List<AccountRef> accounts=e.getAccount();
-        // if (accounts.isEmpty()) {
-        //     accounts=new LinkedList();
-        //     accounts.add(of.newAccountRef(of.newAccount(defaultAccountLabel)));
-        // }
-            
-        // for (AccountRef acc: accounts) {
-        //     String accountLabel=((Account)acc.getRef()).getId();
-        //     addRelationAttributes(accountLabel,e,properties);
-        //        }
         List<QName> others=u.getOtherCauses(e);
         if (others !=null) { // n-ary case
             String bnid="bn" + (bncounter++);
@@ -662,25 +663,28 @@ public class ProvToDot {
             HashMap<String,String> properties4=new HashMap();
 
             for (QName other: others) {
-                emitRelation( bnid,
-                              qnameToString(other),
-                              properties4,
-                              out,
-                              true);
+		if (other!=null) {
+		    emitRelation( bnid,
+				  qnameToString(other),
+				  properties4,
+				  out,
+				  true);
+		}
             }
 
         } else { // binary case
-            relationName(e, properties);
-            if (e instanceof Relation) {
-                addColors((Relation)e,properties);
-            }
-
-            emitRelation( qnameToString(u.getEffect(e)),
-                          qnameToString(u.getCause(e)),
-                          properties,
-                          out,
-                          true);
-
+	    if (u.getCause(e)!=null) { // make sure there is a cuase
+		relationName(e, properties);
+		if (e instanceof Relation) {
+		    addColors((Relation)e,properties);
+		}
+		
+		emitRelation( qnameToString(u.getEffect(e)),
+			      qnameToString(u.getCause(e)),
+			      properties,
+			      out,
+			      true);
+	    }
         }
     }
 
@@ -696,21 +700,38 @@ public class ProvToDot {
     }
 
     String getLabelForRelation(Relation0 e) {
-	if (e instanceof Used) return "used";
-	if (e instanceof WasGeneratedBy) return "wasGeneratedBy";
-	if (e instanceof WasDerivedFrom) return "wasDerivedFrom";
+	if (e instanceof Used)              return "used";
+	if (e instanceof WasGeneratedBy)    return "wasGeneratedBy";
+	if (e instanceof WasDerivedFrom)    return "wasDerivedFrom";
+	if (e instanceof WasStartedBy)      return "wasStartedBy";
+	if (e instanceof WasEndedBy)        return "wasEndedBy";
+	if (e instanceof WasInvalidatedBy)  return "wasInvalidatedBy";
+	if (e instanceof WasInformedBy)     return "wasInformedBy";
 	if (e instanceof WasAssociatedWith) return "wasAssociatedWith";
-	if (e instanceof WasAttributedTo) return "wasAttributedTo";
+	if (e instanceof WasAttributedTo)   return "wasAttributedTo";
+	if (e instanceof WasInfluencedBy)   return "wasInfluencedBy";
+	if (e instanceof ActedOnBehalfOf)   return "actedOnBehalfOf";
+	if (e instanceof SpecializationOf)  return "specializationOf";
+	if (e instanceof AlternateOf)       return "alternateOf";
 	return null;
     }
     String getShortLabelForRelation(Relation0 e) {
-	if (e instanceof Used) return "used";
-	if (e instanceof WasGeneratedBy) return "wgb";
-	if (e instanceof WasDerivedFrom) return "wdf";
-	if (e instanceof WasAssociatedWith) return "waw";
-	if (e instanceof WasAttributedTo) return "wat";
+	if (e instanceof Used)              return "use";
+	if (e instanceof WasGeneratedBy)    return "gen";
+	if (e instanceof WasDerivedFrom)    return "der";
+	if (e instanceof WasStartedBy)      return "start";
+	if (e instanceof WasEndedBy)        return "end";
+	if (e instanceof WasInvalidatedBy)  return "inv";
+	if (e instanceof WasInformedBy)     return "inf";
+	if (e instanceof WasAssociatedWith) return "assoc";
+	if (e instanceof WasAttributedTo)   return "att";
+	if (e instanceof WasInfluencedBy)   return "inf";
+	if (e instanceof ActedOnBehalfOf)   return "del";
+	if (e instanceof SpecializationOf)  return "spe";
+	if (e instanceof AlternateOf)       return "alt";
 	return null;
     }
+
     
 
     public HashMap<String,String> addRelationAttributes(String accountLabel,

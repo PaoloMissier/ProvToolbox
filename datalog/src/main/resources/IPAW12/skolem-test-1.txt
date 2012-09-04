@@ -1,0 +1,8 @@
+wasStartedBy(id_start(A),A,trigger(A), starter(A),T1,nil) :- activity(A,T1,T2,Attr).
+ 
+wasEndedBy(id_end(A),A,trigger(A), starter(A),T2,nil) :-  activity(A,T1,T2,Attr).
+
+wasGeneratedBy(id_gen(A,E1,A1),  genEntity(A,E1,A1), genAct(A,E1,A1), genTime(A,E1, A1),nil) :- wasStartedBy(_, A,E1,A1,_,_).
+
+
+activity(breakfast, t1, t2,nil).

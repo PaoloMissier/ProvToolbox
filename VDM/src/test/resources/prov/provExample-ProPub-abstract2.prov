@@ -1,0 +1,38 @@
+
+bundle 
+
+//
+// entities
+//
+entity(d9)
+entity(d10)
+entity(d11)
+entity(d12)
+entity(d17)
+entity(d18)
+entity(d19)
+entity(d20)
+
+//
+// activities
+//
+activity(a_abstract)
+activity(s3)
+activity(c3)
+
+
+//
+// produce-consume
+//
+used(a_abstract,d9, -)
+used(a_abstract,d10, -)
+used(a_abstract,d11, -)
+used(a_abstract,d12, -)
+used(c3,d17, -)
+
+wasGeneratedBy(d17,s3,2012-06-18T11:10:00)
+wasGeneratedBy(d18,a_abstract,2012-06-18T11:10:00)
+wasGeneratedBy(d19,a_abstract,2012-06-18T11:10:00)
+wasGeneratedBy(d20,c3,2012-06-18T11:10:00)
+
+endBundle

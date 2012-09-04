@@ -35,9 +35,9 @@ public class Paolo3Test extends TestCase {
     }
 
     public void testAsnToDot1() throws java.io.FileNotFoundException,  java.io.IOException, JAXBException, Throwable {
-        asnToDot("../VDM/src/test/resources/prov/provExample-proPub.prov",
-                 "../VDM/target/provExample-proPub.prov-xml",
-                 "../VDM/target/provExample-proPub.dot",
-                 "../VDM/target/provExample-proPub.pdf");
+        asnToDot("../VDM/src/test/resources/prov/provExample-proPub-abstract.prov",
+                 "../VDM/target/provExample-proPub-abstract.prov-xml",
+                 "../VDM/target/provExample-proPub-abstract.dot",
+                 "../VDM/target/provExample-proPub-abstract.pdf");
     }
 }

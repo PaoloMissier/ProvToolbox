@@ -28,7 +28,9 @@
     <module>prov-interop</module>    
     <module>prov-rdf</module>    
     <module>toolbox</module>    
-    <module>datalog</module>  
+    <module>prov-datalog</module>  
+    <module>prov-java</module>
+    <module>prov-gen</module>
   </modules>
 
 

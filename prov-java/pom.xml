@@ -3,9 +3,10 @@
   <parent>
     <groupId>org.openprovenance.prov</groupId>
     <artifactId>ProvToolbox</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
   <artifactId>prov-java</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
   <dependencies>
   	<dependency>
   		<groupId>org.apache.commons</groupId>

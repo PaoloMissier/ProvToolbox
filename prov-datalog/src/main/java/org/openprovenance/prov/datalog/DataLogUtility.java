@@ -1,25 +1,7 @@
 package org.openprovenance.prov.datalog;
-import  org.openprovenance.prov.notation.Utility;
-import  org.openprovenance.prov.notation.TreeTraversal;
-
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Hashtable;
-
-import  org.antlr.runtime.CommonTokenStream;
-import  org.antlr.runtime.ANTLRFileStream;
-import  org.antlr.runtime.CharStream;
-import  org.antlr.runtime.Token;
-import  org.antlr.runtime.tree.Tree;
-import  org.antlr.runtime.tree.CommonTree;
-import  org.antlr.runtime.tree.CommonTreeAdaptor;
-import  org.antlr.runtime.tree.TreeAdaptor;
-
-import org.openprovenance.prov.xml.ProvFactory;
-import org.openprovenance.prov.xml.ProvSerialiser;
-import org.openprovenance.prov.xml.BeanTraversal;
+import org.antlr.runtime.tree.CommonTree;
+import org.openprovenance.prov.notation.TreeTraversal;
+import org.openprovenance.prov.notation.Utility;
 
 
 public  class DataLogUtility extends Utility {

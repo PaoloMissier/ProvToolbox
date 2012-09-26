@@ -1,0 +1,9 @@
+%%   IF f1(X) and  f2(Y) THEN \exists Z. f3(X,Y,Z) 
+
+%% illustrates skolemization
+f3(X,Y,c(X,Y)) :- f1(X), f2(Y).
+
+f1(a).
+f2(b).
+
+

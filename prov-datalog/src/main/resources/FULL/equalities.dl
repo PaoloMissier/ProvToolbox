@@ -1,0 +1,19 @@
+%% f(id1,a) and f(id2,b) => id1=id2
+
+
+%% illustrates key dependencies. to be used in conjunction with DVL-wrapper
+
+eq(X1,X2) :- f(X1,A), f(X2,A), X1 != X2.
+eq(X1,X2) :- f(X1,A), f(X2,B), X1 != X2, eq(A,B).
+
+eq(X1, X2) :- g(X1,A), g(X2, A), X1 != X2.
+eq(X1, X2) :- g(X1,A), g(X2, B), X1 != X2, eq(A,B).
+
+
+f(foo,a).
+f(bar,a).
+f(mah,a).
+
+g(paolo, foo).
+g(pietro, bar).
+

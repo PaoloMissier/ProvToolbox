@@ -1,0 +1,31 @@
+
+% suppose id is key for f(id,_,_).
+% possible encoding:
+
+f(X,Y) :- f(X1, Y), f(X2, Y),   merge(X1, X2, X), X != nil.
+       :- f(X1, Y), f(X2, Y),   merge(X1, X2, X), X == nil.
+
+% existential
+% f1(X), f2(X) => exists Z. f(Z,X).
+
+f(ex(c(X)), X) :- f1(X), f2(X).
+
+
+merge(X,X,X)    :- defined(X).
+merge(X,Y,X)    :- not ex(X), ex(Y), defined(X).
+merge(X,Y,Y)    :- ex(X), not ex(Y), defined(Y).
+merge(X,Y,nil)  :- not ex(X), not ex(Y), X!=Y, defined(X), defined(Y).
+
+%EDB
+
+f(foo, a).
+%f(bar, a).
+f1(a).
+f2(a).
+
+% preprocessing: "is ground" would be nice. Prolog??
+defined(foo).
+defined(bar).
+defined(a).
+
+ex(X) ?

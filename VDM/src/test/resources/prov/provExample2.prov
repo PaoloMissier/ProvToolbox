@@ -21,12 +21,12 @@ activity(a3)
 //
 // produce-consume
 //
-used(a1,e1)
-used(a1,e2)
-used(a2,e1)
-used(a2,e2)
-used(a3,e3)
-used(a3,e4)
+used(a1,e1),2012-06-18T11:10:00
+used(a1,e2,2012-06-18T11:10:00)
+used(a2,e1,2012-06-18T11:10:00)
+used(a2,e2,2012-06-18T11:10:00)
+used(a3,e3,2012-06-18T11:10:00)
+used(a3,e4,2012-06-18T11:10:00)
 
 wasGeneratedBy(e5,a3,2012-06-18T11:10:00)
 wasGeneratedBy(e6,a3,2012-06-18T11:10:00)

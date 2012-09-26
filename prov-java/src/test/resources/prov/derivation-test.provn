@@ -1,0 +1,8 @@
+bundle
+ entity(ex:e1)
+ entity(ex:e2)
+ activity(ex:a1)
+ used(ex:u1; ex:a1, ex:e1, 2011-11-16T16:00:00)
+ wasGeneratedBy(ex:g1; ex:e2, ex:a1, 2011-11-16T16:00:01)
+ wasDerivedFrom(ex:d1; ex:e2, ex:e1, ex:a1, ex:g1, ex:u1)
+endBundle

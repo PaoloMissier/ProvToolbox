@@ -1,0 +1,97 @@
+
+bundle 
+
+//
+// entities
+//
+entity(regionSetting)
+entity(twitterStreamSource)
+entity(trendDetectionSetting)
+
+entity(regionAlert)
+entity(userAlert)
+entity(trendReport)
+
+entity(alert)
+
+entity(userProfiles, [prov:type="DB", ir:clearance="private"])
+entity(predModel1, [prov:type="correlation", ir:clearance="limited"])
+//entity(predModel2, [prov:type="classifier", ir:clearance="limited"])
+entity(predModel3, [prov:type="clustering", ir:clearance="public"])
+
+entity(threatReport, [ir:status="private"])
+entity(expertReport, [ir:status="limited"])
+entity(authStatus, [ir:status="private"])
+
+entity(threatAdvice, [ir:status="public"])
+
+//
+// activities
+//
+activity(regionMonitor)
+activity(userMonitor)
+activity(trendMonitor)
+activity(alertEscalation)
+
+activity(level2Analysis)
+
+activity(expertAssessment)
+activity(releaseAssessment)
+activity(releaseDecision)
+
+agent(Alice, [ex:descr="level 2 analyst"])
+//agent(Bob, [ex:descr="social media analysis validation expert"])
+agent(Mr-Smith, [ex:level=3, ex:descr="region lead"])
+
+
+//
+// produce-consume
+//
+used(regionMonitor,regionSetting,2012-06-18T11:10:00)
+used(regionMonitor,twitterStreamSource,2012-06-18T11:10:00)
+
+used(userMonitor,twitterStreamSource,2012-06-18T11:10:00)
+
+used(trendMonitor,twitterStreamSource,2012-06-18T11:10:00)
+used(trendMonitor,trendDetectionSetting,2012-06-18T11:10:00)
+
+wasGeneratedBy(regionAlert,regionMonitor,2012-06-18T11:10:00)
+wasGeneratedBy(userAlert,userMonitor,2012-06-18T11:10:00)
+
+used(alertEscalation,regionAlert,2012-06-18T11:10:00)
+used(alertEscalation,userAlert,2012-06-18T11:10:00)
+
+wasGeneratedBy(alert,alertEscalation,2012-06-18T11:10:00)
+wasGeneratedBy(trendReport,trendMonitor,2012-06-18T11:10:00)
+
+used(level2Analysis,trendReport,2012-06-18T11:10:00)
+//used(level2Analysis,alert,2012-06-18T11:10:00)
+used(level2Analysis,userProfiles,2012-06-18T11:10:00)
+//used(level2Analysis,predModel2,2012-06-18T11:10:00)
+used(level2Analysis,predModel1,2012-06-18T11:10:00)
+used(level2Analysis,predModel3,2012-06-18T11:10:00)
+
+wasGeneratedBy(threatReport,level2Analysis,2012-06-18T11:10:00)
+
+used(expertAssessment,threatReport,2012-06-18T11:10:00)
+used(releaseAssessment,threatReport,2012-06-18T11:10:00)
+
+used(releaseDecision, expertReport,2012-06-18T11:10:00)
+used(releaseDecision, authStatus,2012-06-18T11:10:00)
+
+wasGeneratedBy(expertReport,expertAssessment,2012-06-18T11:10:00)
+wasGeneratedBy(authStatus,releaseAssessment,2012-06-18T11:10:00)
+
+wasGeneratedBy(threatAdvice,releaseDecision,2012-06-18T11:10:00)
+
+wasStartedBy(level2Analysis, alert, alertEscalation,2012-06-18T11:10:00)
+
+wasAssociatedWith(level2Analysis, Alice, -)
+//wasAssociatedWith(expertAssessment, Bob, -)
+wasAssociatedWith(releaseAssessment, Mr-Smith, -)
+
+actedOnBehalfOf(Alice, Mr-Smith, level2Analysis)
+
+
+
+endBundle

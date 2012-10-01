@@ -40,8 +40,6 @@ import org.openprovenance.prov.xml.Identifiable;
 import org.openprovenance.prov.xml.ProvDeserialiser;
 import org.openprovenance.prov.xml.HasExtensibility;
 
-
-
 import org.openprovenance.prov.dot.ProvPrinterConfiguration;
 import org.openprovenance.prov.dot.AgentMapEntry;
 import org.openprovenance.prov.dot.AccountColorMapEntry;

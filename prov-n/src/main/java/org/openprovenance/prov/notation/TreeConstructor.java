@@ -20,9 +20,6 @@ public interface TreeConstructor {
 
     /* Component 2 */
     public Object convertWasDerivedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertWasRevisionOf(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertWasQuotedFrom(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
-    public Object convertHadPrimarySource(Object id, Object id2,Object id1, Object pe, Object q2, Object q1, Object dAttrs);
 
 
     /* Component 3 */
@@ -74,5 +71,6 @@ public interface TreeConstructor {
     public Object convertNamespace(Object pre, Object iri);
     public Object convertDefaultNamespace(Object iri);
     public Object convertNamespaces(List<Object> namespaces);
+    public Object convertHadMember(Object collection, Object entity);
 
 }

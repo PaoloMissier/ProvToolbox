@@ -15,6 +15,11 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 
+import org.openprovenance.prov.xml.collection.CollectionMemberOf;
+import org.openprovenance.prov.xml.collection.DerivedByInsertionFrom;
+import org.openprovenance.prov.xml.collection.DerivedByRemovalFrom;
+import org.openprovenance.prov.xml.collection.DictionaryMemberOf;
+import org.openprovenance.prov.xml.collection.Entry;
 import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,7 +29,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class ProvFactory {
 
-    public static final String packageList = "org.openprovenance.prov.xml";
+    public static final String DEFAULT_NS = "_";
+
+    public static final String packageList = "org.openprovenance.prov.xml:org.openprovenance.prov.xml.collection:org.openprovenance.prov.xml.validation";
 
     static {
 	initBuilder();
@@ -57,33 +64,56 @@ public class ProvFactory {
     }
 
     protected ObjectFactory of;
+    final protected org.openprovenance.prov.xml.collection.ObjectFactory cof;
+    final protected org.openprovenance.prov.xml.validation.ObjectFactory vof;
 
     protected DatatypeFactory dataFactory;
 
     public ProvFactory() {
 	of = new ObjectFactory();
+	vof = new org.openprovenance.prov.xml.validation.ObjectFactory();
+    	cof = new org.openprovenance.prov.xml.collection.ObjectFactory();
 	init();
+	setNamespaces(new Hashtable<String, String>());
     }
 
     public ProvFactory(Hashtable<String, String> namespaces) {
-	of = new ObjectFactory();
+    	of = new ObjectFactory();
+    	vof = new org.openprovenance.prov.xml.validation.ObjectFactory();
+    	cof = new org.openprovenance.prov.xml.collection.ObjectFactory();
 	this.namespaces = namespaces;
 	init();
     }
 
     public ProvFactory(ObjectFactory of) {
 	this.of = of;
+	vof = new org.openprovenance.prov.xml.validation.ObjectFactory();
+    	cof = new org.openprovenance.prov.xml.collection.ObjectFactory();
 	init();
+	setNamespaces(new Hashtable<String, String>());
     }
 
-    public void addAttribute(HasExtensibility a, Object o) {
+    
+
+    public org.openprovenance.prov.xml.validation.ObjectFactory getValidationObjectFactory() {
+		return vof;
+	}public org.openprovenance.prov.xml.collection.ObjectFactory getCollectionObjectFactory() {
+		return cof;
+	}
+	
+    public void addAttribute(HasExtensibility a, Attribute o) {
 	a.getAny().add(o);
     }
 
     public void addAttribute(HasExtensibility a, String namespace,
-			     String prefix, String localName, String value) {
+                             String localName, String prefix, Object value) {
 
-	a.getAny().add(newAttribute(namespace, prefix, localName, value));
+        a.getAny().add(newAttribute(namespace, localName, prefix, value));
+    }
+    public void addAttribute(HasExtensibility a, String namespace,
+                             String localName, String prefix, Object value, String type) {
+
+        a.getAny().add(newAttribute(namespace, localName, prefix, value, type));
     }
 
     public ActedOnBehalfOf addAttributes(ActedOnBehalfOf from,
@@ -205,16 +235,12 @@ public class ProvFactory {
 	return to;
     }
 
-        public void addLabel(HasExtensibility a, String label) {
-        JAXBElement<InternationalizedString> je = of
-        	.createLabel(newInternationalizedString(label));
-        addAttribute(a, je);
-        }
+    public void addLabel(HasLabel a, String label) {
+	a.getLabel().add(newInternationalizedString(label));
+    }
 
-    public void addLabel(HasExtensibility a, String label, String language) {
-	JAXBElement<InternationalizedString> je = of
-		.createLabel(newInternationalizedString(label, language));
-	addAttribute(a, je);
+    public void addLabel(HasLabel a, String label, String language) {
+	a.getLabel().add(newInternationalizedString(label, language));
     }
 
     public void addRole(HasRole a, Object role) {
@@ -241,6 +267,17 @@ public class ProvFactory {
 
 	a.getType().add(type);
     }
+    
+    public void addRevisionType(HasType a) {
+        a.getType().add(newQName("prov:Revision"));
+    }
+    public void addPrimarySourceType(HasType a) {
+        a.getType().add(newQName("prov:PrimarySource"));
+    }
+    public void addQuotationType(HasType a) {
+        a.getType().add(newQName("prov:Quotation"));
+    }
+    
 
     public void addType(HasType a, URI type) {
 	URIWrapper u = new URIWrapper();
@@ -248,6 +285,7 @@ public class ProvFactory {
 	a.getType().add(u);
     }
 
+    /*
     public void addTypeOLD(HasExtensibility a, Object type) {
 
 	// TypedLiteral tl=newTypedLiteral(type);
@@ -263,6 +301,7 @@ public class ProvFactory {
 	JAXBElement<Object> je = of.createType(u);
 	addAttribute(a, je);
     }
+    */
 
     /**
      * By default, no auto generation of Id. Override this behaviour if
@@ -352,6 +391,8 @@ public class ProvFactory {
 	res.getType().addAll(a.getType()); 
 	res.getLabel().addAll(a.getLabel());
 	res.getLocation().addAll(a.getLocation());
+	res.setStartTime(a.getStartTime());
+	res.setEndTime(a.getEndTime());
 	return res;
     }
 
@@ -451,7 +492,24 @@ public class ProvFactory {
 	return newAnyRef(stringToQName(id));
     }
 
-    public Element newAttribute(String namespace, String prefix,
+    public Attribute newAttribute(String namespace, String localName,
+				  String prefix, Object value) {
+	Attribute res=new Attribute(new QName(namespace, localName, prefix), value, getXsdType(value));
+	return res;
+    }
+
+    public Attribute newAttribute(String namespace, String localName,
+				  String prefix, Object value, String type) {
+	Attribute res=new Attribute(new QName(namespace, localName, prefix), value, type);
+	return res;
+    }
+
+    public Attribute newAttribute(QName qname, Object value) {
+	Attribute res=new Attribute(qname, value, getXsdType(value));
+	return res;
+    }
+
+    public Element OLDnewAttribute(String namespace, String prefix,
 				String localName, String value) {
     	org.w3c.dom.Document doc = builder.newDocument();
 	Element el = doc.createElementNS(namespace, ((prefix.equals("")) ? ""
@@ -461,9 +519,21 @@ public class ProvFactory {
 	return el;
     }
 
+    public Element newElement(QName qname, String value, String type) {
+    	org.w3c.dom.Document doc = builder.newDocument();
+	Element el = doc.createElementNS(qname.getNamespaceURI(), 
+	                                 ((qname.getPrefix().equals("")) 
+	                                	 ? ""
+	                                	 : (qname.getPrefix() + ":")) + qname.getLocalPart());
+	el.setAttributeNS(NamespacePrefixMapper.XSI_NS, "xsi:type", type);
+	el.appendChild(doc.createTextNode(value));
+	doc.appendChild(el);
+	return el;
+    }
+
     public CollectionMemberOf newCollectionMemberOf(QName id, EntityRef after,
 						    List<Entity> entitySet) {
-	CollectionMemberOf res = of.createCollectionMemberOf();
+	CollectionMemberOf res = cof.createCollectionMemberOf();
 	res.setId(id);
 	res.setEntity(after);
 	if (entitySet != null)
@@ -480,7 +550,7 @@ public class ProvFactory {
 							    EntityRef after,
 							    EntityRef before,
 							    List<Entry> keyEntitySet) {
-	DerivedByInsertionFrom res = of.createDerivedByInsertionFrom();
+	DerivedByInsertionFrom res = cof.createDerivedByInsertionFrom();
 	res.setId(id);
 	res.setAfter(after);
 	res.setBefore(before);
@@ -501,7 +571,7 @@ public class ProvFactory {
 							EntityRef after,
 							EntityRef before,
 							List<Object> keys) {
-	DerivedByRemovalFrom res = of.createDerivedByRemovalFrom();
+	DerivedByRemovalFrom res = cof.createDerivedByRemovalFrom();
 	res.setId(id);
 	res.setAfter(after);
 	res.setBefore(before);
@@ -519,7 +589,7 @@ public class ProvFactory {
 
     public DictionaryMemberOf newDictionaryMemberOf(QName id, EntityRef after,
 						    List<Entry> keyEntitySet) {
-	DictionaryMemberOf res = of.createDictionaryMemberOf();
+	DictionaryMemberOf res = cof.createDictionaryMemberOf();
 	res.setId(id);
 	res.setEntity(after);
 	if (keyEntitySet != null)
@@ -551,7 +621,7 @@ return res;
 
 */
     public Document newDocument(Activity[] ps, Entity[] as, Agent[] ags,
-			    Object[] lks) {
+			    Statement[] lks) {
 
 	return newDocument(((ps == null) ? null : Arrays.asList(ps)),
 			 ((as == null) ? null : Arrays.asList(as)),
@@ -560,7 +630,7 @@ return res;
     }
     
     public Document newDocument(Collection<Activity> ps, Collection<Entity> as,
-			    Collection<Agent> ags, Collection<Object> lks) {
+			    Collection<Agent> ags, Collection<Statement> lks) {
 	Document res = of.createDocument();
 	res.getEntityOrActivityOrWasGeneratedBy().addAll(ps);
 	res.getEntityOrActivityOrWasGeneratedBy().addAll(as);
@@ -630,9 +700,11 @@ return res;
 	return of.createWasInvalidatedBy(u);
     }
 
-
     public JAXBElement<WasStartedBy> newElement(WasStartedBy u) {
 	return of.createWasStartedBy(u);
+    }
+    public JAXBElement<MentionOf> newElement(MentionOf u) {
+	return of.createMentionOf(u);
     }
 
     public Entity newEntity(Entity e) {
@@ -680,7 +752,7 @@ return res;
     }
 
     public Entry newEntry(Object key, EntityRef entity) {
-	Entry res = of.createEntry();
+	Entry res = cof.createEntry();
 	res.setKey(key);
 	res.setEntity(entity);
 	return res;
@@ -704,24 +776,6 @@ return res;
 	return res;
     }
 
-    public HadPrimarySource newHadPrimarySource(QName id, EntityRef derived,
-						EntityRef source) {
-	HadPrimarySource res = of.createHadPrimarySource();
-	res.setId(id);
-	res.setDerived(derived);
-	res.setSource(source);
-	return res;
-    }
-
-    public HadPrimarySource newHadPrimarySource(String id, EntityRef derived,
-						EntityRef source) {
-	HadPrimarySource res = of.createHadPrimarySource();
-	res.setId(stringToQName(id));
-	res.setDerived(derived);
-	res.setSource(source);
-	return res;
-    }
-
     public InternationalizedString newInternationalizedString(String s) {
 	InternationalizedString res = of.createInternationalizedString();
 	res.setValue(s);
@@ -742,8 +796,9 @@ return res;
     }
 
     public MentionOf newMentionOf(Entity infra, Entity supra, Entity bundle) {
-	return newMentionOf(newEntityRef(infra), newEntityRef(supra),
-			    newEntityRef(bundle));
+	return newMentionOf((infra==null) ? null : newEntityRef(infra), 
+	                    (supra==null) ? null : newEntityRef(supra),
+	                    (bundle==null)? null : newEntityRef(bundle));
     }
 
     public MentionOf newMentionOf(EntityRef infra, EntityRef supra,
@@ -759,16 +814,26 @@ return res;
 
     public MentionOf newMentionOf(String infra, String supra, String bundle) {
 	MentionOf res = of.createMentionOf();
-	res.setSpecializedEntity(newEntityRef(infra));
-	res.setBundle(newEntityRef(bundle));
-	res.setGeneralEntity(newEntityRef(supra));
+	if (supra!=null) res.setSpecializedEntity(newEntityRef(infra));
+	if (bundle!=null) res.setBundle(newEntityRef(bundle));
+	if (supra!=null) res.setGeneralEntity(newEntityRef(supra));
 	return res;
     }
+    
+    public MentionOf newMentionOf(MentionOf r) {
+	MentionOf res = of.createMentionOf();
+	res.setSpecializedEntity(r.getSpecializedEntity());
+	res.setBundle(r.getBundle());
+	res.setGeneralEntity(r.getGeneralEntity());
+	return res;
+    }
+
+    
 
     public NamedBundle newNamedBundle(QName id, Collection<Activity> ps,
 				      Collection<Entity> as,
 				      Collection<Agent> ags,
-				      Collection<Object> lks) {
+				      Collection<Statement> lks) {
 	NamedBundle res = of.createNamedBundle();
 	if (ps!=null) {
 	  res.getEntityOrActivityOrWasGeneratedBy().addAll(ps);
@@ -786,7 +851,7 @@ return res;
     }
 
     public NamedBundle newNamedBundle(String id, Activity[] ps, Entity[] es,
-				      Agent[] ags, Object[] lks) {
+				      Agent[] ags, Statement[] lks) {
 
 	return newNamedBundle(id, ((ps == null) ? null : Arrays.asList(ps)),
 			      ((es == null) ? null : Arrays.asList(es)),
@@ -798,7 +863,7 @@ return res;
     public NamedBundle newNamedBundle(String id, Collection<Activity> ps,
 				      Collection<Entity> as,
 				      Collection<Agent> ags,
-				      Collection<Object> lks) {
+				      Collection<Statement> lks) {
 	return newNamedBundle(stringToQName(id), ps, as, ags, lks);
     }
 
@@ -1139,8 +1204,9 @@ return res;
 
     public WasInfluencedBy newWasInfluencedBy(String id, String influencee,
 					      String influencer) {
-	return newWasInfluencedBy(id, newAnyRef(influencee),
-				  newAnyRef(influencer));
+	return newWasInfluencedBy(id, 
+	                          (influencee==null)? null: newAnyRef(influencee),
+				  (influencer==null)? null: newAnyRef(influencer));
     }
 
     public WasInfluencedBy newWasInfluencedBy(WasInfluencedBy in) {
@@ -1230,43 +1296,6 @@ return res;
 	return u1;
     }
 
-    public WasQuotedFrom newWasQuotedFrom(QName id, EntityRef quote,
-					  EntityRef original) {
-	WasQuotedFrom res = of.createWasQuotedFrom();
-	res.setId(id);
-	res.setQuote(quote);
-	res.setOriginal(original);
-	return res;
-    }
-
-
-    public WasQuotedFrom newWasQuotedFrom(String id, EntityRef quote,
-					  EntityRef original) {
-	WasQuotedFrom res = of.createWasQuotedFrom();
-	res.setId(stringToQName(id));
-	res.setQuote(quote);
-	res.setOriginal(original);
-	return res;
-    }
-
-    public WasRevisionOf newWasRevisionOf(QName id, EntityRef newer,
-					  EntityRef older) {
-	WasRevisionOf res = of.createWasRevisionOf();
-	res.setId(id);
-	res.setNewer(newer);
-	res.setOlder(older);
-	return res;
-    }
-
-    public WasRevisionOf newWasRevisionOf(String id, EntityRef newer,
-					  EntityRef older) {
-	WasRevisionOf res = of.createWasRevisionOf();
-	res.setId(stringToQName(id));
-	res.setNewer(newer);
-	res.setOlder(older);
-	return res;
-    }
-
     public WasStartedBy newWasStartedBy(QName id, ActivityRef aid, EntityRef eid) {
 	WasStartedBy res = of.createWasStartedBy();
 	res.setId(id);
@@ -1303,20 +1332,124 @@ return res;
 	    return null;
 	int index = id.indexOf(':');
 	if (index == -1) {
-	    return new QName(namespaces.get("_"), id);
+	    return new QName(namespaces.get(DEFAULT_NS), id);
 	}
 	String prefix = id.substring(0, index);
 	String local = id.substring(index + 1, id.length());
 	if ("prov".equals(prefix)) {
 	    return new QName(NamespacePrefixMapper.PROV_NS, local, prefix);
 	} else if ("xsd".equals(prefix)) {
-	    return new QName(NamespacePrefixMapper.XSD_NS + "#", // xsd
-								 // namespace
-								 // for rdf URIs
+	    return new QName(NamespacePrefixMapper.XSD_NS+"#", // RDF ns ends in #, not XML ns.
 		    local, prefix);
 	} else {
 	    return new QName(namespaces.get(prefix), local, prefix);
 	}
     }
 
+    
+
+    public HadMember newHadMember(EntityRef collection,
+				  EntityRef ... entities) {
+	HadMember res=of.createHadMember();
+	res.setCollection(collection);
+	if (entities!=null) {
+	    res.getEntity().addAll(Arrays.asList(entities));
+	}
+	return res;
+    }
+
+
+    public String getXsdType(Object o) {
+	if (o instanceof Integer) return "xsd:int";
+	if (o instanceof String) return "xsd:string";
+	if (o instanceof Long) return "xsd:long";
+	if (o instanceof Short) return "xsd:short";
+	if (o instanceof Double) return "xsd:double";
+	if (o instanceof Float) return "xsd:float";
+	if (o instanceof java.math.BigDecimal) return "xsd:decimal";
+	if (o instanceof Boolean) return "xsd:boolean";
+	if (o instanceof Byte) return "xsd:byte";
+	if (o instanceof URIWrapper) return "xsd:anyURI";
+	if (o instanceof QName) return "xsd:QName";
+	return "xsd:UNKNOWN";
+    }
+
+    /* Uses the xsd:type to java:type mapping of JAXB */
+
+    public Object convertToJava(String datatype, String value) {
+        if (datatype.equals("xsd:string"))  return value;
+
+        if (datatype.equals("xsd:int"))     return Integer.parseInt(value);
+        if (datatype.equals("xsd:long"))    return Long.parseLong(value);
+        if (datatype.equals("xsd:short"))   return Short.parseShort(value);
+        if (datatype.equals("xsd:double"))  return Double.parseDouble(value);
+        if (datatype.equals("xsd:float"))   return Float.parseFloat(value);
+        if (datatype.equals("xsd:decimal")) return new java.math.BigDecimal(value);
+        if (datatype.equals("xsd:boolean")) return Boolean.parseBoolean(value);
+        if (datatype.equals("xsd:byte"))    return Byte.parseByte(value);
+        if (datatype.equals("xsd:unsignedInt"))   return Long.parseLong(value);
+        if (datatype.equals("xsd:unsignedShort")) return Integer.parseInt(value);
+        if (datatype.equals("xsd:unsignedByte"))  return Short.parseShort(value);
+        if (datatype.equals("xsd:unsignedLong"))  return new java.math.BigInteger(value);
+        if (datatype.equals("xsd:integer"))             return new java.math.BigInteger(value);
+        if (datatype.equals("xsd:nonNegativeInteger"))  return new java.math.BigInteger(value);
+        if (datatype.equals("xsd:nonPositiveInteger"))  return new java.math.BigInteger(value);
+        if (datatype.equals("xsd:positiveInteger"))     return new java.math.BigInteger(value);
+
+        if (datatype.equals("xsd:anyURI")) {
+            URIWrapper u=new URIWrapper();
+            u.setValue(URI.create(value));
+            return u;
+        }
+        if (datatype.equals("xsd:QName")) {
+            return newQName(value);
+        }
+
+
+
+        if ((datatype.equals("xsd:dateTime"))
+            || (datatype.equals("rdf:XMLLiteral"))
+            || (datatype.equals("xsd:normalizedString"))
+            || (datatype.equals("xsd:token"))
+            || (datatype.equals("xsd:language"))
+            || (datatype.equals("xsd:Name"))
+            || (datatype.equals("xsd:NCName"))
+            || (datatype.equals("xsd:NMTOKEN"))
+            || (datatype.equals("xsd:hexBinary"))
+            || (datatype.equals("xsd:base64Binary"))) {
+
+            throw new UnsupportedOperationException("KNOWN literal type but conversion not supported yet " + datatype);
+        }
+
+        throw new UnsupportedOperationException("UNKNOWN literal type " + datatype);
+    }
+
+    public Object newQName(String qnameAsString) {
+	int index=qnameAsString.indexOf(':');
+	String prefix;
+	String local;
+
+	if (index==-1) {
+	    prefix="";
+	    local=qnameAsString;
+	} else {
+	    prefix=qnameAsString.substring(0,index);
+	    local=qnameAsString.substring(index+1,qnameAsString.length());
+	}
+	return new QName(getNamespace(prefix), local, prefix);
+    }
+    
+
+    public String getNamespace(String prefix) {
+        if ((prefix==null) || ("".equals(prefix))) return namespaces.get(DEFAULT_NS);
+        if (prefix.equals(NamespacePrefixMapper.PROV_PREFIX)) return NamespacePrefixMapper.PROV_NS;
+        if (prefix.equals(NamespacePrefixMapper.XSD_PREFIX)) return NamespacePrefixMapper.XSD_NS;
+        return namespaces.get(prefix);
+    }
+
+    public Hashtable<String, String> getNss() {
+        return namespaces;
+    }
+
+    
 }

@@ -13,8 +13,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBElement;
 //import org.w3c.dom.Element;
 
+<<<<<<< HEAD
 import org.antlr.runtime.tree.CommonTree;
 import org.openprovenance.prov.notation.Utility;
+=======
+import org.openprovenance.prov.xml.Attribute;
+>>>>>>> upstream/master
 import org.openprovenance.prov.xml.Document;
 import org.openprovenance.prov.xml.Entity;
 import org.openprovenance.prov.xml.Activity;
@@ -36,7 +40,7 @@ import org.openprovenance.prov.xml.WasEndedBy;
 import org.openprovenance.prov.xml.ActedOnBehalfOf;
 import org.openprovenance.prov.xml.WasAttributedTo;
 import org.openprovenance.prov.xml.WasAssociatedWith;
-import org.openprovenance.prov.xml.DerivedByInsertionFrom;
+import org.openprovenance.prov.xml.collection.DerivedByInsertionFrom;
 import org.openprovenance.prov.xml.ProvFactory;
 import org.openprovenance.prov.xml.ProvUtilities;
 import org.openprovenance.prov.xml.Identifiable;
@@ -57,7 +61,13 @@ import org.openprovenance.prov.notation.Utility;
 public class ProvToDot {
     public final static String DEFAULT_CONFIGURATION_FILE="defaultConfig.xml";
     public final static String DEFAULT_CONFIGURATION_FILE_WITH_ROLE="defaultConfigWithRole.xml";
+<<<<<<< HEAD
     public final static String USAGE="prov2dot provFile.provn out.dot out.pdf [configuration.xml]";
+=======
+    public final static String DEFAULT_CONFIGURATION_FILE_WITH_ROLE_NO_LABEL="defaultConfigWithRoleNoLabel.xml";
+
+    public final static String USAGE="prov2dot provFile.xml out.dot out.pdf [configuration.xml]";
+>>>>>>> upstream/master
 
     ProvUtilities u=new ProvUtilities();
     ProvFactory of=new ProvFactory();
@@ -66,8 +76,14 @@ public class ProvToDot {
         return qName.getLocalPart();
     }
 
+<<<<<<< HEAD
     public static void main(String [] args) 
     throws java.io.FileNotFoundException,  java.io.IOException, JAXBException, Throwable {
+=======
+    public enum Config { DEFAULT, ROLE, ROLE_NO_LABEL };
+    
+    public static void main(String [] args) throws Exception {
+>>>>>>> upstream/master
         if ((args==null) || (args.length==0) || (args.length>4)) {
             System.out.println(USAGE);
             return;
@@ -109,6 +125,27 @@ public class ProvToDot {
             is=this.getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIGURATION_FILE_WITH_ROLE);
         } else {
             is=this.getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIGURATION_FILE);
+        }
+        init(is);
+    }
+    public ProvToDot(Config config) {
+        InputStream is=null;
+        switch (config) {
+        case DEFAULT:
+	    System.out.println("ProvToDot DEFAULT");
+            is=this.getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIGURATION_FILE);
+            break;
+        case ROLE:
+	    System.out.println("ProvToDot role");
+            is=this.getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIGURATION_FILE_WITH_ROLE);
+            break;
+
+        case ROLE_NO_LABEL:
+	    System.out.println("ProvToDot role no label");
+        default:
+	    System.out.println("ProvToDot role no label (by default)");
+            is=this.getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIGURATION_FILE_WITH_ROLE_NO_LABEL);
+            break;
         }
         init(is);
     }
@@ -227,9 +264,20 @@ public class ProvToDot {
         convert(graph,new File(dotFile));
         Runtime runtime = Runtime.getRuntime();
         @SuppressWarnings("unused")
-		java.lang.Process proc = runtime.exec("dot -o " + pdfFile + " -Tpdf " + dotFile);
+        java.lang.Process proc = runtime.exec("dot -o " + pdfFile + " -Tpdf " + dotFile);
     }
-
+    
+    public void convert(Document graph, String dotFile, String aFile, String type)
+	        throws java.io.FileNotFoundException, java.io.IOException {
+	        convert(graph,new File(dotFile));
+	        Runtime runtime = Runtime.getRuntime();
+	        @SuppressWarnings("unused")
+	        java.lang.Process proc = runtime.exec("dot -o " + aFile + " -T" + type + " " + dotFile);
+	        try {
+		    proc.waitFor();
+		} catch (InterruptedException e){};
+    }
+    
     public void convert(Document graph, File file) throws java.io.FileNotFoundException{
         OutputStream os=new FileOutputStream(file);
         convert(graph, new PrintStream(os));
@@ -372,26 +420,30 @@ public class ProvToDot {
         if (displayActivityColor) {
             properties.put("color",processColor(p));
             properties.put("fontcolor",processColor(p));
+        } else {
+        	properties.put("fillcolor","#9FB1FC"); //blue
+        	properties.put("color","#0000FF"); //blue
+            properties.put("style", "filled");
         }
         addColors(p,properties);
         return properties;
     }
 
     public  HashMap<String,String> addColors(HasExtensibility e, HashMap<String,String> properties) {
-        Hashtable<String,List<Object>> table=e.attributesWithNamespace("http://openprovenance.org/Toolbox/dot#");
+        Hashtable<String,List<Attribute>> table=e.attributesWithNamespace("http://openprovenance.org/Toolbox/dot#");
 
-        List<Object> o=table.get("fillcolor");
+        List<Attribute> o=table.get("fillcolor");
         if (o!=null && !o.isEmpty()) {
-            properties.put("fillcolor", o.get(0).toString());
+            properties.put("fillcolor", o.get(0).getValue().toString());
             properties.put("style", "filled");
         }
         o=table.get("color");
         if (o!=null && !o.isEmpty()) {
-            properties.put("color", o.get(0).toString());
+            properties.put("color", o.get(0).getValue().toString());
         }
         o=table.get("url");
         if (o!=null && !o.isEmpty()) {
-            properties.put("URL", o.get(0).toString());
+            properties.put("URL", o.get(0).getValue().toString());
         }
         return properties;
     }
@@ -418,6 +470,10 @@ public class ProvToDot {
         if (displayEntityColor) {
             properties.put("color",entityColor(a));
             properties.put("fontcolor",entityColor(a));
+        } else {
+            properties.put("fillcolor","#FFFC87");//yellow
+            properties.put("color","#808080"); //gray
+            properties.put("style", "filled");
         }
         addColors(a,properties);
         return properties;
@@ -443,6 +499,9 @@ public class ProvToDot {
         if (displayAgentColor) {
             properties.put("color",agentColor(a));
             properties.put("fontcolor",agentColor(a));
+        } else {
+           properties.put("fillcolor","#FDB266"); //orange
+           properties.put("style", "filled");
         }
         addColors(a,properties);
         return properties;
@@ -458,19 +517,15 @@ public class ProvToDot {
         for (Object type: ((HasType)ann).getType()) {
             label=label+"	<TR>\n";
             label=label+"	    <TD align=\"left\">" + "type" + ":</TD>\n";
-            label=label+"	    <TD align=\"left\">" + convertValue(type) + "</TD>\n";
+            label=label+"	    <TD align=\"left\">" + getPropertyValueFromAny(type) + "</TD>\n";
             label=label+"	</TR>\n";
         }
-        for (Object prop: ann.getAny()) {
+        for (Attribute prop: ann.getAny()) {
 
-            if (prop instanceof JAXBElement) {
-                JAXBElement<?> je=(JAXBElement<?>) prop;
-                QName attribute=je.getName();
-                if ("fillcolor".equals(attribute.getLocalPart())) {
+            if ("fillcolor".equals(prop.getElementName().getLocalPart())) {
                     // no need to display this attribute
                     break;
-                }
-            } 
+            }
 
             label=label+"	<TR>\n";
             label=label+"	    <TD align=\"left\">" + convertProperty(prop) + ":</TD>\n";
@@ -483,9 +538,9 @@ public class ProvToDot {
         return properties;
     }
 
-   public String convertValue(Object v) {
-       if (v instanceof QName) {
-           QName name=(QName) v;
+   public String convertValue(Attribute v) {
+       if (v.getValue() instanceof QName) {
+           QName name=(QName) v.getValue();
            return name.getLocalPart();
        }
        String label=getPropertyValueFromAny(v);
@@ -498,36 +553,40 @@ public class ProvToDot {
         return qname.getNamespaceURI() + qname.getLocalPart();
     }
 
-    public String convertProperty(Object oLabel) {
+    public String convertProperty(Attribute oLabel) {
         String label=getPropertyFromAny(oLabel);
         int i=label.lastIndexOf("#");
         int j=label.lastIndexOf("/");
         return label.substring(Math.max(i,j)+1, label.length());
     }
 
-    public String getPropertyFromAny (Object o) {
+    public String getPropertyFromAny (Attribute o) {
+        return qnameToUri(o.getElementName());
+        /*
         if (o instanceof JAXBElement) {
             return qnameToUri(((JAXBElement<?>)o).getName());
         } else if (o instanceof org.w3c.dom.Element) {
             return ((org.w3c.dom.Element)o).getTagName();
         } else {
             return o.toString();
-        }
+        }*/
     }
 
-    public String getPropertyValueFromAny (Object o) {
-        if (o instanceof JAXBElement) {
-            Object val=((JAXBElement<?>)o).getValue();
-            if (val instanceof QName) {
-                QName q=(QName)val;
-                return q.getNamespaceURI() + q.getLocalPart();
-            } else {
-                return "" +  val;
-            }
-        } else if (o instanceof org.w3c.dom.Element) {
-            return ((org.w3c.dom.Element)o).getFirstChild().getNodeValue();
+    public String getPropertyValueFromAny (Object val) {
+        if (val instanceof QName) {
+            QName q=(QName)val;
+            return q.getNamespaceURI() + q.getLocalPart();
         } else {
-            return o.toString();
+                return "" +  val;
+        }
+    }
+    public String getPropertyValueFromAny (Attribute o) {
+        Object val=o.getValue();
+        if (val instanceof QName) {
+            QName q=(QName)val;
+            return q.getNamespaceURI() + q.getLocalPart();
+        } else {
+                return "" +  val;
         }
     }
 
@@ -903,7 +962,7 @@ public class ProvToDot {
     }
 
     void prelude(PrintStream out) {
-        out.println("digraph " + name + " { rankdir=\"BT\"; ");
+        out.println("digraph " + name + " { size=\"16,12\"; rankdir=\"BT\"; ");
     }
 
     void postlude(PrintStream out) {

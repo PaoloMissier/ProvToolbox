@@ -24,14 +24,12 @@
 <xs:schema targetNamespace="http://www.w3.org/ns/prov#"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:prov="http://www.w3.org/ns/prov#"
-           xmlns:cu="http://www.w3.org/1999/xhtml/datatypes/"
            xmlns:xml="http://www.w3.org/XML/1998/namespace"
            elementFormDefault="qualified"
            attributeFormDefault="unqualified">
 
 
 
-  <xs:import namespace="http://www.w3.org/1999/xhtml/datatypes/" />
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" 
              schemaLocation="xml.xsd"/>
 
@@ -216,6 +214,7 @@
     <xs:sequence>
       <xs:element ref="prov:label" minOccurs="0"  maxOccurs="unbounded"/> 
       <xs:element ref="prov:type"  minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="prov:location"  minOccurs="0" maxOccurs="unbounded"/>		
       <xs:any namespace="##other"  minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute ref="prov:id"/>
@@ -298,7 +297,7 @@
 
   
   <!-- Component 6 -->
-
+<!-- 
   <xs:complexType name="DerivedByInsertionFrom">
     <xs:sequence>
       <xs:element name="after"           type="prov:EntityRef"/>
@@ -357,7 +356,17 @@
     </xs:sequence>
   </xs:complexType>
 
+-->
 
+  <xs:complexType name="Membership">
+    <xs:sequence>
+      <xs:element name="collection"          type="prov:EntityRef"/>
+      <xs:element name="complete"        type="xs:boolean" minOccurs="0"/>
+      <xs:element name="entity"          type="prov:EntityRef" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+ 
   <xs:complexType name="InternationalizedString">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -433,7 +442,8 @@
          <xs:element name="alternateOf"          type="prov:AlternateOf"/>
          <xs:element name="mentionOf"            type="prov:MentionOf"/>
  
-         <xs:element name="collectionMemberOf"   type="prov:CollectionMemberOf"/>
+         <xs:element name="hadMember"            type="prov:Membership" />
+ 
        </xs:choice>
      </xs:sequence>
    </xs:group>
@@ -473,12 +483,23 @@
             <xs:element name="alternateOf"          type="prov:AlternateOf"/>
             <xs:element name="specializationOf"     type="prov:SpecializationOf"/>
             <xs:element name="mentionOf"            type="prov:MentionOf"/>
-
+<!--  
             <xs:element name="derivedByInsertionFrom" type="prov:DerivedByInsertionFrom"/>
             <xs:element name="derivedByRemovalFrom"   type="prov:DerivedByRemovalFrom"/>
             <xs:element name="collectionMemberOf"     type="prov:CollectionMemberOf"/>
             <xs:element name="dictionaryMemberOf"     type="prov:DictionaryMemberOf"/>
+           --> 
+                     <xs:element name="hadMember"            type="prov:Membership" />
+            
 
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="Statements">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+       <xs:group ref="prov:documentElements"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -494,6 +515,7 @@
 
 <!-- To support validator, this is not part of prov xml! -->
 
+<!-- 
   <xs:element name="validationReport" type="prov:ValidationReport"/>
 
 
@@ -506,11 +528,21 @@
       <xs:element name="specializationReport" type="prov:SpecializationReport"/>
       <xs:element name="typeReport" type="prov:TypeReport" />
       <xs:element name="typeOverlap" type="prov:TypeOverlap" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="validationReport" type="prov:ValidationReport" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
 
   <xs:complexType name="MergeReport">
+    <xs:complexContent>
+      <xs:extension base="prov:Statements">
+       <xs:attribute name="key" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+      
+  <xs:complexType name="MergeReportOLD">
+ 
     <xs:sequence>
       <xs:any namespace="##other"  minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -537,6 +569,7 @@
     </xs:sequence>
   </xs:complexType>
   
+   -->
   <xs:element name="used"               type="prov:Used"/>
   <xs:element name="wasGeneratedBy"     type="prov:WasGeneratedBy"/>
   <xs:element name="wasStartedBy"       type="prov:WasStartedBy"/>
@@ -549,6 +582,7 @@
   <xs:element name="wasAttributedTo"    type="prov:WasAttributedTo"/>
   <xs:element name="wasInfluencedBy"    type="prov:WasInfluencedBy"/>
   <xs:element name="specializationOf"   type="prov:SpecializationOf"/>
+  <xs:element name="mentionOf"          type="prov:MentionOf"/>
   
   
 </xs:schema>

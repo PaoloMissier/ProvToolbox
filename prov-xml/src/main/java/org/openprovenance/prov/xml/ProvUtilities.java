@@ -7,13 +7,17 @@ import javax.xml.bind.JAXBElement;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+
+import org.openprovenance.prov.xml.collection.DerivedByInsertionFrom;
+import org.openprovenance.prov.xml.collection.Entry;
+
 import java.lang.reflect.Method;
 
 /** Utilities for manipulating PROV Descriptions. */
 
 public class ProvUtilities {
 
-    private ProvFactory of = new ProvFactory();
+    private ProvFactory p = new ProvFactory();
 
     /*
      * public List<Element> getElements(Bundle g) { List<Element> res = new
@@ -41,21 +45,21 @@ public class ProvUtilities {
     }
 
     public List<Relation0> getRelations(NamedBundle d) {
-        return getObject(Relation0.class,
+        return getObject2(Relation0.class,
                          d.getEntityOrActivityOrWasGeneratedBy());
     }
 
     public List<Entity> getEntity(NamedBundle d) {
-        return getObject(Entity.class, d.getEntityOrActivityOrWasGeneratedBy());
+        return getObject2(Entity.class, d.getEntityOrActivityOrWasGeneratedBy());
     }
 
     public List<Activity> getActivity(NamedBundle d) {
-        return getObject(Activity.class,
+        return getObject2(Activity.class,
                          d.getEntityOrActivityOrWasGeneratedBy());
     }
 
     public List<Agent> getAgent(NamedBundle d) {
-        return getObject(Agent.class, d.getEntityOrActivityOrWasGeneratedBy());
+        return getObject2(Agent.class, d.getEntityOrActivityOrWasGeneratedBy());
     }
 
     public List<NamedBundle> getNamedBundle(Document d) {
@@ -63,10 +67,9 @@ public class ProvUtilities {
                          d.getEntityOrActivityOrWasGeneratedBy());
     }
 
-    @SuppressWarnings("unchecked")
     public List<Statement> getStatement(Document d) {
-        List<?> res = d.getEntityOrActivityOrWasGeneratedBy();
-        return (List<Statement>) res;
+	return getObject(Statement.class,
+	                 d.getEntityOrActivityOrWasGeneratedBy());
     }
 
     @SuppressWarnings("unchecked")
@@ -75,7 +78,7 @@ public class ProvUtilities {
         return (List<Statement>) res;
     }
 
-    public <T> List<T> getObject(Class<T> cl, List<Object> ll) {
+    public <T> List<T> getObject(Class<T> cl, List<StatementOrBundle> ll) {
         List<T> res = new LinkedList<T>();
         for (Object o : ll) {
             if (cl.isInstance(o)) {
@@ -86,6 +89,18 @@ public class ProvUtilities {
         }
         return res;
     }
+    public <T> List<T> getObject2(Class<T> cl, List<Statement> ll) {
+        List<T> res = new LinkedList<T>();
+        for (Object o : ll) {
+            if (cl.isInstance(o)) {
+                @SuppressWarnings("unchecked")
+                T o2 = (T) o;
+                res.add(o2);
+            }
+        }
+        return res;
+    }
+ 
 
     public QName getEffect(Relation0 r) {
         if (r instanceof Used) {
@@ -103,9 +118,7 @@ public class ProvUtilities {
         if (r instanceof WasDerivedFrom) {
             return ((WasDerivedFrom) r).getGeneratedEntity().getRef();
         }
-        if (r instanceof WasRevisionOf) {
-            return ((WasRevisionOf) r).getNewer().getRef();
-        }
+       
         if (r instanceof WasAssociatedWith) {
             return ((WasAssociatedWith) r).getActivity().getRef();
         }
@@ -121,6 +134,9 @@ public class ProvUtilities {
         }
         if (r instanceof SpecializationOf) {
             return ((SpecializationOf) r).getSpecializedEntity().getRef();
+        }
+        if (r instanceof HadMember) {
+            return ((HadMember) r).getCollection().getRef();
         }
         if (r instanceof WasInformedBy) {
             return ((WasInformedBy) r).getEffect().getRef();
@@ -178,10 +194,7 @@ public class ProvUtilities {
         if (r instanceof WasInfluencedBy) {
             return ((WasInfluencedBy) r).getInfluencer().getRef();
         }
-        if (r instanceof WasRevisionOf) {
-            return ((WasRevisionOf) r).getOlder().getRef();
-        }
-        if (r instanceof WasAssociatedWith) {
+          if (r instanceof WasAssociatedWith) {
             return ((WasAssociatedWith) r).getAgent().getRef();
         }
         if (r instanceof WasAttributedTo) {
@@ -192,6 +205,9 @@ public class ProvUtilities {
         }
         if (r instanceof SpecializationOf) {
             return ((SpecializationOf) r).getGeneralEntity().getRef();
+        }
+        if (r instanceof HadMember) {
+            return ((HadMember) r).getEntity().get(0).getRef();
         }
         if (r instanceof MentionOf) {
             return ((MentionOf) r).getGeneralEntity().getRef();
@@ -234,6 +250,17 @@ public class ProvUtilities {
             res.add(a.getRef());
             return res;
         }
+        if (r instanceof HadMember) {
+            List<QName> res = new LinkedList<QName>();
+            List<EntityRef> entities=((HadMember) r).getEntity();
+            if ((entities==null) || (entities.size()<=1)) return null;
+            boolean first=true;
+            for (EntityRef ee: entities) {
+                if (!first) res.add(ee.getRef());
+                first=false;
+            }
+            return res;
+        }
         if (r instanceof WasEndedBy) {
             List<QName> res = new LinkedList<QName>();
             ActivityRef a = ((WasEndedBy) r).getEnder();
@@ -253,6 +280,7 @@ public class ProvUtilities {
         if (r instanceof DerivedByInsertionFrom) {
             List<QName> res = new LinkedList<QName>();
             DerivedByInsertionFrom dbif = ((DerivedByInsertionFrom) r);
+            
             for (Entry entry : dbif.getEntry()) {
                 res.add(entry.getEntity().getRef());
             }
@@ -264,7 +292,7 @@ public class ProvUtilities {
     public MentionOf getMentionForRemoteEntity(NamedBundle local,
                                                Entity remoteEntity,
                                                NamedBundle remote) {
-        return getMentionForRemoteEntity(local.getEntityOrActivityOrWasGeneratedBy(),
+        return getMentionForLocalEntity(local.getEntityOrActivityOrWasGeneratedBy(),
                                          remoteEntity, remote);
     }
 
@@ -296,9 +324,9 @@ public class ProvUtilities {
                                         localEntity, remote);
     }
 
-    MentionOf getMentionForLocalEntity(List<Object> records,
+    MentionOf getMentionForLocalEntity(List<Statement> records,
                                        Entity localEntity, NamedBundle remote) {
-        for (Object o : records) {
+        for (Statement o : records) {
             if (o instanceof MentionOf) {
                 MentionOf ctxt = (MentionOf) o;
                 QName id1 = localEntity.getId();
@@ -350,6 +378,8 @@ public class ProvUtilities {
     }
 
     static {
+        fields.put(Activity.class, new String[] { "Id", "StartTime", "EndTime", "Any" });
+
         fields.put(Used.class, new String[] { "Id", "Activity", "Entity",
                                              "Time", "Any" });
         fields.put(WasGeneratedBy.class, new String[] { "Id", "Entity",
@@ -387,8 +417,22 @@ public class ProvUtilities {
                                                         "Responsible",
                                                         "Activity", "Any" });
         fields.put(SpecializationOf.class, new String[] { "SpecializedEntity",
-                                                         "GeneralEntity" });
+                                                          "GeneralEntity" });
+        
+	// never use the accessor id for Mention, since it is not defined.
+	// However, this allows iterations over this data structure to be performed
+	//  like others.
 
+        fields.put(MentionOf.class, new String[] { "Id", 
+						   "SpecializedEntity",
+						   "GeneralEntity",
+						   "Bundle" });
+        
+
+        types.put(Activity.class, new Class[] { QName.class, 
+                                           XMLGregorianCalendar.class,
+                                           XMLGregorianCalendar.class,
+                                           Object.class });
         types.put(Used.class, new Class[] { QName.class, ActivityRef.class,
                                            EntityRef.class,
                                            XMLGregorianCalendar.class,
@@ -443,54 +487,66 @@ public class ProvUtilities {
                                                       ActivityRef.class,
                                                       Object.class });
         types.put(SpecializationOf.class, new Class[] { EntityRef.class,
-                                                       Entity.class });
+                                                       EntityRef.class });
+        types.put(MentionOf.class, new Class[] { QName.class,
+						 EntityRef.class,
+						 EntityRef.class,
+						 EntityRef.class });
     }
 
     @SuppressWarnings("unchecked")
     public <T> JAXBElement<T> newElement(T r) {
+        if (r instanceof Activity) {
+            return (JAXBElement<T>) p.newElement(p.newActivity((Activity) r));
+        }
         if (r instanceof Used) {
-            return (JAXBElement<T>) of.newElement(of.newUsed((Used) r));
+            return (JAXBElement<T>) p.newElement(p.newUsed((Used) r));
         }
         if (r instanceof WasStartedBy) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasStartedBy((WasStartedBy) r));
         }
         if (r instanceof WasEndedBy) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasEndedBy((WasEndedBy) r));
         }
         if (r instanceof WasGeneratedBy) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasGeneratedBy((WasGeneratedBy) r));
         }
         if (r instanceof WasDerivedFrom) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasDerivedFrom((WasDerivedFrom) r));
         }
         if (r instanceof WasAssociatedWith) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasAssociatedWith((WasAssociatedWith) r));
         }
         if (r instanceof WasInvalidatedBy) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasInvalidatedBy((WasInvalidatedBy) r));
         }
         if (r instanceof WasAttributedTo) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasAttributedTo((WasAttributedTo) r));
         }
         if (r instanceof WasInformedBy) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasInformedBy((WasInformedBy) r));
         }
         if (r instanceof WasInfluencedBy) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newWasInfluencedBy((WasInfluencedBy) r));
         }
+        if (r instanceof MentionOf) {
+            return (JAXBElement<T>) p.newElement(p.newMentionOf((MentionOf) r));
+        }
         if (r instanceof ActedOnBehalfOf) {
-            return (JAXBElement<T>) of.newElement(of
+            return (JAXBElement<T>) p.newElement(p
                     .newActedOnBehalfOf((ActedOnBehalfOf) r));
         }
+
+        
         System.out.println("newElement Unknow relation " + r);
         throw new UnsupportedOperationException();
     }
@@ -498,33 +554,33 @@ public class ProvUtilities {
     @SuppressWarnings("unchecked")
     public <T> T addAttributes(T from, T to) {
         if (from instanceof Used) {
-            return (T) of.addAttributes((Used) from, (Used) to);
+            return (T) p.addAttributes((Used) from, (Used) to);
         }
         if (from instanceof WasStartedBy) {
-            return (T) of.addAttributes((WasStartedBy) from, (WasStartedBy) to);
+            return (T) p.addAttributes((WasStartedBy) from, (WasStartedBy) to);
         }
         if (from instanceof WasEndedBy) {
-            return (T) of.addAttributes((WasEndedBy) from, (WasEndedBy) to);
+            return (T) p.addAttributes((WasEndedBy) from, (WasEndedBy) to);
         }
         if (from instanceof WasGeneratedBy) {
-            return (T) of.addAttributes((WasGeneratedBy) from,
+            return (T) p.addAttributes((WasGeneratedBy) from,
                                         (WasGeneratedBy) to);
         }
         if (from instanceof WasDerivedFrom) {
-            return (T) of.addAttributes((WasDerivedFrom) from,
+            return (T) p.addAttributes((WasDerivedFrom) from,
                                         (WasDerivedFrom) to);
         }
         if (from instanceof WasAssociatedWith) {
-            return (T) of.addAttributes((WasAssociatedWith) from,
+            return (T) p.addAttributes((WasAssociatedWith) from,
                                         (WasAssociatedWith) to);
         }
         if (from instanceof WasInvalidatedBy) {
-            return (T) of.addAttributes((WasInvalidatedBy) from,
+            return (T) p.addAttributes((WasInvalidatedBy) from,
                                         (WasInvalidatedBy) to);
         }
 
         if (from instanceof WasAttributedTo) {
-            return (T) of.addAttributes((WasAttributedTo) from,
+            return (T) p.addAttributes((WasAttributedTo) from,
                                         (WasAttributedTo) to);
         }
         /*
@@ -536,16 +592,16 @@ public class ProvUtilities {
          * of.addAttributes((SpecializationOf)from, (SpecializationOf)to); }
          */
         if (from instanceof WasInformedBy) {
-            return (T) of.addAttributes((WasInformedBy) from,
+            return (T) p.addAttributes((WasInformedBy) from,
                                         (WasInformedBy) to);
         }
         if (from instanceof WasInfluencedBy) {
-            return (T) of.addAttributes((WasInfluencedBy) from,
+            return (T) p.addAttributes((WasInfluencedBy) from,
                                         (WasInfluencedBy) to);
         }
 
         if (from instanceof ActedOnBehalfOf) {
-            return (T) of.addAttributes((ActedOnBehalfOf) from,
+            return (T) p.addAttributes((ActedOnBehalfOf) from,
                                         (ActedOnBehalfOf) to);
         }
 
@@ -571,7 +627,9 @@ public class ProvUtilities {
                 || (o instanceof WasAssociatedWith)
                 || (o instanceof WasInfluencedBy)
                 || (o instanceof SpecializationOf)
-                || (o instanceof AlternateOf);
+                || (o instanceof AlternateOf)
+                || (o instanceof MentionOf)
+                || (o instanceof HadMember);
     }
 
     public int getFirstTimeIndex(Object o) {
@@ -668,6 +726,11 @@ public class ProvUtilities {
 
         else if (o instanceof SpecializationOf) {
             SpecializationOf tmp = (SpecializationOf) o;
+            action.run(tmp);
+        }
+
+        else if (o instanceof HadMember) {
+            HadMember tmp = (HadMember) o;
             action.run(tmp);
         }
 

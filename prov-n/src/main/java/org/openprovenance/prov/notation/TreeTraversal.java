@@ -208,6 +208,7 @@ public class TreeTraversal {
             Object dAttrs=convert(ast.getChild(6));
             return c.convertWasDerivedFrom(uid,id2,id1,pe,q2,q1,dAttrs);
 
+            /*
         case PROV_NParser.WRO:
             uidTree=ast.getChild(0);
             if (uidTree.getChildCount()>0) {
@@ -249,7 +250,8 @@ public class TreeTraversal {
             q1=convert(ast.getChild(5));
             dAttrs=convert(ast.getChild(6));
             return c.convertHadPrimarySource(uid,id2,id1,pe,q2,q1,dAttrs);
-
+*/
+            
         case PROV_NParser.INFL:
             uidTree=ast.getChild(0);
             if (uidTree.getChildCount()>0) {
@@ -274,6 +276,11 @@ public class TreeTraversal {
             id2=convert(ast.getChild(0));
             id1=convert(ast.getChild(1));
             return c.convertSpecializationOf(id2,id1);
+
+        case PROV_NParser.MEM:
+            id2=convert(ast.getChild(0));
+            id1=convert(ast.getChild(1));
+            return c.convertHadMember(id2,id1);
 
         case PROV_NParser.CTX:
             Object su=convert(ast.getChild(0));
@@ -417,7 +424,7 @@ public class TreeTraversal {
         case PROV_NParser.BUNDLE:
             Object nss=convert(ast.getChild(0));
             c.startBundle(null);
-            System.out.println("Document (UnNamed bunded) ");
+            //System.out.println("Document (UnNamed bunded) ");
             @SuppressWarnings("unchecked")
             List<Object> records2=(List<Object>)convert(ast.getChild(1));
             List<Object> bundles=null;
@@ -430,7 +437,7 @@ public class TreeTraversal {
 
         case PROV_NParser.NAMEDBUNDLE:
             Object bundleId=convert(ast.getChild(0));
-            System.out.println("Named bunded " + bundleId);
+            //System.out.println("Named bunded " + bundleId);
             Object nss2=convert(ast.getChild(1));
             
             c.startBundle(bundleId);

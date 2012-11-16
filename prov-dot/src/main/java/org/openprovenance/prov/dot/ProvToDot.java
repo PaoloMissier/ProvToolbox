@@ -13,9 +13,12 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBElement;
 //import org.w3c.dom.Element;
 
+import org.antlr.runtime.tree.CommonTree;
+import org.openprovenance.prov.notation.Utility;
 import org.openprovenance.prov.xml.Document;
 import org.openprovenance.prov.xml.Entity;
 import org.openprovenance.prov.xml.Activity;
+import org.openprovenance.prov.xml.ProvSerialiser;
 import org.openprovenance.prov.xml.Relation0;
 import org.openprovenance.prov.xml.Influence;
 import org.openprovenance.prov.xml.Agent;
@@ -48,11 +51,13 @@ import org.openprovenance.prov.dot.ActivityMapEntry;
 import org.openprovenance.prov.dot.RelationStyleMapEntry;
 import org.openprovenance.prov.dot.ProvPrinterConfigDeserialiser;
 
+import org.openprovenance.prov.notation.Utility;
+
 /** Serialisation of  Prov representation to DOT format. */
 public class ProvToDot {
     public final static String DEFAULT_CONFIGURATION_FILE="defaultConfig.xml";
     public final static String DEFAULT_CONFIGURATION_FILE_WITH_ROLE="defaultConfigWithRole.xml";
-    public final static String USAGE="prov2dot provFile.xml out.dot out.pdf [configuration.xml]";
+    public final static String USAGE="prov2dot provFile.provn out.dot out.pdf [configuration.xml]";
 
     ProvUtilities u=new ProvUtilities();
     ProvFactory of=new ProvFactory();
@@ -61,20 +66,36 @@ public class ProvToDot {
         return qName.getLocalPart();
     }
 
-    public static void main(String [] args) throws Exception {
+    public static void main(String [] args) 
+    throws java.io.FileNotFoundException,  java.io.IOException, JAXBException, Throwable {
         if ((args==null) || (args.length==0) || (args.length>4)) {
             System.out.println(USAGE);
             return;
         }
 
-        String opmFile=args[0];
+        Utility u=new Utility();
+        
+        String asnFile=args[0];
         String outDot=args[1];
         String outPdf=args[2];
-        String configFile=((args.length==4) ? args[3] : null);
+        String configFile=((args.length==4) ? args[3] : DEFAULT_CONFIGURATION_FILE_WITH_ROLE);
 
-        ProvToDot converter=((configFile==null) ? new ProvToDot() : new ProvToDot(configFile));
+        CommonTree tree = u.convertASNToTree(asnFile);
 
-        converter.convert(opmFile,outDot,outPdf);
+        Document o= (Document) u.convertTreeToJavaBean(tree);
+
+        ProvSerialiser serial=ProvSerialiser.getThreadProvSerialiser();
+
+//        System.out.println(" " + o);
+
+        //serial.serialiseBundle(new File(xmlFile),o,true);
+
+        System.out.println("new ProvToDot with configFile "+ configFile);
+
+        ProvToDot toDot=new ProvToDot(configFile); 
+        
+        toDot.convert(o,outDot,outPdf);
+        
     }
 
 
@@ -93,7 +114,8 @@ public class ProvToDot {
     }
 
     public ProvToDot(String configurationFile) {
-        this();
+        //this();
+        System.out.println("init with config");
         init(configurationFile);
     }
 
@@ -111,12 +133,14 @@ public class ProvToDot {
         try {
             ProvPrinterConfiguration opc=printerDeserial.deserialiseProvPrinterConfiguration(new File(configurationFile));
             init(opc);
+            System.out.println("ProvPrinterConfiguration initialised");
         } catch (JAXBException je) {
             je.printStackTrace();
         }
     }
 
     public void init(InputStream is) {
+    	System.out.println("init ProvPrinterConfiguration -- no config");
         ProvPrinterConfigDeserialiser printerDeserial=getDeserialiser();
         try {
             ProvPrinterConfiguration opc=printerDeserial.deserialiseProvPrinterConfiguration(is);

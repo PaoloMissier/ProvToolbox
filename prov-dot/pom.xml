@@ -33,7 +33,6 @@
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-n</artifactId>
       <version>0.0.2-SNAPSHOT</version>
-      <scope>test</scope>
     </dependency>
 
 

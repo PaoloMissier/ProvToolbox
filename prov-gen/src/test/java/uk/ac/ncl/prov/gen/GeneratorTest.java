@@ -36,7 +36,7 @@ public class GeneratorTest
     public void testParsing() {
     	try {
 			JProvUtility u = new JProvUtility();
-			Bundle b = u.convertASNToJava("../prov-gen/src/test/resources/prov/test.provn");
+			Bundle b = u.convertASNToJava("../prov-gen/src/test/resources/prov/dissertation.provn");
 			Generator generator = new Generator(b);
 			generator.seed(true);
 			System.out.println(generator.expand());

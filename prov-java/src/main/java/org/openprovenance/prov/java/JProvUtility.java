@@ -21,7 +21,13 @@ public class JProvUtility extends Utility {
 	
 	public String convertJavaToASN(Bundle b) {
 		JProvTraversal jt = new JProvTraversal(new JProvTreeConstructor(new ASNConstructor()));
+		
+		System.out.println("traversal created for convertJavaToASN");
+		
         Object o = jt.convert(b);
+
+        System.out.println("conversion accomplished");
+        
         return (String) o;
     }
 	

@@ -424,7 +424,7 @@ public class Generator {
 		
 		if (relation instanceof NonAlternateRelation) {
 			double maxSaturation = startCardinality * endCardinality;
-			numberOfEdges = (int) Math.ceil(maxSaturation * Double.valueOf(((NonAlternateRelation) relation).getValue("gen:concreteSaturation")));
+			numberOfEdges = (int) Math.ceil(maxSaturation * Double.valueOf(((NonAlternateRelation) relation).getValue("gen:concreteSaturation")));			
 		} 
 		
 		return numberOfEdges;

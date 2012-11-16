@@ -38,6 +38,9 @@ public class JProvTraversal {
 		List<Object> agRecords = new LinkedList<Object>();
 		List<Object> bRecords = new LinkedList<Object>();
 
+		System.out.println("converting "+b.getRecords().getElements().size()+" elements in the bundle");
+		
+		
 		for (Element e : b.getRecords().getElements()) {
 			if (e instanceof Entity) {
 				eRecords.add(convert((Entity) e));
@@ -48,18 +51,27 @@ public class JProvTraversal {
 			}
 		}
 
+		System.out.println("all elements converted");
+
+		System.out.println("converting "+b.getRecords().getRelations().size()+" relations in the bundle");
+		
+		Object o;
 		for (Relation relation : b.getRecords().getRelations()) {
-			Object o = convertRelation(relation);
+			o = convertRelation(relation);
 			if (o != null)
 				lnkRecords.add(o);
 		}
 
+		System.out.println("all relations converted");
+
+		System.out.println("converting "+b.getBundles().size()+" bundles... ");
 		for (Bundle bu : b.getBundles()) {
-			Object o = convert(bu);
+			o = convert(bu);
 			if (o != null)
 				bRecords.add(o);
 		}
-
+		System.out.println("all bundles converted");
+	
 		if (b.getId() == null) {
 			return jtc.convertBundle(null, aRecords,
 					eRecords, agRecords, lnkRecords, bRecords);

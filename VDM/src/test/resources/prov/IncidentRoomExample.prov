@@ -4,9 +4,9 @@ bundle
 //
 // entities
 //
-entity(regionSetting)
+//entity(regionSetting)
 entity(twitterStreamSource)
-entity(trendDetectionSetting)
+//entity(trendDetectionSetting)
 
 entity(regionAlert)
 entity(userAlert)
@@ -15,9 +15,9 @@ entity(trendReport)
 entity(alert)
 
 entity(userProfiles, [prov:type="DB", ir:clearance="private"])
-entity(predModel1, [prov:type="correlation", ir:clearance="limited"])
+entity(predModel, [prov:type="correlation", ir:clearance="limited"])
 //entity(predModel2, [prov:type="classifier", ir:clearance="limited"])
-entity(predModel3, [prov:type="clustering", ir:clearance="public"])
+//entity(predModel3, [prov:type="clustering", ir:clearance="public"])
 
 entity(threatReport, [ir:status="private"])
 entity(expertReport, [ir:status="limited"])
@@ -47,13 +47,13 @@ agent(Mr-Smith, [ex:level=3, ex:descr="region lead"])
 //
 // produce-consume
 //
-used(regionMonitor,regionSetting,2012-06-18T11:10:00)
+//used(regionMonitor,regionSetting,2012-06-18T11:10:00)
 used(regionMonitor,twitterStreamSource,2012-06-18T11:10:00)
 
 used(userMonitor,twitterStreamSource,2012-06-18T11:10:00)
 
 used(trendMonitor,twitterStreamSource,2012-06-18T11:10:00)
-used(trendMonitor,trendDetectionSetting,2012-06-18T11:10:00)
+//used(trendMonitor,trendDetectionSetting,2012-06-18T11:10:00)
 
 wasGeneratedBy(regionAlert,regionMonitor,2012-06-18T11:10:00)
 wasGeneratedBy(userAlert,userMonitor,2012-06-18T11:10:00)
@@ -68,8 +68,8 @@ used(level2Analysis,trendReport,2012-06-18T11:10:00)
 //used(level2Analysis,alert,2012-06-18T11:10:00)
 used(level2Analysis,userProfiles,2012-06-18T11:10:00)
 //used(level2Analysis,predModel2,2012-06-18T11:10:00)
-used(level2Analysis,predModel1,2012-06-18T11:10:00)
-used(level2Analysis,predModel3,2012-06-18T11:10:00)
+used(level2Analysis,predModel,2012-06-18T11:10:00)
+//used(level2Analysis,predModel3,2012-06-18T11:10:00)
 
 wasGeneratedBy(threatReport,level2Analysis,2012-06-18T11:10:00)
 

@@ -327,12 +327,23 @@ public class JProvTreeConstructor implements JProvConstructor {
 	public Object convertBundle(Object namespaces, List<Object> aRecords,
 			List<Object> eRecords, List<Object> agRecords,
 			List<Object> lnkRecords, List<Object> bRecords) {
+		
+		System.out.println("preparing convertBundle");
+		
 		List<Object> ll = new LinkedList<Object>();
         if (aRecords!=null) ll.addAll(aRecords);
         if (eRecords!=null) ll.addAll(eRecords);
         if (agRecords!=null) ll.addAll(agRecords);
         if (lnkRecords!=null) ll.addAll(lnkRecords);
-        return c.convertBundle(namespaces,ll,bRecords);
+        
+		System.out.println("convertBundle ready to process  "+ll.size()+" objects");
+
+		 long tstart = System.currentTimeMillis();
+        Object result = c.convertBundle(namespaces,ll,bRecords);
+        long tstop =  System.currentTimeMillis();
+        
+        System.out.println("time (ms): "+(tstop-tstart));
+        return result;
 	}
 
 	@Override

@@ -9,8 +9,12 @@ import java.io.IOException;
 import java.util.HashSet;
 
 import org.apache.commons.io.FileUtils;
+import org.openprovenance.prov.java.Element;
 import org.openprovenance.prov.java.JProvUtility;
+import org.openprovenance.prov.java.Record;
+import org.openprovenance.prov.java.Relation;
 import org.openprovenance.prov.java.component4.Bundle;
+import org.openprovenance.prov.java.component4.Records;
 
 import uk.ac.ncl.prov.gen.generator.Generator;
 
@@ -67,7 +71,7 @@ public class ProvGenCLI {
 		}
 
 		System.out.println("Input graph: "+ inputGraphFileName);
-		System.out.println("Input graph: "+ outputGraphFileName);
+		System.out.println("Output graph: "+ outputGraphFileName);
 
 		pgen.processGraph(inputGraphFileName, outputGraphFileName, noSeed);
 	}
@@ -80,6 +84,9 @@ public class ProvGenCLI {
 		File outputF = new File(outputGraphFileName);
 		Bundle bundle;
 		try {
+			
+		    long timein = System.currentTimeMillis();
+
 			bundle = u.convertASNToJava(inputF.getAbsolutePath());
 
 			Generator generator = new Generator(bundle);
@@ -90,10 +97,20 @@ public class ProvGenCLI {
 			}
 
 			Bundle newBundle = generator.expand();
-			System.out.println("expansion completed");
+			
+			int n=0, e=0;
+			Records rec = newBundle.getRecords();
+				
+			for (Element el : rec.getElements()) { if (el != null) n++; }
+			for (Relation rel : rec.getRelations()) { if (rel != null) e++; }
+
+			System.out.println("expansion completed. Resulted in "+n+" nodes and "+e+" edges");
 
 			String asn = u.convertJavaToASN(newBundle);
-			System.out.println("conversion completed");
+		    long timeout = System.currentTimeMillis();
+
+		    System.out.println("conversion completed. time:  "+(timeout-timein)+" ms");
+			
 
 			FileUtils.fileWrite(outputF.getAbsolutePath(), asn);
 

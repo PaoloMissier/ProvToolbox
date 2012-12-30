@@ -10,29 +10,57 @@ package org.openprovenance.prov.xml;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.namespace.QName;
 
 public class AnyAdapter
     extends XmlAdapter<Object,Attribute>
 {
 
     ProvFactory pFactory=new ProvFactory();
+    
+    ValueConverter vconv=new ValueConverter(pFactory);
+    
+    public QName stringToQName(String id, org.w3c.dom.Element el) {
+        if (id == null)
+            return null;
+        int index = id.indexOf(':');
+        if (index == -1) {
+            QName qn= new QName(el.getAttribute("xmlns"), //what's the default?
+                                id);
+            return qn;
+        }
+        String prefix = id.substring(0, index);
+        String local = id.substring(index + 1, id.length());
+        QName qn= new QName(el.getAttributeNS("http://www.w3.org/2000/xmlns/", prefix),
+                         local,
+                         prefix);
+        return qn;
+    } 
+
 
     public Attribute unmarshal(Object value) {
-        //System.out.println("AnyAdapter2 unmarshalling for " + value);
-        //System.out.println("AnyAdapter2 unmarshalling for " + value.getClass());
         if (value instanceof org.w3c.dom.Element) {
             org.w3c.dom.Element el=(org.w3c.dom.Element)value;
             String prefix=el.getPrefix();
             String namespace=el.getNamespaceURI();
             String local=el.getLocalName();
             String child=el.getTextContent();
-            String type=el.getAttributeNS(NamespacePrefixMapper.XSI_NS, "type");
-            type=(type==null) ? "xsd:string" : type;
-            return pFactory.newAttribute(namespace,local,prefix, pFactory.convertToJava(type, child), type);
+            String typeAsString=el.getAttributeNS(NamespacePrefixMapper.XSI_NS, "type");
+            String lang=el.getAttributeNS(NamespacePrefixMapper.XML_NS, "lang");
+            QName type=((typeAsString==null) || (typeAsString.equals(""))) ? null : stringToQName(typeAsString, el);
+            if (type==null) type=ValueConverter.QNAME_XSD_STRING;
+            if (type.equals(ValueConverter.QNAME_XSD_QNAME)) {
+                QName qn=stringToQName(child,el);  // TODO: not robust to prefix not predeclared 
+                return pFactory.newAttribute(namespace,local,prefix, qn, type);
+            } else if ((lang==null) || (lang.equals(""))) {
+		return pFactory.newAttribute(namespace,local,prefix, vconv.convertToJava(type, child), type);
+	    } else {
+		return pFactory.newAttribute(namespace,local,prefix, pFactory.newInternationalizedString(child,lang), type);
+	    }
         } 
         if (value instanceof JAXBElement) {
             JAXBElement<?> je=(JAXBElement<?>) value;
-            return pFactory.newAttribute(je.getName(),je.getValue());
+            return pFactory.newAttribute(je.getName(),je.getValue(),vconv);
         }
         return null;
     }
@@ -42,9 +70,22 @@ public class AnyAdapter
         //System.out.println("AnyAdapter2 marshalling for " + attribute
         //                .getClass());
         //TODO: this call creates a DOM but does not encode the type as xsi:type
-	return pFactory.newElement(attribute.getElementName(), 
-	                           attribute.getValue().toString(),
-	                           attribute.getXsdType());
+	Object value=attribute.getValue();
+	if (value instanceof InternationalizedString) {
+	    InternationalizedString istring=((InternationalizedString)value);
+	    return pFactory.newElement(attribute.getElementName(), 
+				       istring.getValue(),
+				       attribute.getXsdType(),
+				       istring.getLang());
+	} else if (value instanceof QName) {
+            return pFactory.newElement(attribute.getElementName(), 
+                                       (QName)value);
+
+	} else {
+	    return pFactory.newElement(attribute.getElementName(), 
+				       value.toString(),
+				       attribute.getXsdType());
+	}
         //JAXBElement<?> je=new JAXBElement(value.getElementName(),value.getValue().getClass(),value.getValue());
         //return je;
     }

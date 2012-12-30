@@ -1,8 +1,11 @@
 package org.openprovenance.prov.xml;
 
 import java.io.File;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.net.URI;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
@@ -18,24 +21,31 @@ public class RoundTripFromJavaTest extends TestCase {
     public static final String EX2_NS = "http://example2.org/";
     public static final String EX_PREFIX = "ex";
     public static final String EX2_PREFIX = "ex2";
-     
+    public static final String EX3_NS = "http://example3.org/";
+
     static final ProvUtilities util=new ProvUtilities();
 
 
     static final Hashtable<String, String> namespaces;
 
     public static ProvFactory pFactory;
-    
+    public static ValueConverter vconv;
+
     static Hashtable<String, String> updateNamespaces (Hashtable<String, String> nss) {
         nss.put(EX_PREFIX, EX_NS);
         nss.put(EX2_PREFIX, EX2_NS);
+        nss.put("_", EX3_NS);
 	return nss;
     }
-    
-    
+    static  void setNamespaces() {
+	pFactory.resetNamespaces();
+	pFactory.getNss().putAll(updateNamespaces(new Hashtable<String, String>()));
+    }
+
     static {
 	namespaces = updateNamespaces(new Hashtable<String, String>());
 	pFactory = new ProvFactory(namespaces);
+	vconv=new ValueConverter(pFactory);
     }
 	private DocumentEquality documentEquality;
 
@@ -74,11 +84,29 @@ public class RoundTripFromJavaTest extends TestCase {
 	makeDocAndTest(stment, file, null, check);
     }
     public void makeDocAndTest(Statement stment, Statement[] opt, String file) {
-	makeDocAndTest(stment, file, opt, true);
-    }
+    	makeDocAndTest(stment, file, opt, true);
+        }
+    public void makeDocAndTest(Statement [] stment, Statement[] opt, String file) {
+    	makeDocAndTest(stment, file, opt, true);
+        }
+    
     public void makeDocAndTest(Statement stment, String file, Statement[] opt, boolean check) {
+    	makeDocAndTest(new Statement[] {stment}, file, opt, check);
+    }
+    public void makeDocAndTest(Statement []stment, String file, Statement[] opt, boolean check) {
+        makeDocAndTest(stment, null, file, opt, check);
+    }
+
+    public void makeDocAndTest(Statement []stment, NamedBundle[] bundles, String file, Statement[] opt, boolean check) {
 	Document doc = pFactory.newDocument();
-	doc.getEntityOrActivityOrWasGeneratedBy().add(stment);
+	for (int i=0; i< stment.length; i++) {
+	   doc.getEntityOrActivityOrWasGeneratedBy().add(stment[i]);
+	}
+	if (bundles!=null) {
+	    for (int j=0; j<bundles.length; j++) {
+	        doc.getEntityOrActivityOrWasGeneratedBy().add(bundles[j]);
+	    }
+	}
 	updateNamespaces(doc);
 	
 	String file1=(opt==null) ? file : file+"-S";
@@ -120,8 +148,8 @@ public class RoundTripFromJavaTest extends TestCase {
 	if (check) {
 	    boolean result=this.documentEquality.check(doc,  doc2);
 	    if (!result) {
-		System.out.println("Found " + doc);
-		System.out.println("Found " + doc2);
+	    System.out.println("Pre-write graph: "+doc);
+		System.out.println("Read graph: "+doc2);
 	    }
 	    assertTrue("doc equals doc2", result);
 	} else {
@@ -149,6 +177,9 @@ public class RoundTripFromJavaTest extends TestCase {
     public void writeXMLDocument(Document doc, String file) throws JAXBException {
 	ProvSerialiser serial = ProvSerialiser.getThreadProvSerialiser();
 	serial.serialiseDocument(new File(file), doc, true);
+	StringWriter sw = new StringWriter();
+	serial.serialiseDocument(sw, doc, true);
+	//System.out.println(sw.toString());
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -163,6 +194,7 @@ public class RoundTripFromJavaTest extends TestCase {
    	hl.getLabel().add(pFactory.newInternationalizedString("bye","EN"));
    	hl.getLabel().add(pFactory.newInternationalizedString("bonjour","FR"));
     }
+   
 
     public void addTypes(HasType ht) {
    	ht.getType().add("a");
@@ -190,54 +222,79 @@ public class RoundTripFromJavaTest extends TestCase {
         hl.setValue(new QName(EX_NS, "avalue", EX_PREFIX));
     }
 
-    
+    public void addFurtherAttributes(HasExtensibility he) {
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag1",EX_PREFIX,"hello", vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "bye", vconv));
+	//he.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, pFactory.newInternationalizedString("bonjour","fr"), "xsd:string"));
+	he.getAny().add(pFactory.newAttribute(EX2_NS,"tag3",EX2_PREFIX, "hi", vconv));
+
+    }
 
     
-    public void addFurtherAttributes(HasExtensibility he) {
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag1",EX_PREFIX,"hello"));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "bye"));
-	he.getAny().add(pFactory.newAttribute(EX2_NS,"tag3",EX2_PREFIX, "hi"));
+    public void addFurtherAttributes0(HasExtensibility he) {
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag1",EX_PREFIX,"hello", vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "bye", vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, pFactory.newInternationalizedString("bonjour","fr"), ValueConverter.QNAME_XSD_STRING));
+	he.getAny().add(pFactory.newAttribute(EX2_NS,"tag3",EX2_PREFIX, "hi", vconv));
 	
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Integer(1)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Long(1)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Short((short) 1)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Double(1.0)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Float(1.0)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new java.math.BigDecimal(1.0)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Boolean(true)));
-	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Byte((byte) 123)));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Integer(1), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Long(1), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Short((short) 1), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Double(1.0), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Float(1.0), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new java.math.BigDecimal(1.0), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Boolean(true), vconv));
+	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new Byte((byte) 123), vconv));
+	
+	addFurtherAttributesWithQNames(he);
+	
 	URIWrapper w=new URIWrapper();
    	w.setValue(URI.create(EX_NS+"london"));
-   	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, w));
+   	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, w, vconv));
 	
     }
     
-    public void addFurtherLabelsPROBLEM(HasExtensibility he) {
-	
-   	he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new QName(EX_NS, "london", EX_PREFIX)));
-	
-    }
+   
     
     ///////////////////////////////////////////////////////////////////////
     
+    public void addFurtherAttributesWithQNames(HasExtensibility he) {
+        he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new QName(EX2_NS,"newyork", EX2_PREFIX), vconv));
+        he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new QName(EX_NS, "london", EX_PREFIX), vconv));
+        he.getAny().add(pFactory.newAttribute(EX_NS,"tag",EX_PREFIX, new QName(EX3_NS, "london"), vconv));
+
+    }
+
+    public void testEntity0() throws JAXBException  {
+	setNamespaces();
+	Entity a = pFactory.newEntity("ex:e0");
+	a.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, pFactory.newInternationalizedString("bonjour","fr"), ValueConverter.QNAME_XSD_STRING));
+	makeDocAndTest(a,"target/entity0");
+    }
+
+
     
     public void testEntity1() throws JAXBException  {
+	setNamespaces();
 	Entity a = pFactory.newEntity("ex:e1");
 	makeDocAndTest(a,"target/entity1");
     }
 
     public void testEntity2() throws JAXBException  {
+	setNamespaces();
    	Entity a = pFactory.newEntity("ex:e2", "entity2");
    	makeDocAndTest(a,"target/entity2");
     }
 
     public void testEntity3() throws JAXBException  {
+	setNamespaces();
    	Entity a = pFactory.newEntity("ex:e3", "entity3");
    	addValue(a);
    	makeDocAndTest(a,"target/entity3");
     }
 
     public void testEntity4() throws JAXBException  {
+	setNamespaces();
    	Entity a = pFactory.newEntity("ex:e4", "entity4");
 	addLabels(a);
    	makeDocAndTest(a,"target/entity4");
@@ -245,17 +302,20 @@ public class RoundTripFromJavaTest extends TestCase {
    
     
     public void testEntity5() throws JAXBException  {
+	setNamespaces();
    	Entity a = pFactory.newEntity("ex:e5", "entity5");
 	addTypes(a);
    	makeDocAndTest(a,"target/entity5");
     }
 
     public void testEntity6() throws JAXBException  {
+	setNamespaces();
        	Entity a = pFactory.newEntity("ex:e6", "entity6");
 	addLocations(a);
        	makeDocAndTest(a,"target/entity6");
     }
     public void testEntity7() throws JAXBException  {
+	setNamespaces();
        	Entity a = pFactory.newEntity("ex:e7", "entity7");
 	addTypes(a);
 	addLocations(a);
@@ -263,6 +323,7 @@ public class RoundTripFromJavaTest extends TestCase {
        	makeDocAndTest(a,"target/entity7");
     }
     public void testEntity8() throws JAXBException  {
+	setNamespaces();
        	Entity a = pFactory.newEntity("ex:e8", "entity8");
 	addTypes(a);
 	addTypes(a);
@@ -274,6 +335,7 @@ public class RoundTripFromJavaTest extends TestCase {
     }
 
     public void testEntity9() throws JAXBException  {
+	setNamespaces();
        	Entity a = pFactory.newEntity("ex:e9", "entity9");
 	addTypes(a);
 	addLocations(a);
@@ -283,13 +345,13 @@ public class RoundTripFromJavaTest extends TestCase {
     }
 
     public void testEntity10() throws JAXBException  {
+	setNamespaces();
        	Entity a = pFactory.newEntity("ex:e10", "entity10");
 	addTypes(a);
 	addLocations(a);
 	addLabels(a);
 	addFurtherAttributes(a); 
-	addFurtherLabelsPROBLEM(a);
-       	makeDocAndTest(a,"target/entity10",false);
+       	makeDocAndTest(a,"target/entity10");
     }
 
 
@@ -297,15 +359,18 @@ public class RoundTripFromJavaTest extends TestCase {
     
     
     public void testActivity1() throws JAXBException  {
+	setNamespaces();
 	Activity a = pFactory.newActivity("ex:a1");
 	makeDocAndTest(a,"target/activity1");
     }
     public void testActivity2() throws JAXBException  {
+	setNamespaces();
    	Activity a = pFactory.newActivity("ex:a2", "activity2");
    	makeDocAndTest(a,"target/activity2");
     }
 
     public void testActivity3() throws JAXBException  {
+	setNamespaces();
 	Activity a = pFactory.newActivity("ex:a1");
 	a.setStartTime(pFactory.newTimeNow());
 	a.setEndTime(pFactory.newTimeNow());
@@ -313,11 +378,13 @@ public class RoundTripFromJavaTest extends TestCase {
     }
 
     public void testActivity4() throws JAXBException  {
+	setNamespaces();
    	Activity a = pFactory.newActivity("ex:a2", "activity2");
 	addLabels(a);
    	makeDocAndTest(a,"target/activity4");
     }
     public void testActivity5() throws JAXBException  {
+	setNamespaces();
    	Activity a = pFactory.newActivity("ex:a2", "activity2");
 	addTypes(a);
    	makeDocAndTest(a,"target/activity5");
@@ -325,12 +392,14 @@ public class RoundTripFromJavaTest extends TestCase {
    
     
     public void testActivity6() throws JAXBException  {
+	setNamespaces();
    	Activity a = pFactory.newActivity("ex:a6", "activity6");
 	addLocations(a);
    	makeDocAndTest(a,"target/activity6");
     }
 
     public void testActivity7() throws JAXBException  {
+	setNamespaces();
        	Activity a = pFactory.newActivity("ex:a7", "activity7");
 	addTypes(a);
 	addLocations(a);
@@ -338,6 +407,7 @@ public class RoundTripFromJavaTest extends TestCase {
        	makeDocAndTest(a,"target/activity7");
     }
     public void testActivity8() throws JAXBException  {
+	setNamespaces();
        	Activity a = pFactory.newActivity("ex:a8", "activity8");
 	a.setStartTime(pFactory.newTimeNow());
 	a.setEndTime(pFactory.newTimeNow());
@@ -351,6 +421,7 @@ public class RoundTripFromJavaTest extends TestCase {
     }
 
     public void testActivity9() throws JAXBException  {
+	setNamespaces();
        	Activity a = pFactory.newActivity("ex:a9", "activity9");
         addTypes(a);
         addLocations(a);
@@ -364,27 +435,33 @@ public class RoundTripFromJavaTest extends TestCase {
     
     
     public void testAgent1() throws JAXBException  {
+	setNamespaces();
 	Agent a = pFactory.newAgent("ex:ag1");
 	makeDocAndTest(a,"target/agent1");
     }
+
     public void testAgent2() throws JAXBException  {
+	setNamespaces();
    	Agent a = pFactory.newAgent("ex:ag2", "agent2");
    	makeDocAndTest(a,"target/agent2");
     }
 
     
     public void testAgent3() throws JAXBException  {
+	setNamespaces();
    	Agent a = pFactory.newAgent("ex:ag2", "agent2");
    	a.getLabel().add(pFactory.newInternationalizedString("hello"));
    	makeDocAndTest(a,"target/agent3");
     }
     public void testAgent4() throws JAXBException  {
+	setNamespaces();
    	Agent a = pFactory.newAgent("ex:ag2", "agent2");
    	a.getLabel().add(pFactory.newInternationalizedString("hello"));
    	a.getLabel().add(pFactory.newInternationalizedString("bye","EN"));
    	makeDocAndTest(a,"target/agent4");
     }
     public void testAgent5() throws JAXBException  {
+	setNamespaces();
    	Agent a = pFactory.newAgent("ex:ag2", "agent2");
    	a.getLabel().add(pFactory.newInternationalizedString("hello"));
    	a.getLabel().add(pFactory.newInternationalizedString("bye","EN"));
@@ -394,6 +471,7 @@ public class RoundTripFromJavaTest extends TestCase {
    
     
     public void testAgent6() throws JAXBException  {
+	setNamespaces();
    	Agent a = pFactory.newAgent("ex:ag6", "agent6");
    	a.getType().add("a");
    	a.getType().add(1);
@@ -408,6 +486,7 @@ public class RoundTripFromJavaTest extends TestCase {
     }
 
     public void testAgent7() throws JAXBException  {
+	setNamespaces();
        	Agent a = pFactory.newAgent("ex:ag7", "agent7");
        	pFactory.addType(a,"a");
        	pFactory.addType(a,1);
@@ -431,6 +510,7 @@ public class RoundTripFromJavaTest extends TestCase {
        	makeDocAndTest(a,"target/agent7");
     }
     public void testAgent8() throws JAXBException  {
+	setNamespaces();
        	Agent a = pFactory.newAgent("ex:ag8", "agent8");
        	a.getType().add("a");
        	a.getType().add("a");
@@ -482,55 +562,49 @@ public class RoundTripFromJavaTest extends TestCase {
     }
     
     public void testGeneration1() throws JAXBException  {
+	setNamespaces();
 	WasGeneratedBy gen = pFactory.newWasGeneratedBy(q("gen1"),
 							pFactory.newEntityRef(q("e1")),
 							null,
 							null);
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { e1 };
-	makeDocAndTest(gen, opt , "target/generation1");
+	makeDocAndTest(gen, "target/generation1");
     }
 
 
     public void testGeneration2() throws JAXBException  {
+	setNamespaces();
 	WasGeneratedBy gen = pFactory.newWasGeneratedBy(q("gen2"),
 							pFactory.newEntityRef(q("e1")),
 							null,
 							pFactory.newActivityRef(q("a1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
 
-	makeDocAndTest(gen, opt, "target/generation2");
+	makeDocAndTest(gen, "target/generation2");
     }
 
 
     public void testGeneration3() throws JAXBException  {
+	setNamespaces();
 	WasGeneratedBy gen = pFactory.newWasGeneratedBy(q("gen3"),
 							pFactory.newEntityRef(q("e1")),
 							"somerole",
 							pFactory.newActivityRef(q("a1")));
         gen.getRole().add("otherRole");
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(gen,opt,"target/generation3");
+	makeDocAndTest(gen,"target/generation3");
     }
 
 
     public void testGeneration4() throws JAXBException  {
+	setNamespaces();
         WasGeneratedBy gen = pFactory.newWasGeneratedBy(q("gen4"),
                                                         pFactory.newEntityRef(q("e1")),
                                                         "somerole",
                                                         pFactory.newActivityRef(q("a1")));
         gen.setTime(pFactory.newTimeNow());
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(gen,opt,"target/generation4");
+        makeDocAndTest(gen,"target/generation4");
     }
     
     public void testGeneration5() throws JAXBException  {
+	setNamespaces();
         WasGeneratedBy gen = pFactory.newWasGeneratedBy(q("gen4"),
                                                         pFactory.newEntityRef(q("e1")),
                                                         "somerole",
@@ -541,25 +615,21 @@ public class RoundTripFromJavaTest extends TestCase {
         addLabels(gen);
         addFurtherAttributes(gen);
 
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(gen,opt,"target/generation5");
+        makeDocAndTest(gen,"target/generation5");
     }
     
     
     public void testGeneration6() throws JAXBException  {
+	setNamespaces();
   	WasGeneratedBy gen = pFactory.newWasGeneratedBy((QName)null,
   							pFactory.newEntityRef(q("e1")),
   							null,
   							pFactory.newActivityRef(q("a1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-  	makeDocAndTest(gen,opt,"target/generation6");
+  	makeDocAndTest(gen,"target/generation6");
       }
 
     public void testGeneration7() throws JAXBException  {
+	setNamespaces();
         WasGeneratedBy gen = pFactory.newWasGeneratedBy((QName)null,
                                                         pFactory.newEntityRef(q("e1")),
                                                         "somerole",
@@ -570,63 +640,54 @@ public class RoundTripFromJavaTest extends TestCase {
         addLabels(gen);
         addFurtherAttributes(gen);
 
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(gen,opt,"target/generation7");
+        makeDocAndTest(gen,"target/generation7");
     }
     
     //////////////////////////////////
     
     public void testUsage1() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed(q("use1"),
                                     null,
                                     null,
                                     pFactory.newEntityRef(q("e1")));
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Statement [] opt=new Statement[] { e1 };
-        makeDocAndTest(use,opt,"target/usage1");
+        makeDocAndTest(use,"target/usage1");
     }
 
     public void testUsage2() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed(q("use2"),
                                     pFactory.newActivityRef(q("a1")),
                                     null,
                                     pFactory.newEntityRef(q("e1")));
         
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(use,opt,"target/usage2");
+        makeDocAndTest(use,"target/usage2");
     }
 
     public void testUsage3() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed(q("use3"),
                                     pFactory.newActivityRef(q("a1")),
                                     "somerole",
                                     pFactory.newEntityRef(q("e1")));
         use.getRole().add("otherRole");
         
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(use,opt,"target/usage3");
+        makeDocAndTest(use,"target/usage3");
     }
     
     public void testUsage4() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed(q("use4"),
                                     pFactory.newActivityRef(q("a1")),
                                     "somerole",
                                     pFactory.newEntityRef(q("e1")));
         use.setTime(pFactory.newTimeNow());
 
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(use,opt,"target/usage4");
+        makeDocAndTest(use,"target/usage4");
     }
 
     public void testUsage5() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed(q("use4"),
                                     pFactory.newActivityRef(q("a1")),
                                     "somerole",
@@ -637,25 +698,21 @@ public class RoundTripFromJavaTest extends TestCase {
         addLabels(use);
         addFurtherAttributes(use);
         
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(use,opt,"target/usage5");
+        makeDocAndTest(use,"target/usage5");
     }
 
     public void testUsage6() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed((QName)null,
                                     pFactory.newActivityRef(q("a1")),
                                     null,
                                     pFactory.newEntityRef(q("e1")));
 
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(use,opt,"target/usage6");
+        makeDocAndTest(use,"target/usage6");
     }
 
     public void testUsage7() throws JAXBException  {
+	setNamespaces();
         Used use = pFactory.newUsed((QName)null,
                                     pFactory.newActivityRef(q("a1")),
                                     "somerole",
@@ -666,58 +723,49 @@ public class RoundTripFromJavaTest extends TestCase {
         addLabels(use);
         addFurtherAttributes(use);
         
-    	Entity e1=pFactory.newEntity(q("e1"));
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { e1, a1 };
-        makeDocAndTest(use,opt,"target/usage7");
+        makeDocAndTest(use,"target/usage7");
     }
     
     // //////////////////////////////////////////////
 
     public void testInvalidation1() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy(q("inv1"),
 							    pFactory.newEntityRef(q("e1")),
 							    null);
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { e1 };
-	makeDocAndTest(inv, opt, "target/invalidation1");
+	makeDocAndTest(inv,  "target/invalidation1");
     }
 
     public void testInvalidation2() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy(q("inv2"),
 							    pFactory.newEntityRef(q("e1")),
 							    pFactory.newActivityRef(q("a1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(inv, opt, "target/invalidation2");
+	makeDocAndTest(inv, "target/invalidation2");
     }
 
     public void testInvalidation3() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy(q("inv3"),
 							    pFactory.newEntityRef(q("e1")),
 							    pFactory.newActivityRef(q("a1")));
 	inv.getRole().add("someRole");
 	inv.getRole().add("otherRole");
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(inv, opt, "target/invalidation3");
+	makeDocAndTest(inv,  "target/invalidation3");
     }
 
     public void testInvalidation4() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy(q("inv4"),
 							    pFactory.newEntityRef(q("e1")),
 							    pFactory.newActivityRef(q("a1")));
 	inv.getRole().add("someRole");
 	inv.setTime(pFactory.newTimeNow());
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(inv, opt, "target/invalidation4");
+	makeDocAndTest(inv,  "target/invalidation4");
     }
 
     public void testInvalidation5() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy(q("inv4"),
 							    pFactory.newEntityRef(q("e1")),
 							    pFactory.newActivityRef(q("a1")));
@@ -729,23 +777,19 @@ public class RoundTripFromJavaTest extends TestCase {
 	addLabels(inv);
 	addFurtherAttributes(inv);
 
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(inv, opt, "target/invalidation5");
+	makeDocAndTest(inv,  "target/invalidation5");
     }
 
     public void testInvalidation6() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy((QName) null,
 							    pFactory.newEntityRef(q("e1")),
 							    pFactory.newActivityRef(q("a1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(inv, opt, "target/invalidation6");
+	makeDocAndTest(inv,  "target/invalidation6");
     }
 
     public void testInvalidation7() throws JAXBException {
+	setNamespaces();
 	WasInvalidatedBy inv = pFactory.newWasInvalidatedBy((QName) null,
 							    pFactory.newEntityRef(q("e1")),
 							    pFactory.newActivityRef(q("a1")));
@@ -756,95 +800,82 @@ public class RoundTripFromJavaTest extends TestCase {
 	addLabels(inv);
 	addFurtherAttributes(inv);
 
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(inv, opt, "target/invalidation7");
+	makeDocAndTest(inv, "target/invalidation7");
     }
     
 //////////////////////////////////
 
     public void testStart1() throws JAXBException {
+	setNamespaces();
 	WasStartedBy start = pFactory.newWasStartedBy(q("start1"),
 						      null,
 						      pFactory.newEntityRef(q("e1")));
 	
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { e1 };
-	makeDocAndTest(start, opt, "target/start1");
+	makeDocAndTest(start, "target/start1");
     }
 
     public void testStart2() throws JAXBException {
+	setNamespaces();
 	WasStartedBy start = pFactory.newWasStartedBy(q("start2"),
 						      pFactory.newActivityRef(q("a1")),
 						      pFactory.newEntityRef(q("e1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(start, opt, "target/start2");
+	
+	makeDocAndTest(start, "target/start2");
     }
 
     public void testStart3() throws JAXBException {
+	setNamespaces();
 	WasStartedBy start = pFactory.newWasStartedBy(q("start3"),
 						      pFactory.newActivityRef(q("a1")),
 						      null);
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { a1 };
-	makeDocAndTest(start, opt, "target/start3");
+	
+	makeDocAndTest(start, "target/start3");
     }
 
     public void testStart4() throws JAXBException {
+	setNamespaces();
 	WasStartedBy start = pFactory.newWasStartedBy(q("start4"),
 						      null,
 						      pFactory.newEntityRef(q("e1")));
 	start.setStarter(pFactory.newActivityRef(q("a2")));
 	
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { e1, a2 };
-	makeDocAndTest(start, opt, "target/start4");
+	makeDocAndTest(start, "target/start4");
     }
 
     public void testStart5() throws JAXBException {
+	setNamespaces();
 	WasStartedBy start = pFactory.newWasStartedBy(q("start5"),
 						      pFactory.newActivityRef(q("a1")),
 						      pFactory.newEntityRef(q("e1")));
 	start.setStarter(pFactory.newActivityRef(q("a2")));
 	
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { e1, a1, a2 };
-	makeDocAndTest(start, opt, "target/start5");
+	makeDocAndTest(start, "target/start5");
     }
 
     public void testStart6() throws JAXBException {
+	setNamespaces();
 	WasStartedBy start = pFactory.newWasStartedBy(q("start6"),
 						      pFactory.newActivityRef(q("a1")),
 						      null);
 	start.setStarter(pFactory.newActivityRef(q("a2")));
 	
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a1, a2 };
-	makeDocAndTest(start, opt, "target/start6");
+	makeDocAndTest(start, "target/start6");
     }
 
     
     public void testStart7() throws JAXBException {
+	setNamespaces();
    	WasStartedBy start = pFactory.newWasStartedBy(q("start7"),
    						      pFactory.newActivityRef(q("a1")),
    						      null);
    	start.setStarter(pFactory.newActivityRef(q("a2")));
    	start.setTime(pFactory.newTimeNow());
 
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a1, a2 };
-   	makeDocAndTest(start, opt, "target/start7");
+   	makeDocAndTest(start, "target/start7");
     }
     
     public void testStart8() throws JAXBException {
+	setNamespaces();
    	WasStartedBy start = pFactory.newWasStartedBy(q("start8"),
    						      pFactory.newActivityRef(q("a1")),
    						      null);
@@ -857,24 +888,20 @@ public class RoundTripFromJavaTest extends TestCase {
 	addLabels(start);
 	addFurtherAttributes(start);
 
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a1, a2 };
-   	makeDocAndTest(start, opt, "target/start8");
+   	makeDocAndTest(start, "target/start8");
     }
     
     public void testStart9() throws JAXBException {
+	setNamespaces();
    	WasStartedBy start = pFactory.newWasStartedBy((QName)null,
    						      pFactory.newActivityRef(q("a1")),
    						      pFactory.newEntityRef(q("e1")));
    	
-	Entity e1=pFactory.newEntity(q("e1"));
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-   	makeDocAndTest(start, opt, "target/start9");
+   	makeDocAndTest(start, "target/start9");
        }
     
     public void testStart10() throws JAXBException {
+	setNamespaces();
    	WasStartedBy start = pFactory.newWasStartedBy((QName)null,
    						      pFactory.newActivityRef(q("a1")),
    						      null);
@@ -887,93 +914,79 @@ public class RoundTripFromJavaTest extends TestCase {
 	addLabels(start);
 	addFurtherAttributes(start);
 
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a1, a2 };
-   	makeDocAndTest(start, opt, "target/start10");
+   	makeDocAndTest(start, "target/start10");
     }
     
     // ////////////////////////////////
 
     public void testEnd1() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end1"), null,
 						pFactory.newEntityRef(q("e1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { e1 };
-	makeDocAndTest(end, opt, "target/end1");
+	
+	makeDocAndTest(end, "target/end1");
     }
 
     public void testEnd2() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end2"),
 						pFactory.newActivityRef(q("a1")),
 						pFactory.newEntityRef(q("e1")));
 
-	Activity a1=pFactory.newActivity(q("a1"));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { a1, e1 };
-	
-	makeDocAndTest(end, opt, "target/end2");
+	makeDocAndTest(end, "target/end2");
     }
 
     public void testEnd3() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end3"),
 						pFactory.newActivityRef(q("a1")),
 						null);
-	Activity a1=pFactory.newActivity(q("a1"));
-	Statement [] opt=new Statement[] { a1 };
-	makeDocAndTest(end, opt, "target/end3");
+	
+	makeDocAndTest(end, "target/end3");
     }
 
     public void testEnd4() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end4"), null,
 						pFactory.newEntityRef(q("e1")));
 	end.setEnder(pFactory.newActivityRef(q("a2")));
 	
-	Activity a2=pFactory.newActivity(q("a2"));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { a2, e1 };
-	makeDocAndTest(end, opt, "target/end4");
+	makeDocAndTest(end, "target/end4");
     }
 
     public void testEnd5() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end5"),
 						pFactory.newActivityRef(q("a1")),
 						pFactory.newEntityRef(q("e1")));
 	end.setEnder(pFactory.newActivityRef(q("a2")));
 
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { a2, e1, a1 };
-	makeDocAndTest(end, opt, "target/end5");
+	makeDocAndTest(end, "target/end5");
     }
 
     public void testEnd6() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end6"),
 						pFactory.newActivityRef(q("a1")),
 						null);
 	end.setEnder(pFactory.newActivityRef(q("a2")));
 	
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a2, a1 };
-	makeDocAndTest(end, opt, "target/end6");
+	makeDocAndTest(end, "target/end6");
     }
 
     public void testEnd7() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end7"),
 						pFactory.newActivityRef(q("a1")),
 						null);
 	end.setEnder(pFactory.newActivityRef(q("a2")));
 	end.setTime(pFactory.newTimeNow());
 	
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a2, a1 };
-	makeDocAndTest(end, opt, "target/end7");
+	makeDocAndTest(end, "target/end7");
     }
 
     public void testEnd8() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy(q("end8"),
 						pFactory.newActivityRef(q("a1")),
 						null);
@@ -986,24 +999,20 @@ public class RoundTripFromJavaTest extends TestCase {
 	addLabels(end);
 	addFurtherAttributes(end);
 
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a2, a1 };
-	makeDocAndTest(end, opt, "target/end8");
+	makeDocAndTest(end, "target/end8");
     }
 
     public void testEnd9() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy((QName) null,
 						pFactory.newActivityRef(q("a1")),
 						pFactory.newEntityRef(q("e1")));
 	
-	Activity a1=pFactory.newActivity(q("a1"));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { e1, a1 };
-	makeDocAndTest(end, opt, "target/end9");
+	makeDocAndTest(end, "target/end9");
     }
 
     public void testEnd10() throws JAXBException {
+	setNamespaces();
 	WasEndedBy end = pFactory.newWasEndedBy((QName) null,
 						pFactory.newActivityRef(q("a1")),
 						null);
@@ -1016,85 +1025,67 @@ public class RoundTripFromJavaTest extends TestCase {
 	addLabels(end);
 	addFurtherAttributes(end);
 
-
-	Activity a1=pFactory.newActivity(q("a1"));
-	Activity a2=pFactory.newActivity(q("a2"));
-	Statement [] opt=new Statement[] { a2, a1 };
-	makeDocAndTest(end, opt, "target/end10");
+	makeDocAndTest(end, "target/end10");
     }
     
     
     // ////////////////////////////////
 
     public void testDerivation1() throws JAXBException {
+	setNamespaces();
 	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der1"), 
 	                                                null,
 	                                                pFactory.newEntityRef(q("e1")));
-	Entity e1=pFactory.newEntity(q("e1"));
-	Statement [] opt=new Statement[] { e1 };
-	makeDocAndTest(der, opt, "target/derivation1");
+	makeDocAndTest(der, "target/derivation1");
     }
 
     public void testDerivation2() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der2"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                null);
-   	Entity e2=pFactory.newEntity(q("e2"));
-   	Statement [] opt=new Statement[] { e2 };
-   	makeDocAndTest(der, opt, "target/derivation2");
+   	makeDocAndTest(der, "target/derivation2");
     }
     
     public void testDerivation3() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der3"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                pFactory.newEntityRef(q("e1")));   	
-   	Entity e1=pFactory.newEntity(q("e1"));
-   	Entity e2=pFactory.newEntity(q("e2"));
-   	Statement [] opt=new Statement[] { e1, e2 };
-   	makeDocAndTest(der, opt, "target/derivation3");
+   	makeDocAndTest(der, "target/derivation3");
     }
 
     public void testDerivation4() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der4"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                pFactory.newEntityRef(q("e1")));
    	addLabel(der);
-   	Entity e1=pFactory.newEntity(q("e1"));
-   	Entity e2=pFactory.newEntity(q("e2"));
-   	Statement [] opt=new Statement[] { e1, e2 };
-   	makeDocAndTest(der, opt, "target/derivation4");
+   	makeDocAndTest(der, "target/derivation4");
     }
     
     public void testDerivation5() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der5"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                pFactory.newEntityRef(q("e1")));
    	der.setActivity(pFactory.newActivityRef(q("a")));
-   	Entity e1=pFactory.newEntity(q("e1"));
-   	Entity e2=pFactory.newEntity(q("e2"));
-	Activity a=pFactory.newActivity(q("a"));
-   	Statement [] opt=new Statement[] { e1, e2, a };
-   	makeDocAndTest(der, opt, "target/derivation5");
+   	makeDocAndTest(der, "target/derivation5");
     }
     
     
     public void testDerivation6() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der6"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                pFactory.newEntityRef(q("e1")));
    	der.setActivity(pFactory.newActivityRef(q("a")));
    	der.setUsage(pFactory.newUsageRef(q("u")));
-   	
-   	Entity e1=pFactory.newEntity(q("e1"));
-   	Entity e2=pFactory.newEntity(q("e2"));
-	Activity a=pFactory.newActivity(q("a"));
-	Used u=pFactory.newUsed(q("u"));
-   	Statement [] opt=new Statement[] { e1, e2, a, u };
-   	
-   	makeDocAndTest(der, opt, "target/derivation6");
+   	makeDocAndTest(der, "target/derivation6");
     }
     
     public void testDerivation7() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der7"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                pFactory.newEntityRef(q("e1")));
@@ -1102,20 +1093,13 @@ public class RoundTripFromJavaTest extends TestCase {
    	der.setUsage(pFactory.newUsageRef(q("u")));
    	der.setGeneration(pFactory.newGenerationRef(q("g")));
    	
-
-   	Entity e1=pFactory.newEntity(q("e1"));
-   	Entity e2=pFactory.newEntity(q("e2"));
-	Activity a=pFactory.newActivity(q("a"));
-	Used u=pFactory.newUsed(q("u"));
-	WasGeneratedBy g=pFactory.newWasGeneratedBy(q("g"));
-   	Statement [] opt=new Statement[] { e1, e2, a, u, g };
-   	
-   	makeDocAndTest(der, opt, "target/derivation7");
+   	makeDocAndTest(der, "target/derivation7");
     }
     
     
     
     public void testDerivation8() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom(q("der8"), 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                pFactory.newEntityRef(q("e1")));
@@ -1123,44 +1107,31 @@ public class RoundTripFromJavaTest extends TestCase {
    	addTypes(der);
    	addFurtherAttributes(der);
    	
-
-   	Entity e1=pFactory.newEntity(q("e1"));
-   	Entity e2=pFactory.newEntity(q("e2"));
-   	Statement [] opt=new Statement[] { e1, e2 };
-   	
-   	makeDocAndTest(der, opt, "target/derivation8");
+   	makeDocAndTest(der, "target/derivation8");
     }
     
     public void testDerivation9() throws JAXBException {
+	setNamespaces();
    	WasDerivedFrom der = pFactory.newWasDerivedFrom((QName)null, 
    	                                                pFactory.newEntityRef(q("e2")),
    	                                                null);
    	addTypes(der);
-   	Entity e2=pFactory.newEntity(q("e2"));
-   	Statement [] opt=new Statement[] { e2 };
-   	
-   	makeDocAndTest(der, opt, "target/derivation9");
+   	makeDocAndTest(der, "target/derivation9");
     }
     
     public void testDerivation10() throws JAXBException {
+	setNamespaces();
         WasDerivedFrom der = pFactory.newWasDerivedFrom((QName)null, 
                                                         pFactory.newEntityRef(q("e2")),
                                                         pFactory.newEntityRef(q("e1")));
         der.setActivity(pFactory.newActivityRef(q("a")));
         der.setUsage(pFactory.newUsageRef(q("u")));
         der.setGeneration(pFactory.newGenerationRef(q("g")));
-
-       	Entity e1=pFactory.newEntity(q("e1"));
-       	Entity e2=pFactory.newEntity(q("e2"));
-    	Activity a=pFactory.newActivity(q("a"));
-    	Used u=pFactory.newUsed(q("u"));
-    	WasGeneratedBy g=pFactory.newWasGeneratedBy(q("g"));
-       	Statement [] opt=new Statement[] { e1, e2, a, u, g };
-       	
-        makeDocAndTest(der, opt, "target/derivation10");
+        makeDocAndTest(der, "target/derivation10");
     }
     
     public void testDerivation11() throws JAXBException {
+	setNamespaces();
         WasDerivedFrom der = pFactory.newWasDerivedFrom(q("rev1"), 
                                                         pFactory.newEntityRef(q("e2")),
                                                         pFactory.newEntityRef(q("e1")));
@@ -1168,18 +1139,11 @@ public class RoundTripFromJavaTest extends TestCase {
         der.setUsage(pFactory.newUsageRef(q("u")));
         der.setGeneration(pFactory.newGenerationRef(q("g")));
         pFactory.addRevisionType(der);
-
-       	Entity e1=pFactory.newEntity(q("e1"));
-       	Entity e2=pFactory.newEntity(q("e2"));
-    	Activity a=pFactory.newActivity(q("a"));
-    	Used u=pFactory.newUsed(q("u"));
-    	WasGeneratedBy g=pFactory.newWasGeneratedBy(q("g"));
-       	Statement [] opt=new Statement[] { e1, e2, a, u, g };
-       	
-        makeDocAndTest(der, opt, "target/derivation11");
+        makeDocAndTest(der, "target/derivation11");
     }
 
     public void testDerivation12() throws JAXBException {
+	setNamespaces();
         WasDerivedFrom der = pFactory.newWasDerivedFrom(q("quo1"), 
                                                         pFactory.newEntityRef(q("e2")),
                                                         pFactory.newEntityRef(q("e1")));
@@ -1187,18 +1151,11 @@ public class RoundTripFromJavaTest extends TestCase {
         der.setUsage(pFactory.newUsageRef(q("u")));
         der.setGeneration(pFactory.newGenerationRef(q("g")));
         pFactory.addQuotationType(der);
-
-       	Entity e1=pFactory.newEntity(q("e1"));
-       	Entity e2=pFactory.newEntity(q("e2"));
-    	Activity a=pFactory.newActivity(q("a"));
-    	Used u=pFactory.newUsed(q("u"));
-    	WasGeneratedBy g=pFactory.newWasGeneratedBy(q("g"));
-       	Statement [] opt=new Statement[] { e1, e2, a, u, g };
-       	
-        makeDocAndTest(der, opt, "target/derivation12");
+        makeDocAndTest(der, "target/derivation12");
     }
 
     public void testDerivation13() throws JAXBException {
+	setNamespaces();
         WasDerivedFrom der = pFactory.newWasDerivedFrom(q("prim1"), 
                                                         pFactory.newEntityRef(q("e2")),
                                                         pFactory.newEntityRef(q("e1")));
@@ -1206,123 +1163,92 @@ public class RoundTripFromJavaTest extends TestCase {
         der.setUsage(pFactory.newUsageRef(q("u")));
         der.setGeneration(pFactory.newGenerationRef(q("g")));
         pFactory.addPrimarySourceType(der);
-        
-       	Entity e1=pFactory.newEntity(q("e1"));
-       	Entity e2=pFactory.newEntity(q("e2"));
-    	Activity a=pFactory.newActivity(q("a"));
-    	Used u=pFactory.newUsed(q("u"));
-    	WasGeneratedBy g=pFactory.newWasGeneratedBy(q("g"));
-       	Statement [] opt=new Statement[] { e1, e2, a, u, g };
-       	
-        makeDocAndTest(der, opt, "target/derivation13");
+        makeDocAndTest(der, "target/derivation13");
     }
     
     // ////////////////////////////////
 
     public void testAssociation1() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc1"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 null);
-    	Activity a1=pFactory.newActivity(q("a1"));
-    	Statement [] opt=new Statement[] { a1 };
-        makeDocAndTest(assoc, opt, "target/association1");
+        makeDocAndTest(assoc, "target/association1");
     }
 
     public void testAssociation2() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc2"), 
                                                                 null,
                                                                 pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Statement [] opt = new Statement[] { ag1 };
-        makeDocAndTest(assoc, opt, "target/association2");
+        makeDocAndTest(assoc, "target/association2");
     }
 
     public void testAssociation3() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc3"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Statement [] opt = new Statement[] { ag1, a1 };
-        makeDocAndTest(assoc, opt, "target/association3");
+        makeDocAndTest(assoc, "target/association3");
     }
 
 
     public void testAssociation4() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc4"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
         assoc.setPlan(pFactory.newEntityRef(q("plan1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Entity plan1=pFactory.newEntity(q("plan1"));
-        Statement [] opt = new Statement[] { ag1, a1, plan1 };
-        makeDocAndTest(assoc, opt, "target/association4");
+        makeDocAndTest(assoc, "target/association4");
     }
 
     
     public void testAssociation5() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith((QName)null, 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Statement [] opt = new Statement[] { ag1, a1 };
-        makeDocAndTest(assoc, opt, "target/association5");
+        makeDocAndTest(assoc, "target/association5");
     }
     
     
 
     public void testAssociation6() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc6"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
         assoc.setPlan(pFactory.newEntityRef(q("plan1")));
         addLabels(assoc);
-        
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Entity plan1=pFactory.newEntity(q("plan1"));
-        Statement [] opt = new Statement[] { ag1, a1, plan1 };
-        
-        makeDocAndTest(assoc, opt, "target/association6");
+        makeDocAndTest(assoc, "target/association6");
     }
 
     public void testAssociation7() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc7"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
         assoc.setPlan(pFactory.newEntityRef(q("plan1")));
         addLabels(assoc);
         addTypes(assoc);        
-        
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Entity plan1=pFactory.newEntity(q("plan1"));
-        Statement [] opt = new Statement[] { ag1, a1, plan1 };
-        
-        makeDocAndTest(assoc, opt, "target/association7");
+        makeDocAndTest(assoc, "target/association7");
     }
 
 
     public void testAssociation8() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc8"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
         assoc.setPlan(pFactory.newEntityRef(q("plan1")));
         assoc.getRole().add("someRole");
         assoc.getRole().add("someOtherRole");
-        
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Entity plan1=pFactory.newEntity(q("plan1"));
-        Statement [] opt = new Statement[] { ag1, a1, plan1 };
-        
-        makeDocAndTest(assoc, opt, "target/association8");
+        makeDocAndTest(assoc, "target/association8");
     }
     
 
     public void testAssociation9() throws JAXBException {
+	setNamespaces();
         WasAssociatedWith assoc = pFactory.newWasAssociatedWith(q("assoc9"), 
                                                                 pFactory.newActivityRef(q("a1")),
                                                                 pFactory.newAgentRef(q("ag1")));
@@ -1330,197 +1256,163 @@ public class RoundTripFromJavaTest extends TestCase {
         addLabels(assoc);
         addTypes(assoc);
         addFurtherAttributes(assoc);
-        
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Activity a1=pFactory.newActivity(q("a1"));
-        Entity plan1=pFactory.newEntity(q("plan1"));
-        Statement [] opt = new Statement[] { ag1, a1, plan1 };
-        
-        makeDocAndTest(assoc, opt, "target/association9");
+        makeDocAndTest(assoc, "target/association9");
     }
 
  // ////////////////////////////////
 
     public void testAttribution1() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr1"), 
                                                            pFactory.newEntityRef(q("e1")),
                                                            null);
-        Entity e1=pFactory.newEntity(q("e1"));
-    	Statement [] opt=new Statement[] { e1 };
-        makeDocAndTest(attr, opt, "target/attribution1");
+        makeDocAndTest(attr, "target/attribution1");
     }
     
     public void testAttribution2() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr2"), 
                                                            null,
                                                            pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Statement [] opt = new Statement[] { ag1 };
-        makeDocAndTest(attr, opt, "target/attribution2");
+        makeDocAndTest(attr, "target/attribution2");
     }
     
     public void testAttribution3() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr3"), 
                                                            pFactory.newEntityRef(q("e1")),
                                                            pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Entity e1=pFactory.newEntity(q("e1"));
-        Statement [] opt = new Statement[] { ag1, e1 };
-        makeDocAndTest(attr, opt, "target/attribution3");
+        makeDocAndTest(attr, "target/attribution3");
     }
 
 
     public void testAttribution4() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr4"), 
                                                            pFactory.newEntityRef(q("e1")),
                                                            pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Entity e1=pFactory.newEntity(q("e1"));
-        Statement [] opt = new Statement[] { ag1, e1 };
-        makeDocAndTest(attr, opt, "target/attribution4");
+        makeDocAndTest(attr, "target/attribution4");
     }
 
     
     public void testAttribution5() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo((QName)null, 
                                                            pFactory.newEntityRef(q("e1")),
                                                            pFactory.newAgentRef(q("ag1")));
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Entity e1=pFactory.newEntity(q("e1"));
-        Statement [] opt = new Statement[] { ag1, e1 };
-        makeDocAndTest(attr, opt, "target/attribution5");
+        makeDocAndTest(attr, "target/attribution5");
     }
     
     
 
     public void testAttribution6() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr6"), 
                                                            pFactory.newEntityRef(q("e1")),
                                                            pFactory.newAgentRef(q("ag1")));
         addLabels(attr);
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Entity e1=pFactory.newEntity(q("e1"));
-        Statement [] opt = new Statement[] { ag1, e1 };
-        makeDocAndTest(attr, opt, "target/attribution6");
+        makeDocAndTest(attr, "target/attribution6");
     }
 
     public void testAttribution7() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr7"), 
                                                            pFactory.newEntityRef(q("e1")),
                                                            pFactory.newAgentRef(q("ag1")));
         addLabels(attr);
         addTypes(attr);
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Entity e1=pFactory.newEntity(q("e1"));
-        Statement [] opt = new Statement[] { ag1, e1 };
-        makeDocAndTest(attr, opt, "target/attribution7");
+        makeDocAndTest(attr, "target/attribution7");
     }
 
 
     public void testAttribution8() throws JAXBException {
+	setNamespaces();
         WasAttributedTo attr = pFactory.newWasAttributedTo(q("attr8"), 
                                                            pFactory.newEntityRef(q("e1")),
                                                            pFactory.newAgentRef(q("ag1")));
         addLabels(attr);
         addTypes(attr);
         addFurtherAttributes(attr);
-        Agent ag1=pFactory.newAgent(q("ag1"));
-        Entity e1=pFactory.newEntity(q("e1"));
-        Statement [] opt = new Statement[] { ag1, e1 };
-        makeDocAndTest(attr, opt, "target/attribution8");
+        makeDocAndTest(attr, "target/attribution8");
     }
 
 
     // ////////////////////////////////
 
        public void testDelegation1() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del1"), 
                                                               pFactory.newAgentRef(q("e1")),
                                                               null,
                                                               null);
-           Agent e1=pFactory.newAgent(q("e1"));
-       	Statement [] opt=new Statement[] { e1 };
-           makeDocAndTest(del, opt, "target/delegation1");
+           makeDocAndTest(del, "target/delegation1");
        }
        
        public void testDelegation2() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del2"), 
                                                               null,
                                                               pFactory.newAgentRef(q("ag1")),
                                                               null);
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Statement [] opt = new Statement[] { ag1 };
-           makeDocAndTest(del, opt, "target/delegation2");
+           makeDocAndTest(del, "target/delegation2");
        }
        
        public void testDelegation3() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del3"), 
                                                               pFactory.newAgentRef(q("e1")),
                                                               pFactory.newAgentRef(q("ag1")),
                                                               null);
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Agent e1=pFactory.newAgent(q("e1"));
-           Statement [] opt = new Statement[] { ag1, e1 };
-           makeDocAndTest(del, opt, "target/delegation3");
+           makeDocAndTest(del, "target/delegation3");
        }
 
 
        public void testDelegation4() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del4"), 
                                                               pFactory.newAgentRef(q("e1")),
                                                               pFactory.newAgentRef(q("ag1")),
                                                               pFactory.newActivityRef(q("a")));
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Agent e1=pFactory.newAgent(q("e1"));
-           Activity a=pFactory.newActivity(q("a"));
-           Statement [] opt = new Statement[] { ag1, e1, a };
            
-           makeDocAndTest(del, opt, "target/delegation4");
+           makeDocAndTest(del, "target/delegation4");
        }
 
        
        public void testDelegation5() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf((QName)null, 
                                                               pFactory.newAgentRef(q("e1")),
                                                               pFactory.newAgentRef(q("ag1")),
                                                               null);
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Agent e1=pFactory.newAgent(q("e1"));
-           Statement [] opt = new Statement[] { ag1, e1 };
-           makeDocAndTest(del, opt, "target/delegation5");
+           makeDocAndTest(del, "target/delegation5");
        }
        
        
 
        public void testDelegation6() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del6"), 
                                                               pFactory.newAgentRef(q("e1")),
                                                               pFactory.newAgentRef(q("ag1")),
                                                               pFactory.newActivityRef(q("a")));
            addLabels(del);
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Agent e1=pFactory.newAgent(q("e1"));
-           Activity a=pFactory.newActivity(q("a"));
-           Statement [] opt = new Statement[] { ag1, e1, a };
-           makeDocAndTest(del, opt, "target/delegation6");
+           makeDocAndTest(del, "target/delegation6");
        }
 
        public void testDelegation7() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del7"), 
                                                               pFactory.newAgentRef(q("e1")),
                                                               pFactory.newAgentRef(q("ag1")),
                                                               pFactory.newActivityRef(q("a")));
            addLabels(del);
            addTypes(del);
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Agent e1=pFactory.newAgent(q("e1"));
-           Activity a=pFactory.newActivity(q("a"));
-           Statement [] opt = new Statement[] { ag1, e1, a };
-           makeDocAndTest(del, opt, "target/delegation7");
+           makeDocAndTest(del, "target/delegation7");
        }
 
 
        public void testDelegation8() throws JAXBException {
+	setNamespaces();
            ActedOnBehalfOf del = pFactory.newActedOnBehalfOf(q("del8"), 
                                                               pFactory.newAgentRef(q("e1")),
                                                               pFactory.newAgentRef(q("ag1")),
@@ -1528,174 +1420,146 @@ public class RoundTripFromJavaTest extends TestCase {
            addLabels(del);
            addTypes(del);
            addFurtherAttributes(del);
-           Agent ag1=pFactory.newAgent(q("ag1"));
-           Agent e1=pFactory.newAgent(q("e1"));
-           Activity a=pFactory.newActivity(q("a"));
-           Statement [] opt = new Statement[] { ag1, e1, a };
-           makeDocAndTest(del, opt, "target/delegation8");
+           makeDocAndTest(del, "target/delegation8");
        }
 
        // ////////////////////////////////
 
        public void testCommunication1() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy(q("inf1"), 
                                                          pFactory.newActivityRef(q("a2")),
                                                          null);
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a2 };
-           makeDocAndTest(inf, opt, "target/communication1");
+           makeDocAndTest(inf, "target/communication1");
        }
        
        public void testCommunication2() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy(q("inf2"), 
                                                               null,
                                                               pFactory.newActivityRef(q("a1")));
-           Activity a1=pFactory.newActivity(q("a1"));
-          	Statement [] opt=new Statement[] { a1 };
-           makeDocAndTest(inf, opt, "target/communication2");
+           makeDocAndTest(inf, "target/communication2");
        }
        
        public void testCommunication3() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy(q("inf3"), 
                                                          pFactory.newActivityRef(q("a2")),
                                                          pFactory.newActivityRef(q("a1")));
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/communication3");
+           makeDocAndTest(inf, "target/communication3");
        }
 
 
        
        public void testCommunication4() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy((QName)null, 
                                                          pFactory.newActivityRef(q("a2")),
                                                          pFactory.newActivityRef(q("a1")));
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/communication4");
+           makeDocAndTest(inf, "target/communication4");
        }
        
        
 
        public void testCommunication5() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy(q("inf5"), 
                                                          pFactory.newActivityRef(q("a2")),
                                                          pFactory.newActivityRef(q("a1")));
            addLabels(inf);
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/communication5");
+           makeDocAndTest(inf, "target/communication5");
        }
 
        public void testCommunication6() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy(q("inf6"), 
                                                          pFactory.newActivityRef(q("a2")),
                                                          pFactory.newActivityRef(q("a1")));
            addLabels(inf);
            addTypes(inf);
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/communication6");
+           makeDocAndTest(inf, "target/communication6");
        }
 
 
        public void testCommunication7() throws JAXBException {
+	setNamespaces();
            WasInformedBy inf = pFactory.newWasInformedBy(q("inf7"), 
                                                          pFactory.newActivityRef(q("a2")),
                                                          pFactory.newActivityRef(q("a1")));
            addLabels(inf);
            addTypes(inf);
            addFurtherAttributes(inf);
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/communication7");
+           makeDocAndTest(inf, "target/communication7");
        }
 
 
        // ////////////////////////////////
 
        public void testInfluence1() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy(q("inf1"), 
                                                              pFactory.newAnyRef(q("a2")),
                                                              null);
-           Activity a2=pFactory.newActivity(q("a2"));
-         	Statement [] opt=new Statement[] { a2 };
-           makeDocAndTest(inf, opt, "target/influence1");
+           makeDocAndTest(inf, "target/influence1");
        }
        
        public void testInfluence2() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy(q("inf2"), 
                                                              null,
                                                              pFactory.newAnyRef(q("a1")));
-           Activity a1=pFactory.newActivity(q("a1"));
-          	Statement [] opt=new Statement[] { a1 };
-           makeDocAndTest(inf, opt, "target/influence2");
+           makeDocAndTest(inf, "target/influence2");
        }
        
        public void testInfluence3() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy(q("inf3"), 
                                                              pFactory.newAnyRef(q("a2")),
                                                              pFactory.newAnyRef(q("a1")));
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/influence3");
+           makeDocAndTest(inf, "target/influence3");
        }
 
 
        
        public void testInfluence4() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy((QName)null, 
                                                              pFactory.newAnyRef(q("a2")),
                                                              pFactory.newAnyRef(q("a1")));
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/influence4");
+           makeDocAndTest(inf, "target/influence4");
        }
        
        
 
        public void testInfluence5() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy(q("inf5"), 
                                                              pFactory.newAnyRef(q("a2")),
                                                              pFactory.newAnyRef(q("a1")));
            addLabels(inf);
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/influence5");
+           makeDocAndTest(inf, "target/influence5");
        }
 
        public void testInfluence6() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy(q("inf6"), 
                                                              pFactory.newAnyRef(q("a2")),
                                                              pFactory.newAnyRef(q("a1")));
            addLabels(inf);
            addTypes(inf);
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/influence6");
+           makeDocAndTest(inf, "target/influence6");
        }
 
 
        public void testInfluence7() throws JAXBException {
+	setNamespaces();
            WasInfluencedBy inf = pFactory.newWasInfluencedBy(q("inf7"), 
                                                              pFactory.newAnyRef(q("a2")),
                                                              pFactory.newAnyRef(q("a1")));
            addLabels(inf);
            addTypes(inf);
            addFurtherAttributes(inf);
-           Activity a1=pFactory.newActivity(q("a1"));
-           Activity a2=pFactory.newActivity(q("a2"));
-          	Statement [] opt=new Statement[] { a1, a2 };
-           makeDocAndTest(inf, opt, "target/influence7");
+           makeDocAndTest(inf, "target/influence7");
        }
 
        
@@ -1703,83 +1567,447 @@ public class RoundTripFromJavaTest extends TestCase {
        // ////////////////////////////////
 
        public void testAlternate1() throws JAXBException {
+	setNamespaces();
            AlternateOf alt = pFactory.newAlternateOf(pFactory.newEntityRef(q("e2")),
                                                      pFactory.newEntityRef(q("e1")));
-           Entity e1=pFactory.newEntity(q("e1")); 
-           Entity e2=pFactory.newEntity(q("e2"));
-        	Statement [] opt=new Statement[] { e1, e2 };
-        	
-        	
-           makeDocAndTest(alt, opt, "target/alternate1");
+           makeDocAndTest(alt, "target/alternate1");
        }
        
 
        public void testSpecialization1() throws JAXBException {
+	setNamespaces();
            SpecializationOf spe = pFactory.newSpecializationOf(pFactory.newEntityRef(q("e2")),
                                                                pFactory.newEntityRef(q("e1")));
-           Entity e1=pFactory.newEntity(q("e1")); 
-           Entity e2=pFactory.newEntity(q("e2"));
-        	Statement [] opt=new Statement[] { e1, e2 };
-           makeDocAndTest(spe, opt, "target/specialization1");
+           makeDocAndTest(spe, "target/specialization1");
        }
        
        
        public void testMention1() throws JAXBException {
+	setNamespaces();
            MentionOf men = pFactory.newMentionOf(pFactory.newEntityRef(q("e2")),
                                                  pFactory.newEntityRef(q("e1")),
                                                  null);
-           Entity e1=pFactory.newEntity(q("e1")); 
-           Entity e2=pFactory.newEntity(q("e2"));
-        	Statement [] opt=new Statement[] { e1, e2 };
-           makeDocAndTest(men, opt, "target/mention1");
+           makeDocAndTest(men, "target/mention1");
        }
        
        public void testMention2() throws JAXBException {
+	setNamespaces();
            MentionOf men = pFactory.newMentionOf(pFactory.newEntityRef(q("e2")),
                                                  pFactory.newEntityRef(q("e1")),
                                                  pFactory.newEntityRef(q("b")));
-           Entity e1=pFactory.newEntity(q("e1")); 
-           Entity e2=pFactory.newEntity(q("e2"));
-           Entity b=pFactory.newEntity(q("b"));
-           e1.getType().add(pFactory.newQName("prov:Bundle"));
-        	Statement [] opt=new Statement[] { e1, e2, b };
-           makeDocAndTest(men, opt, "target/mention2");
+           makeDocAndTest(men, "target/mention2");
        }
        
 
        public void testMembership1() throws JAXBException {
+	setNamespaces();
            HadMember mem = pFactory.newHadMember(pFactory.newEntityRef(q("c")),
                                                  pFactory.newEntityRef(q("e1")));
-           Entity c=pFactory.newEntity(q("c")); 
-          
-           Entity e1=pFactory.newEntity(q("e1"));
-       	   Statement [] opt=new Statement[] { c, e1 };
-           makeDocAndTest(mem, opt, "target/member1");
+           makeDocAndTest(mem, "target/member1");
        }
        public void testMembership2() throws JAXBException {
+	setNamespaces();
            HadMember mem = pFactory.newHadMember(pFactory.newEntityRef(q("c")),
                                                  pFactory.newEntityRef(q("e1")),
                                                  pFactory.newEntityRef(q("e2")));
            //TODO: multiple arguments not supported by toolbox 
-           Entity c=pFactory.newEntity(q("c")); 
-           Entity e1=pFactory.newEntity(q("e1"));
-           Entity e2=pFactory.newEntity(q("e2"));
-       	   Statement [] opt=new Statement[] { c, e1, e2 };
-           makeDocAndTest(mem, opt, "target/member2");
+           makeDocAndTest(mem, "target/member2");
        }
        public void testMembership3() throws JAXBException {
+	setNamespaces();
            HadMember mem = pFactory.newHadMember(pFactory.newEntityRef(q("c")),
                                                  pFactory.newEntityRef(q("e1")),
                                                  pFactory.newEntityRef(q("e2")),
                                                  pFactory.newEntityRef(q("e3")));
            //TODO: multiple arguments not supported by toolbox 
-           Entity c=pFactory.newEntity(q("c")); 
-           Entity e1=pFactory.newEntity(q("e1"));
-           Entity e2=pFactory.newEntity(q("e2"));
-           Entity e3=pFactory.newEntity(q("e3"));
-       	   Statement [] opt=new Statement[] { c, e1, e2, e3 };
-           makeDocAndTest(mem, opt, "target/member3");
+           makeDocAndTest(mem, "target/member3");
        }
      
-    
+       public void testScruffyGeneration1() throws JAXBException  {
+	setNamespaces();
+    	   WasGeneratedBy gen1 = pFactory.newWasGeneratedBy(q("gen1"),
+					pFactory.newEntityRef(q("e1")),
+					null,
+					pFactory.newActivityRef(q("a1")));
+	       gen1.setTime(pFactory.newTimeNow());
+	       WasGeneratedBy gen2 = pFactory.newWasGeneratedBy(q("gen1"),
+			          pFactory.newEntityRef(q("e1")),
+			        	null,
+			          pFactory.newActivityRef(q("a1")));
+	  	   gen2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { gen1, gen2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-generation1");
+       }
+       
+       public void testScruffyGeneration2() throws JAXBException  {
+	setNamespaces();
+    	   WasGeneratedBy gen1 = pFactory.newWasGeneratedBy(q("gen1"),
+					pFactory.newEntityRef(q("e1")),
+					null,
+					pFactory.newActivityRef(q("a1")));
+	       gen1.setTime(pFactory.newTimeNow());
+	   	   gen1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+
+	       WasGeneratedBy gen2 = pFactory.newWasGeneratedBy(q("gen1"),
+			          pFactory.newEntityRef(q("e1")),
+			        	null,
+			          pFactory.newActivityRef(q("a1")));
+	  	   gen2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   gen2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { gen1, gen2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-generation2");
+       }
+       
+       public void testScruffyInvalidation1() throws JAXBException  {
+	setNamespaces();
+    	   WasInvalidatedBy inv1 = pFactory.newWasInvalidatedBy(q("inv1"),
+					pFactory.newEntityRef(q("e1")),
+					pFactory.newActivityRef(q("a1")));
+	       inv1.setTime(pFactory.newTimeNow());
+	       WasInvalidatedBy inv2 = pFactory.newWasInvalidatedBy(q("inv1"),
+			          pFactory.newEntityRef(q("e1")),
+			          pFactory.newActivityRef(q("a1")));
+	  	   inv2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { inv1, inv2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-invalidation1");
+       }
+       
+       public void testScruffyInvalidation2() throws JAXBException  {
+	setNamespaces();
+    	   WasInvalidatedBy inv1 = pFactory.newWasInvalidatedBy(q("inv1"),
+					pFactory.newEntityRef(q("e1")),
+					pFactory.newActivityRef(q("a1")));
+	       inv1.setTime(pFactory.newTimeNow());
+	   	   inv1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+
+	       WasInvalidatedBy inv2 = pFactory.newWasInvalidatedBy(q("inv1"),
+			          pFactory.newEntityRef(q("e1")),
+			          pFactory.newActivityRef(q("a1")));
+	  	   inv2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   inv2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { inv1, inv2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-invalidation2");
+       }
+       
+       public void testScruffyUsage1() throws JAXBException  {
+	setNamespaces();
+    	   Used use1 = pFactory.newUsed(q("use1"),
+					pFactory.newActivityRef(q("a1")),
+					null,
+					pFactory.newEntityRef(q("e1")));
+	       use1.setTime(pFactory.newTimeNow());
+	       Used use2 = pFactory.newUsed(q("use1"),
+			          pFactory.newActivityRef(q("a1")),
+			        	null,
+			          pFactory.newEntityRef(q("e1")));
+	  	   use2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { use1, use2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-usage1");
+       }
+       
+       public void testScruffyUsage2() throws JAXBException  {
+	setNamespaces();
+    	   Used use1 = pFactory.newUsed(q("use1"),
+					pFactory.newActivityRef(q("a1")),
+					null,
+					pFactory.newEntityRef(q("e1")));
+	       use1.setTime(pFactory.newTimeNow());
+	   	   use1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+
+	       Used use2 = pFactory.newUsed(q("use1"),
+			          pFactory.newActivityRef(q("a1")),
+			        	null,
+			          pFactory.newEntityRef(q("e1")));
+	  	   use2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   use2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { use1, use2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-usage2");
+       }
+       
+       public void testScruffyStart1() throws JAXBException  {
+	setNamespaces();
+    	   WasStartedBy start1 = pFactory.newWasStartedBy(q("start1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       start1.setTime(pFactory.newTimeNow());
+
+	       WasStartedBy start2 = pFactory.newWasStartedBy(q("start1"),
+			          pFactory.newActivityRef(q("a1")),
+			          pFactory.newEntityRef(q("e1")));
+	  	   start2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { start1, start2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-start1");
+       }
+       
+       public void testScruffyStart2() throws JAXBException  {
+	setNamespaces();
+    	   WasStartedBy start1 = pFactory.newWasStartedBy(q("start1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       start1.setTime(pFactory.newTimeNow());
+	   	   start1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+
+	       WasStartedBy start2 = pFactory.newWasStartedBy(q("start1"),
+			          pFactory.newActivityRef(q("a1")),
+			          pFactory.newEntityRef(q("e1")));
+	  	   start2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   start2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { start1, start2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-start2");
+       }
+       
+       public void testScruffyStart3() throws JAXBException  {
+	setNamespaces();
+    	   WasStartedBy start1 = pFactory.newWasStartedBy(q("start1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       start1.setTime(pFactory.newTimeNow());
+	   	   start1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+	   	   start1.setStarter(pFactory.newActivityRef(q("a1s")));	
+
+	       WasStartedBy start2 = pFactory.newWasStartedBy(q("start1"),
+			          pFactory.newActivityRef(q("a1")),
+			          pFactory.newEntityRef(q("e1")));
+	  	   start2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   start2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+		   start2.setStarter(pFactory.newActivityRef(q("a2s")));
+		   
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Activity a2=pFactory.newActivity(q("a2"));
+		   Activity a2s=pFactory.newActivity(q("a2s"));
+		   Statement [] opt=new Statement[] { e1, a1, a2, a2s };
+		   Statement [] statements=new Statement[] { start1, start2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-start3");
+       }
+       
+       public void testScruffyStart4() throws JAXBException  {
+	setNamespaces();
+    	   WasStartedBy start1 = pFactory.newWasStartedBy(q("start1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       start1.setTime(pFactory.newTimeNow());
+	   	   start1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+	   	   start1.setStarter(pFactory.newActivityRef(q("a1s")));	
+
+	       WasStartedBy start2 = pFactory.newWasStartedBy(q("start1"),
+			          pFactory.newActivityRef(q("a2")),
+			          pFactory.newEntityRef(q("e2")));
+	  	   start2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   start2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+		   start2.setStarter(pFactory.newActivityRef(q("a2s")));
+		   
+		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Activity a1s=pFactory.newActivity(q("a1s"));
+		   Entity e2=pFactory.newEntity(q("e2"));
+		   Activity a2=pFactory.newActivity(q("a2"));
+		   Activity a2s=pFactory.newActivity(q("a2s"));
+		   Statement [] opt=new Statement[] { e1, a1, a1s, e2, a2, a2s };
+		   Statement [] statements=new Statement[] { start1, start2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-start4");
+       }
+       
+       public void testScruffyEnd1() throws JAXBException  {
+	setNamespaces();
+    	   WasEndedBy end1 = pFactory.newWasEndedBy(q("end1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       end1.setTime(pFactory.newTimeNow());
+
+	       WasEndedBy end2 = pFactory.newWasEndedBy(q("end1"),
+			          pFactory.newActivityRef(q("a1")),
+			          pFactory.newEntityRef(q("e1")));
+	  	   end2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { end1, end2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-end1");
+       }
+       
+       public void testScruffyEnd2() throws JAXBException  {
+	setNamespaces();
+    	   WasEndedBy end1 = pFactory.newWasEndedBy(q("end1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       end1.setTime(pFactory.newTimeNow());
+	   	   end1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+
+	       WasEndedBy end2 = pFactory.newWasEndedBy(q("end1"),
+			          pFactory.newActivityRef(q("a1")),
+			          pFactory.newEntityRef(q("e1")));
+	  	   end2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   end2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Statement [] opt=new Statement[] { e1, a1 };
+		   Statement [] statements=new Statement[] { end1, end2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-end2");
+       }
+       
+       public void testScruffyEnd3() throws JAXBException  {
+	setNamespaces();
+    	   WasEndedBy end1 = pFactory.newWasEndedBy(q("end1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       end1.setTime(pFactory.newTimeNow());
+	   	   end1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+	   	   end1.setEnder(pFactory.newActivityRef(q("a1s")));	
+
+	       WasEndedBy end2 = pFactory.newWasEndedBy(q("end1"),
+			          pFactory.newActivityRef(q("a1")),
+			          pFactory.newEntityRef(q("e1")));
+	  	   end2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   end2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+		   end2.setEnder(pFactory.newActivityRef(q("a2s")));
+		   
+   		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Activity a2=pFactory.newActivity(q("a2"));
+		   Activity a2s=pFactory.newActivity(q("a2s"));
+		   Statement [] opt=new Statement[] { e1, a1, a2, a2s };
+		   Statement [] statements=new Statement[] { end1, end2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-end3");
+       }
+       
+       public void testScruffyEnd4() throws JAXBException  {
+	setNamespaces();
+    	   WasEndedBy end1 = pFactory.newWasEndedBy(q("end1"),
+					pFactory.newActivityRef(q("a1")),
+					pFactory.newEntityRef(q("e1")));
+	       end1.setTime(pFactory.newTimeNow());
+	   	   end1.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hello", ValueConverter.QNAME_XSD_STRING));
+	   	   end1.setEnder(pFactory.newActivityRef(q("a1s")));	
+
+	       WasEndedBy end2 = pFactory.newWasEndedBy(q("end1"),
+			          pFactory.newActivityRef(q("a2")),
+			          pFactory.newEntityRef(q("e2")));
+	  	   end2.setTime(pFactory.newISOTime("2012-12-03T21:08:16.686Z"));	
+		   end2.getAny().add(pFactory.newAttribute(EX_NS,"tag2",EX_PREFIX, "hi", ValueConverter.QNAME_XSD_STRING));
+		   end2.setEnder(pFactory.newActivityRef(q("a2s")));
+		   
+		   Entity e1=pFactory.newEntity(q("e1"));
+		   Activity a1=pFactory.newActivity(q("a1"));
+		   Activity a1s=pFactory.newActivity(q("a1s"));
+		   Entity e2=pFactory.newEntity(q("e2"));
+		   Activity a2=pFactory.newActivity(q("a2"));
+		   Activity a2s=pFactory.newActivity(q("a2s"));
+		   Statement [] opt=new Statement[] { e1, a1, a1s, e2, a2, a2s };
+		   Statement [] statements=new Statement[] { end1, end2 };
+    	   makeDocAndTest(statements, opt , "target/scruffy-end4");
+       }
+       
+       public void testBundle1 () throws JAXBException {
+	setNamespaces();
+           Used use1 = pFactory.newUsed(q("use1"),
+                                        pFactory.newActivityRef(q("a1")),
+                                        null,
+                                        pFactory.newEntityRef(q("e1")));
+           Entity e1=pFactory.newEntity(q("e1"));
+           Activity a1=pFactory.newActivity(q("a1"));
+           List<Statement> st1=new LinkedList<Statement>(); 
+           st1.add(a1);
+           st1.add(e1);
+           st1.add(use1);
+
+           NamedBundle b1=pFactory.newNamedBundle(q("bundle1"), st1);
+           
+           Used use2 = pFactory.newUsed(q("use2"),
+                                        pFactory.newActivityRef(q("aa1")),
+                                        null,
+                                        pFactory.newEntityRef(q("ee1")));
+           Entity ee1=pFactory.newEntity(q("ee1"));
+           Activity aa1=pFactory.newActivity(q("aa1"));
+           List<Statement> st2=new LinkedList<Statement>(); 
+           st2.add(aa1);
+           st2.add(ee1);
+           st2.add(use2);
+
+           NamedBundle b2=pFactory.newNamedBundle(q("bundle2"), st2);
+           
+           Entity eb1=pFactory.newEntity(q("bundle1"));
+           pFactory.addType(eb1, pFactory.newQName("prov:Bundle"));
+           
+           Entity eb2=pFactory.newEntity(q("bundle2"));
+           pFactory.addType(eb2, pFactory.newQName("prov:Bundle"));
+
+           Statement [] statements=new Statement[] { eb1, eb2,};
+           NamedBundle [] bundles=new NamedBundle[] {  b1, b2 };
+
+           makeDocAndTest(statements, bundles, "target/bundle1", null, true);
+
+       }
+       
+       public void testBundle2 () throws JAXBException {
+	setNamespaces();
+           Used use1 = pFactory.newUsed(q("use1"),
+                                        pFactory.newActivityRef(q("a1")),
+                                        null,
+                                        pFactory.newEntityRef(q("e1")));
+           Entity e1=pFactory.newEntity(q("e1"));
+           Activity a1=pFactory.newActivity(q("a1"));
+           List<Statement> st1=new LinkedList<Statement>(); 
+           st1.add(a1);
+           st1.add(e1);
+           st1.add(use1);
+
+           NamedBundle b1=pFactory.newNamedBundle(q("bundle1"), st1);
+           
+           Used use2 = pFactory.newUsed(q("use2"),
+                                        pFactory.newActivityRef(q("e1")),
+                                        null,
+                                        pFactory.newEntityRef(q("a1")));
+           Entity ee1=pFactory.newEntity(q("a1"));
+           Activity aa1=pFactory.newActivity(q("e1"));
+           List<Statement> st2=new LinkedList<Statement>(); 
+           st2.add(aa1);
+           st2.add(ee1);
+           st2.add(use2);
+
+           NamedBundle b2=pFactory.newNamedBundle(q("bundle2"), st2);
+           
+           Entity eb1=pFactory.newEntity(q("bundle1"));
+           pFactory.addType(eb1, pFactory.newQName("prov:Bundle"));
+           
+           Entity eb2=pFactory.newEntity(q("bundle2"));
+           pFactory.addType(eb2, pFactory.newQName("prov:Bundle"));
+
+           Statement [] statements=new Statement[] { eb1, eb2,};
+           NamedBundle [] bundles=new NamedBundle[] {  b1, b2 };
+
+           makeDocAndTest(statements, bundles, "target/bundle2", null, true);
+
+       }
+
 }

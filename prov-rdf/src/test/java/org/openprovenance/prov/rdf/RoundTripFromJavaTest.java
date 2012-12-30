@@ -5,16 +5,16 @@ import java.io.StringWriter;
 import javax.xml.bind.JAXBException;
 
 import org.openprovenance.prov.xml.Document;
+import org.openprovenance.prov.xml.HasExtensibility;
 import org.openprovenance.prov.xml.ProvFactory;
 import org.openprovenance.prov.xml.ProvSerialiser;
 import org.openprovenance.prov.xml.UncheckedTestException;
 import org.openrdf.rio.RDFFormat;
 
-public class ParserTest extends
-		org.openprovenance.prov.xml.RoundTripFromJavaTest
-{
+public class RoundTripFromJavaTest extends
+		org.openprovenance.prov.xml.RoundTripFromJavaTest {
 
-	public ParserTest(String name)
+	public RoundTripFromJavaTest(String name)
 	{
 		super(name);
 	}
@@ -53,10 +53,11 @@ public class ParserTest extends
 	@Override
 	public boolean checkTest(String name)
 	{
-		if (name.endsWith("-S" + extension()))
+		if(name.endsWith("mention1"+extension()) || name.endsWith("mention2"+extension()))
 		{
 			return false;
 		}
+		
 		return true;
 	}
 
@@ -79,53 +80,108 @@ public class ParserTest extends
 
 	public void testInfluence1() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)   Limitation of Elmo, I think this can be fixed by asserting triples without Elmo
+		// RDF Collector doesn't support Influence
 	}
 
 	public void testInfluence2() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)    Limitation of Elmo, I think this can be fixed by asserting triples without Elmo
+		// RDF Collector doesn't support Influence
 	}
 
 	public void testInfluence3() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)
+		// RDF Collector doesn't support Influence
 	}
 
 	public void testInfluence4() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)
+		// RDF Collector doesn't support Influence
 	}
 
 	public void testInfluence5() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)
+		// RDF Collector doesn't support Influence
 	}
 
 	public void testInfluence6() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)
+		// RDF Collector doesn't support Influence
 	}
 
 	public void testInfluence7() throws JAXBException
 	{
-		// Class cast errors (ActivityOrAgentOrEntity)
+
+		// RDF Collector doesn't support Influence
+
 	}
 
-	
-	public void testMembership1() throws JAXBException
+	public void testScruffyGeneration1()
 	{
-	    
-	    //Problem with RDFConstructor: I don't seem to be able to generate a resource of type prov:Collection
+		// TODO: Unsupported
+
+	}
+
+	public void testScruffyGeneration2()
+	{
 		// TODO: Unsupported
 	}
 
-	public void testMembership2() throws JAXBException
+	public void testScruffyInvalidation1()
 	{
 		// TODO: Unsupported
 	}
 
-	public void testMembership3() throws JAXBException
+	public void testScruffyInvalidation2()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyUsage1()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyUsage2()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyStart1()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyStart2()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyStart3()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyStart4()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyEnd1()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyEnd2()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyEnd3()
+	{
+		// TODO: Unsupported
+	}
+
+	public void testScruffyEnd4()
 	{
 		// TODO: Unsupported
 	}

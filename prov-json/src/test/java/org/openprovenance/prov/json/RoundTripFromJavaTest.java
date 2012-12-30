@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 import org.openprovenance.prov.xml.Document;
+import org.openprovenance.prov.xml.HasExtensibility;
 import org.openprovenance.prov.xml.UncheckedTestException;
 
 import com.google.gson.Gson;
@@ -31,11 +32,6 @@ public class RoundTripFromJavaTest extends org.openprovenance.prov.xml.RoundTrip
 		return ".json";
 	}
 	
-	public boolean checkTest(String name) {
-		return !(name.contains("member2") || name.contains("member3"));
-	}
-
-	
 	@Override
 	public Document readDocument(String file) {
 		try {
@@ -56,5 +52,5 @@ public class RoundTripFromJavaTest extends org.openprovenance.prov.xml.RoundTrip
 			throw new UncheckedTestException(e);
 		}
 	}
-
+	
 }

@@ -31,6 +31,7 @@ import org.openprovenance.prov.java.component3.WasAssociatedWith;
 import org.openprovenance.prov.java.component3.WasAttributedTo;
 import org.openprovenance.prov.java.component3.WasInfluencedBy;
 import org.openprovenance.prov.java.component4.Bundle;
+import org.openprovenance.prov.java.component4.Records;
 import org.openprovenance.prov.java.component5.AlternateOf;
 import org.openprovenance.prov.java.component5.MentionOf;
 import org.openprovenance.prov.java.component5.SpecializationOf;
@@ -237,6 +238,15 @@ public class Generator {
 		newBundle = expandElements(newBundle);
 		newBundle = expandRelations(newBundle);
 		newBundle = removeSuperElements(newBundle);
+		
+		int n=0, e=0;
+		Records rec = newBundle.getRecords();
+			
+		for (Element el : rec.getElements()) { if (el != null) n++; }
+		for (Relation rel : rec.getRelations()) { if (rel != null) e++; }
+
+		System.out.println("** before orphan removal: "+n+" nodes and "+e+" edges");
+		
 		newBundle = removeOrphans(newBundle);
 
 		return newBundle;
@@ -347,7 +357,9 @@ public class Generator {
 	private Entity duplicateEntity(Entity entity, int id) {
 
 		Entity newEntity = new Entity();
+		
 		newEntity.setId(entity.getId() + id);
+		
 		newEntity = (Entity) duplicateConstructAttributes(entity, newEntity);
 		newEntity = (Entity) duplicateLocationAttributes(entity, newEntity);
 
@@ -397,7 +409,16 @@ public class Generator {
 	
 	private Bundle expandAndAttachRelations(Bundle newBundle, Relation relation) {
 		
-		int numberOfRelations = calculateNumberOfRelations(relation);
+		final String WGBY_REL = "WasGeneratedBy";
+		
+		int numberOfRelations = 1;
+		
+		if (relation.getClass().getSimpleName().equals(WGBY_REL)) {
+			System.out.println("forcing 1 instance of "+relation.getClass().getSimpleName());
+		}  else {
+			numberOfRelations = calculateNumberOfRelations(relation);						
+		}
+		
 		newBundle = duplicateRelation(newBundle, relation, numberOfRelations);
 		
 		return newBundle;
@@ -500,7 +521,13 @@ public class Generator {
 			for (int i = 0; i < endElementSize; i++) {
 				
 				Used newUsed = new Used();
-				newUsed.setId(used.getId() + numberAttached);
+				
+				// PM edited to avoid "nullX" Ids
+				if (used.getId() != null)	newUsed.setId(used.getId() + numberAttached);	
+				else newUsed.setId(null);
+
+				newUsed.setTime(used.getTime());
+				
 				newUsed.setActivity((Activity) element);
 				newUsed.setEntity((Entity) endElement.getElement(i));
 				newUsed = (Used) duplicateConstructAttributes(used, newUsed);
@@ -532,7 +559,13 @@ public class Generator {
 			for (int i = 0; i < endElementSize; i++) {
 				
 				WasGeneratedBy newWasGeneratedBy = new WasGeneratedBy();
-				newWasGeneratedBy.setId(wasGeneratedBy.getId() + numberAttached);
+				
+				// PM edited to avoid "nullX" Ids
+				if (newWasGeneratedBy.getId() != null)	newWasGeneratedBy.setId(wasGeneratedBy.getId() + numberAttached);	
+				else newWasGeneratedBy.setId(null);
+
+				newWasGeneratedBy.setTime(wasGeneratedBy.getTime());
+
 				newWasGeneratedBy.setEntity((Entity) element);
 				newWasGeneratedBy.setActivity((Activity) endElement.getElement(i));
 				newWasGeneratedBy = (WasGeneratedBy) duplicateConstructAttributes(wasGeneratedBy, newWasGeneratedBy);

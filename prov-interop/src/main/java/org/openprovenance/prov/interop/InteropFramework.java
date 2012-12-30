@@ -1,8 +1,5 @@
 package org.openprovenance.prov.interop;
 import java.io.File;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.xml.bind.JAXBException;
@@ -10,23 +7,11 @@ import org.openprovenance.prov.xml.Document;
 import org.openprovenance.prov.xml.ProvDeserialiser;
 import org.openprovenance.prov.xml.ProvSerialiser;
 import org.openprovenance.prov.xml.ProvFactory;
-import org.openprovenance.prov.notation.TreeTraversal;
 import org.openprovenance.prov.notation.Utility;
 
 import  org.antlr.runtime.tree.CommonTree;
 
-import org.openrdf.elmo.ElmoManager;
-import org.openrdf.elmo.ElmoManagerFactory;
-import org.openrdf.elmo.ElmoModule;
-import org.openrdf.elmo.sesame.SesameManager;
-import org.openrdf.elmo.sesame.SesameManagerFactory;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-
-import org.openprovenance.prov.rdf.RdfConstructor;
-import org.openprovenance.prov.rdf.RepositoryHelper;
-
 import org.openprovenance.prov.dot.ProvToDot;
 
 import org.apache.log4j.Logger;
@@ -164,34 +149,13 @@ public class InteropFramework
 
     
 
-    public void writeTextToFile(String text,
-                                String filename) {
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(filename));
-            writer.write(text);
-        }
-        catch (IOException e) {
-        }
-        finally {
-            try {
-                if (writer != null)
-                    writer.close( );
-            }
-            catch (IOException e) {}
-        }
-    }
     
    
 
     public void provn2html(String file, String file2) throws java.io.IOException, JAXBException, Throwable {
-
-        CommonTree tree = u.convertASNToTree(file);
-
-
-        String s=u.convertTreeToHTML(tree);
-
-        writeTextToFile(s,file2);        
+        Document doc = (Document)u.convertASNToJavaBean(file);
+        String s=u.convertBeanToHTML(doc);
+        u.writeTextToFile(s,file2);        
 
     }
     
@@ -243,8 +207,7 @@ public class InteropFramework
 	    setNamespaces(doc);
 	    switch (format) {
 	    case PROVN: {
-		String s=u.convertBeanToASN(doc);
-	        writeTextToFile(s,filename);
+		u.writeDocument(doc,filename);
 	        break;
 	    }
 	    case XML: {

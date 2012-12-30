@@ -1,7 +1,8 @@
 package org.openprovenance.prov.rdf;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -12,21 +13,19 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.openprovenance.prov.xml.ActedOnBehalfOf;
+import org.openprovenance.prov.xml.HadMember;
 import org.openprovenance.prov.xml.AlternateOf;
 import org.openprovenance.prov.xml.Attribute;
 import org.openprovenance.prov.xml.Document;
-import org.openprovenance.prov.xml.Element;
-import org.openprovenance.prov.xml.HasExtensibility;
-import org.openprovenance.prov.xml.HasLabel;
-import org.openprovenance.prov.xml.HasLocation;
-import org.openprovenance.prov.xml.HasRole;
-import org.openprovenance.prov.xml.HasType;
+import org.openprovenance.prov.xml.InternationalizedString;
 import org.openprovenance.prov.xml.MentionOf;
 import org.openprovenance.prov.xml.NamedBundle;
+import org.openprovenance.prov.xml.NamespacePrefixMapper;
 import org.openprovenance.prov.xml.ProvFactory;
 import org.openprovenance.prov.xml.SpecializationOf;
 import org.openprovenance.prov.xml.URIWrapper;
 import org.openprovenance.prov.xml.Used;
+import org.openprovenance.prov.xml.ValueConverter;
 import org.openprovenance.prov.xml.WasAssociatedWith;
 import org.openprovenance.prov.xml.WasAttributedTo;
 import org.openprovenance.prov.xml.WasDerivedFrom;
@@ -48,97 +47,108 @@ import org.openrdf.rio.helpers.RDFHandlerBase;
 
 public class RdfCollector extends RDFHandlerBase {
 
-	public static String PROV = "http://www.w3.org/ns/prov#";
-	public static String XMLS = "http://www.w3.org/2001/XMLSchema#";
-
 	enum ProvType
 	{
 
-		ENTITY("Entity"), AGENT("Agent"), ACTIVITY("Activity"), INFLUENCE(
-				"Influence"),
+		ENTITY(Ontology.QNAME_PROVO_Entity), AGENT(Ontology.QNAME_PROVO_Agent), ACTIVITY(
+				Ontology.QNAME_PROVO_Activity), INFLUENCE(
+				Ontology.QNAME_PROVO_Influence),
 
-		BUNDLE("Bundle", ProvType.ENTITY),
+		BUNDLE(Ontology.QNAME_PROVO_Bundle, ProvType.ENTITY),
 
-		ORGANIZATION("Organization", ProvType.AGENT),
+		ORGANIZATION(Ontology.QNAME_PROVO_Organization, ProvType.AGENT),
 
-		PERSON("Person", ProvType.AGENT),
+		PERSON(Ontology.QNAME_PROVO_Person, ProvType.AGENT),
 
-		SOFTWAREAGENT("SoftwareAgent", ProvType.AGENT),
+		SOFTWAREAGENT(Ontology.QNAME_PROVO_SoftwareAgent, ProvType.AGENT),
 
-		LOCATION("Location"),
+		LOCATION(Ontology.QNAME_PROVO_Location),
 
-		ROLE("Role"),
+		ROLE(Ontology.QNAME_PROVO_Role),
 
-		PLAN("Plan", ProvType.ENTITY),
+		PLAN(Ontology.QNAME_PROVO_Plan, ProvType.ENTITY),
 
-		COLLECTION("Collection", ProvType.ENTITY),
+		COLLECTION(Ontology.QNAME_PROVO_Collection, ProvType.ENTITY),
 
-		EMPTYCOLLECTION("EmptyCollection", ProvType.COLLECTION),
+		EMPTYCOLLECTION(Ontology.QNAME_PROVO_EmptyCollection,
+				ProvType.COLLECTION),
 
-		INSTANTANEOUSEVENT("InstantaneousEvent"),
+		INSTANTANEOUSEVENT(Ontology.QNAME_PROVO_InstantaneousEvent),
 
-		ENTITYINFLUENCE("EntityInfluence", ProvType.INFLUENCE),
+		ENTITYINFLUENCE(Ontology.QNAME_PROVO_EntityInfluence,
+				ProvType.INFLUENCE),
 
-		ACTIVITYINFLUENCE("ActivityInfluence", ProvType.INFLUENCE),
+		ACTIVITYINFLUENCE(Ontology.QNAME_PROVO_ActivityInfluence,
+				ProvType.INFLUENCE),
 
-		AGENTINFLUENCE("AgentInfluence", ProvType.INFLUENCE),
+		AGENTINFLUENCE(Ontology.QNAME_PROVO_AgentInfluence, ProvType.INFLUENCE),
 
-		ASSOCIATION("Association", ProvType.AGENTINFLUENCE),
+		ASSOCIATION(Ontology.QNAME_PROVO_Association, ProvType.AGENTINFLUENCE),
 
-		ATTRIBUTION("Attribution", ProvType.AGENTINFLUENCE),
+		ATTRIBUTION(Ontology.QNAME_PROVO_Attribution, ProvType.AGENTINFLUENCE),
 
-		COMMUNICATION("Communication", ProvType.AGENTINFLUENCE),
+		COMMUNICATION(Ontology.QNAME_PROVO_Communication,
+				ProvType.AGENTINFLUENCE),
 
-		DELEGATION("Delegation", ProvType.AGENTINFLUENCE),
+		DELEGATION(Ontology.QNAME_PROVO_Delegation, ProvType.AGENTINFLUENCE),
 
-		DERIVATION("Derivation", ProvType.ENTITYINFLUENCE),
+		DERIVATION(Ontology.QNAME_PROVO_Derivation, ProvType.ENTITYINFLUENCE),
 
-		END("End", new ProvType[] { ProvType.INSTANTANEOUSEVENT,
-				ProvType.ENTITYINFLUENCE }),
+		QUOTATION(Ontology.QNAME_PROVO_Quotation, ProvType.ENTITYINFLUENCE), REVISION(
+				Ontology.QNAME_PROVO_Revision, ProvType.ENTITYINFLUENCE), PRIMARYSOURCE(
+				Ontology.QNAME_PROVO_PrimarySource, ProvType.ENTITYINFLUENCE),
 
-		START("Start", new ProvType[] { ProvType.INSTANTANEOUSEVENT,
-				ProvType.ENTITYINFLUENCE }),
+		END(Ontology.QNAME_PROVO_End, new ProvType[] {
+				ProvType.INSTANTANEOUSEVENT, ProvType.ENTITYINFLUENCE }),
 
-		GENERATION("Generation", new ProvType[] { ProvType.INSTANTANEOUSEVENT,
-				ProvType.ACTIVITYINFLUENCE }),
+		START(Ontology.QNAME_PROVO_Start, new ProvType[] {
+				ProvType.INSTANTANEOUSEVENT, ProvType.ENTITYINFLUENCE }),
 
-		INVALIDATION("Invalidation", new ProvType[] {
+		GENERATION(Ontology.QNAME_PROVO_Generation, new ProvType[] {
 				ProvType.INSTANTANEOUSEVENT, ProvType.ACTIVITYINFLUENCE }),
 
-		USAGE("Usage", new ProvType[] { ProvType.INSTANTANEOUSEVENT,
-				ProvType.ENTITYINFLUENCE });
+		INVALIDATION(Ontology.QNAME_PROVO_Invalidation, new ProvType[] {
+				ProvType.INSTANTANEOUSEVENT, ProvType.ACTIVITYINFLUENCE }),
 
-		private static final Map<String, ProvType> lookup = new HashMap<String, ProvType>();
+		USAGE(Ontology.QNAME_PROVO_Usage, new ProvType[] {
+				ProvType.INSTANTANEOUSEVENT, ProvType.ENTITYINFLUENCE });
+
+		private static final Map<QName, ProvType> lookup = new HashMap<QName, ProvType>();
 		static
 		{
 			for (ProvType provStatement : EnumSet.allOf(ProvType.class))
-				lookup.put(provStatement.getURI(), provStatement);
+				lookup.put(provStatement.getQName(), provStatement);
 		}
 
-		private String uri;
 		private ProvType[] extendsTypes;
+		private QName qname;
 
-		private ProvType(String localName)
+		private ProvType(QName qname)
 		{
-			this.uri = PROV + localName;
+			this.qname = qname;
 			this.extendsTypes = new ProvType[] {};
 		}
 
-		private ProvType(String localName, ProvType extendsType)
+		private ProvType(QName qname, ProvType extendsType)
 		{
-			this(localName);
+			this(qname);
 			this.extendsTypes = new ProvType[] { extendsType };
 		}
 
-		private ProvType(String localName, ProvType[] extendsTypes)
+		private ProvType(QName qname, ProvType[] extendsTypes)
 		{
-			this(localName);
+			this(qname);
 			this.extendsTypes = extendsTypes;
 		}
 
-		public String getURI()
+		public QName getQName()
 		{
-			return uri;
+			return qname;
+		}
+
+		public String getURIString()
+		{
+			return qname.getNamespaceURI() + qname.getLocalPart();
 		}
 
 		public ProvType[] getExtends()
@@ -146,14 +156,19 @@ public class RdfCollector extends RDFHandlerBase {
 			return this.extendsTypes;
 		}
 
-		public static ProvType lookup(String uri)
+		public static ProvType lookup(QName qname)
 		{
-			return lookup.get(uri);
+			return lookup.get(qname);
 		}
 
 		public String toString()
 		{
-			return uri;
+			return qname.toString();
+		}
+
+		public boolean equals(ProvType b)
+		{
+			return b.getQName().equals(this.getQName());
 		}
 
 	}
@@ -163,16 +178,21 @@ public class RdfCollector extends RDFHandlerBase {
 	private Hashtable<QName, BundleHolder> bundles;
 	protected Document document;
 	private Hashtable<String, String> revnss;
+	private ValueConverter valueConverter;
+	private Ontology ontology;
 
 	public RdfCollector(ProvFactory pFactory)
 	{
 		this.pFactory = pFactory;
+		this.ontology = new Ontology();
 		this.collators = new HashMap<QName, HashMap<QName, List<Statement>>>();
 		this.revnss = new Hashtable<String, String>();
 		this.document = pFactory.newDocument();
+		this.valueConverter = new ValueConverter(pFactory);
 		this.bundles = new Hashtable<QName, BundleHolder>();
 		document.setNss(new Hashtable<String, String>());
-		handleNamespace("xsd", XMLS);
+		handleNamespace(NamespacePrefixMapper.XSD_PREFIX,
+				NamespacePrefixMapper.XSD_HASH_NS);
 	}
 
 	private HashMap<QName, List<Statement>> getCollator(Resource context)
@@ -183,28 +203,18 @@ public class RdfCollector extends RDFHandlerBase {
 	@Override
 	public void handleNamespace(String prefix, String namespace)
 	{
+		if (prefix.equals(""))
+		{
+			prefix = "def";
+		}
 		this.document.getNss().put(prefix, namespace);
 		pFactory.setNamespaces(this.document.getNss());
 		this.revnss.put(namespace, prefix);
 	}
 
-	protected QName convertResourceToQName(Resource resource)
+	private boolean isProvURI(QName qname)
 	{
-		if (resource instanceof URI)
-		{
-			return convertURIToQName((URI)resource);
-		} else if (resource instanceof BNode)
-		{
-			return new QName(((BNode) (resource)).getID());
-		} else
-		{
-			return null;
-		}
-	}
-
-	private boolean isProvURI(URI uri)
-	{
-		if (!uri.getNamespace().equals(PROV))
+		if (!qname.getNamespaceURI().equals(NamespacePrefixMapper.PROV_NS))
 		{
 			return false;
 		}
@@ -252,12 +262,12 @@ public class RdfCollector extends RDFHandlerBase {
 	/* Utility functions */
 
 	protected List<Statement> getStatementsForPredicate(QName context,
-			QName qname, String uri)
+			QName qname, QName uri)
 	{
 		ArrayList<Statement> statements = new ArrayList<Statement>();
 		for (Statement statement : collators.get(context).get(qname))
 		{
-			if (statement.getPredicate().stringValue().equals(uri))
+			if (convertURIToQName(statement.getPredicate()).equals(uri))
 			{
 				statements.add(statement);
 			}
@@ -266,7 +276,7 @@ public class RdfCollector extends RDFHandlerBase {
 	}
 
 	protected Statement getSingleStatementForPredicate(QName context,
-			QName qname, String uri)
+			QName qname, QName uri)
 	{
 		List<Statement> statements = getStatementsForPredicate(context, qname,
 				uri);
@@ -280,43 +290,154 @@ public class RdfCollector extends RDFHandlerBase {
 		return statement;
 	}
 
-	protected ProvType[] getResourceTypes(QName context, QName qname)
+	private ProvType[] filterImplicitTypes(ProvType[] implicitTypes,
+			ProvType[] explicitTypes)
 	{
-		List<Statement> statements = collators.get(context).get(qname);
-		List<ProvType> options = new ArrayList<ProvType>();
-		for (Statement statement : statements)
+		List<ProvType> explicitOptions = new ArrayList<ProvType>(
+				Arrays.asList(explicitTypes));
+		List<ProvType> implicitOptions = new ArrayList<ProvType>(
+				Arrays.asList(implicitTypes));
+
+		// Remove any that are already types that are already explicit
+		implicitOptions.removeAll(explicitOptions);
+
+		// Remove any that are extended by types in explicit
+		List<ProvType> cloned = new ArrayList<ProvType>(implicitOptions);
+		for (ProvType option : explicitOptions)
 		{
-			if (statement.getPredicate().equals(RDF.TYPE))
+			for (ProvType extended : option.getExtends())
 			{
-				Value value = statement.getObject();
-				if (value instanceof URI && !isProvURI((URI) value))
-				{
-					continue;
-				}
-				ProvType provType = ProvType.lookup(value.stringValue());
-				options.add(provType);
+				cloned.remove(extended);
 			}
 		}
+		implicitOptions = cloned;
+		return implicitOptions.toArray(new ProvType[] {});
+	}
 
-		if (options.size() > 1)
+	protected ProvType[] getImplicitTypes(QName context, QName qname)
+	{
+		List<Statement> statements = collators.get(context).get(qname);
+		List<ProvType> implicitOptions = new ArrayList<ProvType>();
+		for (Statement statement : statements)
 		{
-			List<ProvType> cloned = new ArrayList<ProvType>(options);
-			for (ProvType option : options)
+			QName predQ = convertURIToQName(statement.getPredicate());
+			// Check for a type that we can infer
+			if (ontology.domains.containsKey(predQ))
+			{
+				ProvType provType = ProvType
+						.lookup(ontology.domains.get(predQ));
+				if (!implicitOptions.contains(provType))
+				{
+					implicitOptions.add(provType);
+				}
+			}
+		}
+		
+		// TODO: Handle cases where qname is the object rather than the subject.
+		// We can use the range mapping to deduce the type of the object in these
+		// cases.
+
+		// Prunes back to the 'top' class (e.g. if we have Person and Agent, we
+		// only need Person)
+		if (implicitOptions.size() > 1)
+		{
+			List<ProvType> cloned = new ArrayList<ProvType>(implicitOptions);
+			for (ProvType option : implicitOptions)
 			{
 				for (ProvType extended : option.getExtends())
 				{
 					cloned.remove(extended);
 				}
 			}
-			options = cloned;
+			implicitOptions = cloned;
 		}
 
-		return options.toArray(new ProvType[] {});
+		return implicitOptions.toArray(new ProvType[] {});
+
+	}
+
+	protected ProvType[] getExplicitTypes(QName context, QName qname)
+	{
+		List<Statement> statements = collators.get(context).get(qname);
+		List<ProvType> explicitOptions = new ArrayList<ProvType>();
+		for (Statement statement : statements)
+		{
+			QName predQ = convertURIToQName(statement.getPredicate());
+			if (predQ.equals(Ontology.QNAME_RDF_TYPE))
+			{
+				Value value = statement.getObject();
+				if (!(value instanceof URI))
+				{
+					continue;
+				}
+				if (!isProvURI(convertURIToQName((URI) value)))
+				{
+					continue;
+				}
+				ProvType provType = ProvType
+						.lookup(convertURIToQName((URI) value));
+				explicitOptions.add(provType);
+			}
+		}
+
+		// Prunes back to the 'top' class (e.g. if we have Person and Agent, we
+		// only need Person)
+		if (explicitOptions.size() > 1)
+		{
+			List<ProvType> cloned = new ArrayList<ProvType>(explicitOptions);
+			for (ProvType option : explicitOptions)
+			{
+				for (ProvType extended : option.getExtends())
+				{
+					cloned.remove(extended);
+				}
+			}
+			explicitOptions = cloned;
+		}
+
+		return explicitOptions.toArray(new ProvType[] {});
+	}
+
+	protected QName convertResourceToQName(Resource resource)
+	{
+		if (resource instanceof URI)
+		{
+			return convertURIToQName((URI) resource);
+		} else if (resource instanceof BNode)
+		{
+			return new QName(((BNode) (resource)).getID());
+		} else
+		{
+			return null;
+		}
+	}
+
+	protected Object valueToObject(Value value)
+	{
+		if (value instanceof Resource)
+		{
+			return convertResourceToQName((Resource) value);
+		} else if (value instanceof Literal)
+		{
+			return decodeLiteral((Literal) value);
+		} else if (value instanceof URI)
+		{
+			URI uri = (URI) (value);
+			URIWrapper uw = new URIWrapper();
+			uw.setValue(java.net.URI.create(uri.toString()));
+			return uw;
+		} else if (value instanceof BNode)
+		{
+			return new QName(((BNode) (value)).getID());
+		} else
+		{
+			return null;
+		}
 	}
 
 	protected Object decodeLiteral(Literal literal)
 	{
-		String dataType = XMLS + "string";
+		String dataType = NamespacePrefixMapper.XSD_HASH_NS + "string";
 		if (literal.getLanguage() != null)
 		{
 			return pFactory.newInternationalizedString(literal.stringValue(),
@@ -336,50 +457,56 @@ public class RdfCollector extends RDFHandlerBase {
 			}
 		}
 
-		if (dataType.equals(XMLS + "QName"))
+		if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS + "QName"))
 		{
 			return pFactory.newQName(literal.stringValue());
-		} else if (dataType.equals(XMLS + "string"))
+		} else if (dataType
+				.equals(NamespacePrefixMapper.XSD_HASH_NS + "string"))
 		{
 			return literal.stringValue();
-		} else if (dataType.equals(XMLS + "dateTime"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS
+				+ "dateTime"))
 		{
 			return literal.calendarValue();
-		} else if (dataType.equals(XMLS + "int"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS + "int"))
 		{
 			return literal.intValue();
-		} else if (dataType.equals(XMLS + "integer"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS
+				+ "integer"))
 		{
 			return literal.integerValue();
-		} else if (dataType.equals(XMLS + "boolean"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS
+				+ "boolean"))
 		{
 			return literal.booleanValue();
-		} else if (dataType.equals(XMLS + "double"))
+		} else if (dataType
+				.equals(NamespacePrefixMapper.XSD_HASH_NS + "double"))
 		{
 			return literal.doubleValue();
-		} else if (dataType.equals(XMLS + "float"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS + "float"))
 		{
 			return literal.floatValue();
-		} else if (dataType.equals(XMLS + "long"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS + "long"))
 		{
 			return literal.longValue();
-		} else if (dataType.equals(XMLS + "short"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS + "short"))
 		{
 			return literal.shortValue();
-		} else if (dataType.equals(XMLS + "byte"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS + "byte"))
 		{
 			return literal.byteValue();
-		} else if (dataType.equals(XMLS + "decimal"))
+		} else if (dataType.equals(NamespacePrefixMapper.XSD_HASH_NS
+				+ "decimal"))
 		{
 			return literal.decimalValue();
-		} else if (dataType.equals(XMLS + "anyURI"))
+		} else if (dataType
+				.equals(NamespacePrefixMapper.XSD_HASH_NS + "anyURI"))
 		{
 			URIWrapper uw = new URIWrapper();
 			uw.setValue(java.net.URI.create(literal.stringValue()));
 			return uw;
 		} else
 		{
-			// System.out.println("Unhandled::: "+literal.getDatatype());
 			return literal.stringValue();
 		}
 	}
@@ -387,192 +514,188 @@ public class RdfCollector extends RDFHandlerBase {
 	private String getXsdType(String shorttype)
 	{
 		String xsdType = "";
-		if (revnss.containsKey(XMLS))
+		if (revnss.containsKey(NamespacePrefixMapper.XSD_HASH_NS))
 		{
-			xsdType = revnss.get(XMLS) + ":" + shorttype;
+			xsdType = revnss.get(NamespacePrefixMapper.XSD_HASH_NS) + ":"
+					+ shorttype;
 		} else
 		{
-			xsdType = XMLS + shorttype;
+			xsdType = NamespacePrefixMapper.XSD_HASH_NS + shorttype;
 		}
 		return xsdType;
 	}
 
-	/* Prov-specific functions */
-
-	protected List<Statement> handleBaseStatements(
-			org.openprovenance.prov.xml.Statement element, QName context,
-			QName qname, ProvType type)
+	public List<Attribute> collectAttributes(QName context, QName qname,
+			ProvType type)
 	{
-
+		List<Attribute> attributes = new ArrayList<Attribute>();
 		List<Statement> statements = collators.get(context).get(qname);
 		for (Statement statement : statements)
 		{
-			String predS = statement.getPredicate().stringValue();
+			QName predQ = convertURIToQName(statement.getPredicate());
 
-			if (element instanceof HasType)
+			if (statement.getPredicate().equals(RDF.TYPE))
 			{
-				if (statement.getPredicate().stringValue()
-						.equals(PROV + "type"))
+				Value value = statement.getObject();
+				Object obj = valueToObject(statement.getObject());
+				if (obj != null)
 				{
-					Value value = statement.getObject();
-					if (value instanceof Literal)
+
+					Value vobj = statement.getObject();
+					Boolean sameAsType = false;
+					if (vobj instanceof URI)
 					{
-						Object literalValue = decodeLiteral((Literal) (value));
-						if (literalValue == null)
+						// TODO: Nasty.
+						URI uri = (URI) (vobj);
+
+						String uriVal = uri.getNamespace() + uri.getLocalName();
+						sameAsType = uriVal.equals(type.getURIString());
+					}
+
+					if (!sameAsType)
+					{
+
+						if (statement.getObject() instanceof Resource)
 						{
-							System.out
-									.println("Null :( " + value.stringValue());
+							attributes
+									.add(pFactory
+											.newAttribute(
+													Attribute.PROV_TYPE_QNAME,
+													convertResourceToQName((Resource) statement
+															.getObject()),
+													this.valueConverter));
+
+						} else if (statement.getObject() instanceof Literal)
+						{
+
+							attributes
+									.add(pFactory.newAttribute(
+											Attribute.PROV_TYPE_QNAME,
+											decodeLiteral((Literal) statement
+													.getObject()),
+											this.valueConverter));
 						}
-						pFactory.addType((HasType) element, literalValue);
+					}
+				} else
+				{
+					System.out.println(value);
+					System.out.println("Value wasn't a suitable type");
+				}
+			}
+
+			if (predQ.equals(Ontology.QNAME_PROVO_hadRole))
+			{
+				String role = statement.getObject().stringValue();
+				attributes.add(pFactory.newAttribute(Attribute.PROV_ROLE_QNAME,
+						role, this.valueConverter));
+			}
+
+			if (predQ.equals(Ontology.QNAME_PROVO_atLocation))
+			{
+				Object obj = valueToObject(statement.getObject());
+				if (obj != null)
+				{
+					attributes.add(pFactory.newAttribute(
+							Attribute.PROV_LOCATION_QNAME, obj,
+							this.valueConverter));
+				}
+			}
+
+			if (predQ.equals(Ontology.QNAME_RDFS_LABEL))
+			{
+				Literal lit = (Literal) (statement.getObject());
+				if (lit.getLanguage() != null)
+				{
+					InternationalizedString is = pFactory
+							.newInternationalizedString(lit.stringValue(), lit
+									.getLanguage().toUpperCase());
+					attributes.add(pFactory
+							.newAttribute(Attribute.PROV_LABEL_QNAME, is,
+									this.valueConverter));
+				} else
+				{
+					attributes.add(pFactory.newAttribute(
+							Attribute.PROV_LABEL_QNAME, lit.stringValue(),
+							this.valueConverter));
+				}
+			}
+
+			Value val = statement.getObject();
+			if (!isProvURI(predQ))
+			{
+				if (!predQ.equals(Ontology.QNAME_RDF_TYPE)
+						&& !predQ.equals(Ontology.QNAME_RDFS_LABEL))
+				{
+					// Retrieve the prefix
+					String prefix = this.revnss.get(predQ.getNamespaceURI());
+					Attribute attr = null;
+					if (val instanceof Literal)
+					{
+						Literal lit = (Literal) val;
+
+						String shortType = "string";
+						if (lit.getDatatype() != null)
+						{
+							shortType = lit.getDatatype().getLocalName();
+						}
+
+						QName xsdType = pFactory
+								.stringToQName(getXsdType(shortType));
+						attr = pFactory.newAttribute(predQ.getNamespaceURI(),
+								predQ.getLocalPart(), prefix,
+								decodeLiteral(lit), xsdType);
+
+					} else if (val instanceof Resource)
+					{
+						URIWrapper uw = new URIWrapper();
+						java.net.URI jURI = java.net.URI.create(val
+								.stringValue());
+						uw.setValue(jURI);
+
+						attr = pFactory.newAttribute(predQ.getNamespaceURI(),
+								predQ.getLocalPart(), prefix, uw,
+								pFactory.stringToQName(getXsdType("anyURI")));
 					} else
 					{
-						System.out.println(value);
-						System.out.println("Value wasn't a suitable type");
+						System.err.println("Invalid value");
 					}
-				}
-			}
 
-			if (element instanceof HasRole)
-			{
-				if (predS.equals(PROV + "role"))
-				{
-					String role = statement.getObject().stringValue();
-					pFactory.addRole((HasRole) element, role);
-				}
-			}
-
-			if (element instanceof HasLocation)
-			{
-				if (predS.equals(PROV + "atLocation"))
-				{
-					QName anyQ = convertResourceToQName((Resource) (statement
-							.getObject()));
-					((HasLocation) element).getLocation().add(
-							pFactory.newAnyRef(anyQ));
-				}
-
-				if (predS.equals(PROV + "location"))
-				{
-					((HasLocation) element).getLocation().add(
-							decodeLiteral((Literal) statement.getObject()));
-				}
-			}
-
-			if (element instanceof HasLabel)
-			{
-				if (predS.equals(PROV + "label"))
-				{
-					Literal lit = (Literal) (statement.getObject());
-					if (lit.getLanguage() != null)
+					if (attr != null)
 					{
-						pFactory.addLabel((HasLabel) element,
-								lit.stringValue(), lit.getLanguage()
-										.toUpperCase());
-					} else
-					{
-						pFactory.addLabel((HasLabel) element, lit.stringValue());
+						attributes.add(attr);
 					}
+
 				}
-			}
-
-			if (element instanceof HasExtensibility)
-			{
-				URI uri = (URI) statement.getPredicate();
-				Value val = statement.getObject();
-				if (!isProvURI(uri))
-				{
-					if (uri.equals(RDF.TYPE))
-					{
-						// Add prov:type
-						if (element instanceof HasType)
-						{
-							if (val instanceof URI)
-							{
-								if (!val.toString().equals(type.getURI()))
-								{
-									URI valURI = (URI) (val);
-									QName valQ = new QName(
-											valURI.getNamespace(),
-											valURI.getLocalName(), this.revnss.get(valURI.getNamespace()));
-									if (((HasType) element).getType().contains(
-											valQ))
-									{
-										pFactory.addType((HasType) element,
-												valQ);
-									}
-								}
-							} else if (val instanceof Literal)
-							{
-								pFactory.addType((HasType) element,
-										decodeLiteral((Literal) val));
-							}
-						}
-
-					} else
-					{
-						// Retrieve the prefix
-						String prefix = this.revnss.get(uri.getNamespace());
-						Attribute attr = null;
-						if (val instanceof Literal)
-						{
-							Literal lit = (Literal) val;
-
-							String shortType = "string";
-							if (lit.getDatatype() != null)
-							{
-								shortType = lit.getDatatype().getLocalName();
-							}
-
-							String xsdType = getXsdType(shortType);
-							attr = pFactory.newAttribute(uri.getNamespace(),
-									uri.getLocalName(), prefix,
-									decodeLiteral(lit), xsdType);
-
-						} else if (val instanceof Resource)
-						{
-							attr = pFactory.newAttribute(uri.getNamespace(),
-									uri.getLocalName(), prefix,
-									val.stringValue(), getXsdType("anyURI"));
-						} else
-						{
-							System.err.println("Invalid value");
-						}
-
-						if (attr != null)
-						{
-							pFactory.addAttribute((HasExtensibility) element,
-									attr);
-						}
-
-					}
-				}
-			}
-
-			if (predS.equals(PROV + "wasInfluencedBy"))
-			{
-				QName anyQ = convertResourceToQName((Resource) (statement
-						.getObject()));
-				WasInfluencedBy wib = pFactory.newWasInfluencedBy((QName) null,
-						pFactory.newAnyRef(qname), pFactory.newAnyRef(anyQ));
-
-				store(convertResourceToQName(statement.getContext()), wib);
-			}
-
-			if (predS.equals(PROV + "influenced"))
-			{
-				QName anyQ = convertResourceToQName((Resource) (statement
-						.getObject()));
-
-				WasInfluencedBy wib = pFactory.newWasInfluencedBy((QName) null,
-						pFactory.newAnyRef(anyQ), pFactory.newAnyRef(qname));
-
-				store(convertResourceToQName(statement.getContext()), wib);
 			}
 		}
-
-		return statements;
+		return attributes;
 	}
 
+	private void handleTypes(ProvType[] types, QName context, QName subject, boolean implicit) {
+		for (ProvType type : types)
+		{
+			switch (type)
+			{
+			case ACTIVITY:
+				createActivity(context, subject, implicit);
+				break;
+			case AGENT:
+			case PERSON:
+			case ORGANIZATION:
+			case SOFTWAREAGENT:
+				createAgent(context, subject, implicit);
+				break;
+			case COLLECTION:
+			case ENTITY:
+			case PLAN:
+			case BUNDLE:
+				createEntity(context, subject, implicit);
+				break;
+			default:
+			}
+		}
+	}
+	
 	protected void buildGraph()
 	{
 		for (QName contextQ : collators.keySet())
@@ -580,29 +703,15 @@ public class RdfCollector extends RDFHandlerBase {
 			HashMap<QName, List<Statement>> collator = collators.get(contextQ);
 			for (QName qname : collator.keySet())
 			{
-				ProvType[] types = getResourceTypes(contextQ, qname);
-
-				for (ProvType type : types)
-				{
-					switch (type)
-					{
-					case ACTIVITY:
-						createActivity(contextQ, qname);
-						break;
-					case AGENT:
-					case PERSON:
-					case ORGANIZATION:
-					case SOFTWAREAGENT:
-						createAgent(contextQ, qname);
-						break;
-					case ENTITY:
-					case PLAN:
-					case BUNDLE:
-						createEntity(contextQ, qname);
-						break;
-					default:
-					}
-				}
+				
+				ProvType[] explicitTypes = getExplicitTypes(contextQ, qname);
+				ProvType[] implicitTypes = getImplicitTypes(contextQ, qname);
+				implicitTypes = filterImplicitTypes(implicitTypes,
+						explicitTypes);
+				
+				handleTypes(explicitTypes, contextQ, qname, false);
+				handleTypes(implicitTypes, contextQ, qname, true);
+				
 			}
 		}
 	}
@@ -645,10 +754,12 @@ public class RdfCollector extends RDFHandlerBase {
 				continue;
 			}
 			BundleHolder bundleHolder = bundles.get(key);
-			NamedBundle bundle = pFactory.newNamedBundle(key,
-					bundleHolder.getActivities(), bundleHolder.getEntities(),
-					bundleHolder.getAgents(), bundleHolder.getStatements());
-			bundle.setId(key);
+			Collection<org.openprovenance.prov.xml.Statement> statements = new ArrayList<org.openprovenance.prov.xml.Statement>();
+			statements.addAll(bundleHolder.getActivities());
+			statements.addAll(bundleHolder.getEntities());
+			statements.addAll(bundleHolder.getAgents());
+			statements.addAll(bundleHolder.getStatements());
+			NamedBundle bundle = pFactory.newNamedBundle(key, null, statements);
 			document.getEntityOrActivityOrWasGeneratedBy().add(bundle);
 		}
 
@@ -667,7 +778,8 @@ public class RdfCollector extends RDFHandlerBase {
 					System.out.println("Unhandled statements in " + qname);
 					for (Statement statement : collator.get(qname))
 					{
-						if (isProvURI(statement.getPredicate()))
+						if (isProvURI(convertURIToQName(statement
+								.getPredicate())))
 						{
 							System.out.println(statement);
 						}
@@ -683,207 +795,292 @@ public class RdfCollector extends RDFHandlerBase {
 		buildGraph();
 		buildBundles();
 	}
-	
-	private QName convertURIToQName(URI uri) {
-//		QName qname = new QName(uri.getNamespace(), uri.getLocalName(), revnss.get(uri.getNamespace()));
-	    // It is not necessary to specify a prefix for a QName. This code was breaking on the jpl trace.
-		QName qname = new QName(uri.getNamespace(), uri.getLocalName());
 
+	protected QName convertURIToQName(URI uri)
+	{
+		// It is not necessary to specify a prefix for a QName. This code was
+		// breaking on the jpl trace.
+		QName qname;
+		if (revnss.containsKey(uri.getNamespace()))
+		{
+			String prefix = revnss.get(uri.getNamespace());
+			qname = new QName(uri.getNamespace(), uri.getLocalName(), prefix);
+		} else
+		{
+			// Ugly!
+			String prefix = "ns" + uri.getNamespace().hashCode() + "";//
+			handleNamespace(prefix, uri.getNamespace());
+			qname = new QName(uri.getNamespace(), uri.getLocalName(), prefix);
+		}
 		return qname;
 	}
 
-	private void createEntity(QName context, QName qname)
+	private void createEntity(QName context, QName qname, boolean implicit)
 	{
-		org.openprovenance.prov.xml.Entity entity = pFactory.newEntity(qname);
 
 		List<Statement> statements = collators.get(context).get(qname);
-		statements = handleBaseStatements(entity, context, qname,
+		List<Attribute> attributes = collectAttributes(context, qname,
 				ProvType.ENTITY);
-
+		List<QName> members = new ArrayList<QName>();
 		for (Statement statement : statements)
 		{
-			String predS = statement.getPredicate().stringValue();
+			QName predQ = convertURIToQName(statement.getPredicate());
 			Value value = statement.getObject();
+
 			if (value instanceof Resource)
 			{
 				QName valueQ = convertResourceToQName((Resource) value);
-				if (predS.equals(PROV + "wasDerivedFrom"))
+				if (predQ.equals(Ontology.QNAME_PROVO_wasDerivedFrom))
 				{
-					WasDerivedFrom wdf = pFactory.newWasDerivedFrom(
-							(QName) null, pFactory.newEntityRef(qname),
-							pFactory.newEntityRef(valueQ));
+					WasDerivedFrom wdf = pFactory
+							.newWasDerivedFrom((QName) null, qname, valueQ,
+									null, null, null, null);
 
 					store(context, wdf);
-				} else if (predS.equals(PROV + "wasGeneratedBy"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_hadPrimarySource))
 				{
-					WasGeneratedBy wgb = pFactory.newWasGeneratedBy(
-							(QName) null, pFactory.newEntityRef(qname), null,
-							pFactory.newActivityRef(valueQ));
+					WasDerivedFrom wdf = pFactory.newWasDerivedFrom(null,
+							qname, valueQ, null, null, null, null);
+
+					pFactory.addPrimarySourceType(wdf);
+					store(context, wdf);
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasQuotedFrom))
+				{
+					WasDerivedFrom wdf = pFactory.newWasDerivedFrom(null,
+							qname, valueQ, null, null, null, null);
+					pFactory.addQuotationType(wdf);
+					store(context, wdf);
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasRevisionOf))
+				{
+					WasDerivedFrom wdf = pFactory.newWasDerivedFrom(null,
+							qname, valueQ, null, null, null, null);
+					pFactory.addRevisionType(wdf);
+					store(context, wdf);
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasGeneratedBy))
+				{
+					WasGeneratedBy wgb = pFactory.newWasGeneratedBy(null,
+							qname, valueQ, null, null);
 
 					store(context, wgb);
-				} else if (predS.equals(PROV + "alternateOf"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_alternateOf))
 				{
-					AlternateOf ao = pFactory.newAlternateOf(
-							pFactory.newEntityRef(qname),
-							pFactory.newEntityRef(valueQ));
+					AlternateOf ao = pFactory.newAlternateOf(qname, valueQ);
 
 					store(context, ao);
-				} else if (predS.equals(PROV + "specializationOf"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_specializationOf))
 				{
-					SpecializationOf so = pFactory.newSpecializationOf(
-							pFactory.newEntityRef(qname),
-							pFactory.newEntityRef(valueQ));
+					SpecializationOf so = pFactory.newSpecializationOf(qname,
+							valueQ);
 
 					store(context, so);
-				} else if (predS.equals(PROV + "wasInvalidatedBy"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasInvalidatedBy))
 				{
-					WasInvalidatedBy wib = pFactory.newWasInvalidatedBy(
-							(QName) null, pFactory.newEntityRef(qname),
-							pFactory.newActivityRef(valueQ));
+					WasInvalidatedBy wib = pFactory.newWasInvalidatedBy(null,
+							qname, valueQ, null, null);
 
 					store(context, wib);
-				} else if (predS.equals(PROV + "wasAttributedTo"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasAttributedTo))
 				{
-					WasAttributedTo wit = pFactory.newWasAttributedTo(
-							(QName) null, pFactory.newEntityRef(qname),
-							pFactory.newAgentRef(valueQ));
+					WasAttributedTo wit = pFactory.newWasAttributedTo(null,
+							qname, valueQ, null);
 
 					store(context, wit);
-				} else if (predS.equals(PROV + "mentionOf"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_mentionOf))
 				{
 					Statement asInBundleStatement = getSingleStatementForPredicate(
-							context, qname, PROV + "asInBundle");
-					Object o=(asInBundleStatement==null) ? null: asInBundleStatement.getObject();
-					QName bundleQ = (o==null)? null: convertURIToQName((URI)o);					
-					QName entityQ = (value==null)? null: convertURIToQName((URI)value);
-					MentionOf nmo = pFactory.newMentionOf(
-							(qname==null)? null: pFactory.newEntityRef(qname),
-							(entityQ==null)? null: pFactory.newEntityRef(entityQ),
-							(bundleQ==null)? null: pFactory.newEntityRef(bundleQ));
+							context, qname, Ontology.QNAME_PROVO_asInBundle);
+					Object o = (asInBundleStatement == null) ? null
+							: asInBundleStatement.getObject();
+					QName bundleQ = (o == null) ? null
+							: convertURIToQName((URI) o);
+					QName entityQ = (value == null) ? null
+							: convertURIToQName((URI) value);
+					MentionOf nmo = pFactory.newMentionOf(qname, entityQ,
+							bundleQ);
 
 					store(context, nmo);
+				} else if (predQ.equals(Ontology.QNAME_PROVO_value))
+				{
+					Object resourceVal = convertResourceToQName((Resource) value);
+					attributes.add(pFactory.newAttribute(
+							Attribute.PROV_VALUE_QNAME, resourceVal,
+							this.valueConverter));
+				} else if (predQ.equals(Ontology.QNAME_PROVO_hadMember))
+				{
+					members.add(convertResourceToQName((Resource) (statement
+                                                .getObject())));
 				}
 			} else if (value instanceof Literal)
 			{
-				if (predS.equals(PROV + "generatedAtTime"))
-				{
-					// TODO: Unable to implement this.
-					Object literal = decodeLiteral((Literal) value);
-				}
-				if (predS.equals(PROV + "invalidatedAtTime"))
-				{
-					// TODO: Unable to implement this.
-					Object literal = decodeLiteral((Literal) value);
-				} else if (predS.equals(PROV + "value"))
+				if (predQ.equals(Ontology.QNAME_PROVO_value))
 				{
 					Object literal = decodeLiteral((Literal) value);
-					entity.setValue(literal);
+					attributes.add(pFactory.newAttribute(
+							Attribute.PROV_VALUE_QNAME, literal,
+							this.valueConverter));
 				}
 			}
+
+			if (predQ.equals(Ontology.QNAME_PROVO_wasInfluencedBy))
+			{
+				QName anyQ = convertResourceToQName((Resource) (statement
+						.getObject()));
+				WasInfluencedBy wib = pFactory.newWasInfluencedBy(null, qname,
+						anyQ, null);
+
+				store(convertResourceToQName(statement.getContext()), wib);
+			}
+
+			if (predQ.equals(Ontology.QNAME_PROVO_influenced))
+			{
+				QName anyQ = convertResourceToQName((Resource) (statement
+						.getObject()));
+
+				WasInfluencedBy wib = pFactory.newWasInfluencedBy(null, anyQ,
+						qname, null);
+
+				store(convertResourceToQName(statement.getContext()), wib);
+			}
 		}
-		store(context, entity);
+
+		if(members.size() > 0) {
+			HadMember hm = pFactory.newHadMember(qname, members);
+			store(context, hm);
+		}
+
+		if (!implicit)
+		{
+			org.openprovenance.prov.xml.Entity entity = pFactory.newEntity(
+					qname, attributes);
+			store(context, entity);
+		}
 	}
 
-	private void createAgent(QName context, QName qname)
+	private void createAgent(QName context, QName qname, boolean implicit)
 	{
-		org.openprovenance.prov.xml.Agent agent = pFactory.newAgent(qname);
-
+		List<Attribute> attributes = collectAttributes(context, qname,
+				ProvType.AGENT);
 		List<Statement> statements = collators.get(context).get(qname);
-		statements = handleBaseStatements(agent, context, qname, ProvType.AGENT);
 
 		for (Statement statement : statements)
 		{
-			String predS = statement.getPredicate().stringValue();
+			QName predQ = convertURIToQName(statement.getPredicate());
 			Value value = statement.getObject();
 			if (value instanceof Resource)
 			{
-				if (predS.equals(PROV + "actedOnBehalfOf"))
+				if (predQ.equals(Ontology.QNAME_PROVO_actedOnBehalfOf))
 				{
 					QName agentQ = convertResourceToQName((Resource) value);
-					ActedOnBehalfOf aobo = pFactory.newActedOnBehalfOf(
-							(QName) null, pFactory.newAgentRef(qname),
-							pFactory.newAgentRef(agentQ), null);
+					ActedOnBehalfOf aobo = pFactory.newActedOnBehalfOf(null,
+							qname, agentQ, null, null);
 
 					store(context, aobo);
 				}
 			}
 		}
-		store(context, agent);
+
+		if (!implicit)
+		{
+			org.openprovenance.prov.xml.Agent agent = pFactory.newAgent(qname,
+					attributes);
+			store(context, agent);
+		}
 	}
 
-	private void createActivity(QName context, QName qname)
+	private void createActivity(QName context, QName qname, boolean implicit)
 	{
-		org.openprovenance.prov.xml.Activity activity = pFactory
-				.newActivity(qname);
+		List<Attribute> attributes = collectAttributes(context, qname,
+				ProvType.ACTIVITY);
 		List<Statement> statements = collators.get(context).get(qname);
 
-		statements = handleBaseStatements(activity, context, qname,
-				ProvType.ACTIVITY);
+		XMLGregorianCalendar startTime = null;
+		XMLGregorianCalendar endTime = null;
 
 		for (Statement statement : statements)
 		{
-			String predS = statement.getPredicate().stringValue();
+			QName predQ = convertURIToQName(statement.getPredicate());
 			Value value = statement.getObject();
 			if (value instanceof Resource)
 			{
 				QName valueQ = convertResourceToQName((Resource) value);
-				if (predS.equals(PROV + "wasAssociatedWith"))
+				if (predQ.equals(Ontology.QNAME_PROVO_wasAssociatedWith))
 				{
-					WasAssociatedWith waw = pFactory.newWasAssociatedWith(
-							(QName) null, pFactory.newActivityRef(qname),
-							pFactory.newAgentRef(valueQ));
+					WasAssociatedWith waw = pFactory.newWasAssociatedWith(null,
+							qname, valueQ, null, null);
 
 					store(context, waw);
 
-				} else if (predS.equals(PROV + "used"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_used))
 				{
-					Used used = pFactory.newUsed((QName) null,
-							pFactory.newActivityRef(qname), null,
-							pFactory.newEntityRef(valueQ));
+					Used used = pFactory.newUsed(null, qname, valueQ, null,
+							null);
 					store(context, used);
 
-				} else if (predS.equals(PROV + "wasStartedBy"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasStartedBy))
 				{
-					WasStartedBy wsb = pFactory.newWasStartedBy((QName) null,
-							pFactory.newActivityRef(qname),
-							pFactory.newEntityRef(valueQ));
+					WasStartedBy wsb = pFactory.newWasStartedBy(null, qname,
+							valueQ, null, null, null);
 					store(context, wsb);
 
-				} else if (predS.equals(PROV + "generated"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_generated))
 				{
-					WasGeneratedBy wgb = pFactory.newWasGeneratedBy(
-							(QName) null, pFactory.newEntityRef(valueQ), null,
-							pFactory.newActivityRef(qname));
+					WasGeneratedBy wgb = pFactory.newWasGeneratedBy(null,
+							valueQ, qname, null, null);
 					store(context, wgb);
 
-				} else if (predS.equals(PROV + "wasEndedBy"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasEndedBy))
 				{
-					WasEndedBy web = pFactory.newWasEndedBy((QName) null,
-							pFactory.newActivityRef(qname),
-							pFactory.newEntityRef(valueQ));
+					WasEndedBy web = pFactory.newWasEndedBy(null, qname,
+							valueQ, null, null, null);
 					store(context, web);
 
-				} else if (predS.equals(PROV + "wasInformedBy"))
+				} else if (predQ.equals(Ontology.QNAME_PROVO_wasInformedBy))
 				{
-					WasInformedBy wib = pFactory.newWasInformedBy((QName) null,
-							pFactory.newActivityRef(qname),
-							pFactory.newActivityRef(valueQ));
+					WasInformedBy wib = pFactory.newWasInformedBy(null, qname,
+							valueQ, null);
 					store(context, wib);
 				}
 			} else if (value instanceof Literal)
 			{
-				if (predS.equals(PROV + "startedAtTime"))
+				if (predQ.equals(Ontology.QNAME_PROVO_startedAtTime))
 				{
 					Object literal = decodeLiteral((Literal) value);
-					activity.setStartTime((XMLGregorianCalendar) literal);
-				} else if (predS.equals(PROV + "endedAtTime"))
+					startTime = (XMLGregorianCalendar) literal;
+				} else if (predQ.equals(Ontology.QNAME_PROVO_endedAtTime))
 				{
 					Object literal = decodeLiteral((Literal) value);
-					activity.setEndTime((XMLGregorianCalendar) literal);
+					endTime = (XMLGregorianCalendar) literal;
 				}
 			}
+
+			if (predQ.equals(Ontology.QNAME_PROVO_wasInfluencedBy))
+			{
+				QName anyQ = convertResourceToQName((Resource) (statement
+						.getObject()));
+				WasInfluencedBy wib = pFactory.newWasInfluencedBy(null, qname,
+						anyQ, null);
+
+				store(convertResourceToQName(statement.getContext()), wib);
+			}
+
+			if (predQ.equals(Ontology.QNAME_PROVO_influenced))
+			{
+				QName anyQ = convertResourceToQName((Resource) (statement
+						.getObject()));
+
+				WasInfluencedBy wib = pFactory.newWasInfluencedBy(null, anyQ,
+						qname, null);
+
+				store(convertResourceToQName(statement.getContext()), wib);
+			}
 		}
-		store(context, activity);
+
+		if (!implicit)
+		{
+			org.openprovenance.prov.xml.Activity activity = pFactory
+					.newActivity(qname, startTime, endTime, attributes);
+			store(context, activity);
+		}
 	}
 
 	@Override
@@ -899,7 +1096,7 @@ public class RdfCollector extends RDFHandlerBase {
 		} else if (subject instanceof URI)
 		{
 			URI uri = (URI) subject;
-			subjectQ = new QName(uri.getNamespace(), uri.getLocalName());
+			subjectQ = convertURIToQName(uri);
 		} else
 		{
 			System.err.println("Invalid subject resource");

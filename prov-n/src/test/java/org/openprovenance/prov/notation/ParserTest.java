@@ -1,8 +1,7 @@
 package org.openprovenance.prov.notation;
 import junit.framework.TestCase;
 
-public class ParserTest extends TestCase
-{
+public class ParserTest extends TestCase {
     public void testBundle0() {
         testBundle("src/test/resources/prov/container0.provn");
     }
@@ -27,7 +26,7 @@ public class ParserTest extends TestCase
 
     public void testBundle(String file) {
         try {
-            new Utility().getParserForFile(file).bundle();
+            new Utility().getParserForFile(file).document();
         } catch (Throwable t) {
             System.out.println("exception: "+t);
             t.printStackTrace();

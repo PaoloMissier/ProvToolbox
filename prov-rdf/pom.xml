@@ -2,7 +2,7 @@
   <parent>
     <artifactId>ProvToolbox</artifactId>
     <groupId>org.openprovenance.prov</groupId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
@@ -19,75 +19,63 @@
 		<url>http://repo.aduna-software.org/maven2/releases</url>
 	</repository>
   </repositories>
-
+  
+  <properties>
+    <sesame.version>2.6.10</sesame.version> 
+  </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.openrdf.elmo</groupId>
-      <artifactId>elmo-sesame</artifactId>
-      <version>1.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.elmo</groupId>
-      <artifactId>elmo-codegen</artifactId>
-      <version>1.5</version>
-    </dependency>
 
     <dependency>
       <groupId>org.openrdf.sesame</groupId>
       <artifactId>sesame-runtime</artifactId>
-      <version>2.3.0</version>
+      <version>${sesame.version}</version>
     </dependency>
 
     <dependency>
-		<groupId>org.openrdf.sesame</groupId>
-		<artifactId>sesame-rio-n3</artifactId>
-		<version>2.3.0</version>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-n3</artifactId>
+        <version>${sesame.version}</version>
     </dependency>
 
+    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-rdfxml</artifactId>
+        <version>${sesame.version}</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.openrdf.sesame</groupId>
+        <artifactId>sesame-rio-trig</artifactId>
+        <version>${sesame.version}</version>
+    </dependency>
+<!--
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.2</version>  <!-- note old version required for elmo! -->
+      <version>1.5.2</version>   
     </dependency>
-
+note old version required for elmo! -->
 
     <dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-xml</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>0.1.2-SNAPSHOT</version>
     </dependency>
 
+<!--  
     <dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-n</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>0.1.1-SNAPSHOT</version>
     </dependency>
+-->
 
-    <dependency>
-      <groupId>org.openprovenance.prov</groupId>
-      <artifactId>prov-n</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
-      <scope>test</scope>
-      <classifier>tests</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.jvnet.jaxb2_commons</groupId>
-	  <artifactId>runtime</artifactId>
-   	  <version>${jaxb.common.version}</version>
-    </dependency>
-
-
-    <dependency>
-    	<groupId>org.openrdf.sesame</groupId>
-    	<artifactId>sesame-rio-trig</artifactId>
-    	<version>2.3.0</version>
-    </dependency>
+    
     <dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-xml</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>0.1.2-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
@@ -106,77 +94,6 @@
 
      <plugins>
 
-
-
-
-<!--
-A tool for converting ontologies to Elmo concepts and concepts back to
-ontologies.
-
-usage: java -jar elmo-codegen.jar [options] [ontology | jar]...
-[ontology | jar]... are a list of RDF and jar files that should be
-imported before converting.
- -b,-bind <package=namespace>          Binds a package name and namespace together
- -e,-extends <full class name>   super class that all concepts should extend
- -h,-help                        print this message
- -j,-jar <jar file>              filename where the jar will be saved
- -p,-prefix <prefix>             prefix the property names with namespace prefix
- -r,-rdf <RDF file>              filename where the rdf ontology will be saved
--->
-
-
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>patch.source.files</id>
-            <phase>generate-sources</phase>
-            <goals>
-             <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-
-
-
-
-
-                <mkdir dir="${project.build.directory}" />
-                <mkdir dir="${project.build.directory}/generated-sources" />
-                <mkdir dir="${project.build.directory}/generated-sources/elmo" />
-                
-                <java classname="org.openrdf.elmo.codegen.OntologyConverter" fork="true">
-                  <classpath refid="maven.compile.classpath" />
-                  <classpath>
-                    <pathelement path="." />   <!-- add this path element to pick up log4.properties in the classpath -->
-                  </classpath>
-                  <arg value="-b" />
-                  <arg value="org.openprovenance.prov.rdf=http://www.w3.org/ns/prov#" />
-                  <arg value="-b" />
-                  <arg value="org.openprovenance.dc=http://purl.org/dc/elements/1.1/" />
-                  <arg value="-j" />
-                  <arg value="target/provconcepts.jar" />
-                  <arg value="-p" />
-                  <arg value="" />
-
-                  <arg value="src/main/resources/prov-20120724.owl" />
-                </java>
-                
-                
-                <unzip src="${project.build.directory}/provconcepts.jar" dest="${project.build.directory}/generated-sources/elmo">
-                  <patternset>
-                    <exclude name="**/*.class" />
-                  </patternset>
-                </unzip>
-                
-                
-              </tasks>
-              <sourceRoot>${project.build.directory}/generated-sources/elmo/</sourceRoot>
-            </configuration>
-          </execution>
-          
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

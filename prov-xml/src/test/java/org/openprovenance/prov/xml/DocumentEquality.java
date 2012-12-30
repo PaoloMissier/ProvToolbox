@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.apache.commons.collections.bag.HashBag;
+import org.apache.log4j.Logger;
 
 /**
  * @author Trung Dong Huynh <tdh@ecs.soton.ac.uk>
  * 
  */
 public class DocumentEquality {
-
+	static Logger logger = Logger.getLogger(DocumentEquality.class);
+	
 	private boolean mergeDuplicates;
 
 	public DocumentEquality() {
@@ -59,11 +60,13 @@ public class DocumentEquality {
 		}
 		// Two normal statements
 		Class<?> class1 = r1.getClass();
-		if (class1 != r2.getClass())
+		if (class1 != r2.getClass()) {
 			return false;
+		}
 		Method[] allMethods = class1.getDeclaredMethods();
 		for (Method m : allMethods) {
-			if (m.getName().startsWith("get")) {
+			String methodName = m.getName(); 
+			if (methodName.startsWith("get")) {
 				try {
 					Object attr1 = m.invoke(r1);
 					Object attr2 = m.invoke(r2);
@@ -78,10 +81,16 @@ public class DocumentEquality {
 						if (collectionEqual((Collection<?>) attr1,
 								(Collection<?>) attr2))
 							continue;
+
 					// the two attributes are not equal
+					String attrName = methodName.substring(3);
+					logger.debug("The following " + attrName + " attributes are not the same");
+					logger.debug(attr1);
+					logger.debug(attr2);
 					return false;
 				} catch (Exception e) {
 					// Any exception means no equality
+					logger.debug(e);
 					return false;
 				}
 			}
@@ -92,8 +101,9 @@ public class DocumentEquality {
 
 	private boolean statementListEqual(List<StatementOrBundle> stmts1,
 			List<StatementOrBundle> stmts2) {
-		if (stmts1.size() != stmts2.size())
+		if (stmts1.size() != stmts2.size()) {
 			return false;
+		}
 		// Cloning the lists to avoid modification of the originals
 		List<StatementOrBundle> list1 = new ArrayList<StatementOrBundle>(stmts1);
 		List<StatementOrBundle> list2 = new ArrayList<StatementOrBundle>(stmts2);
@@ -107,6 +117,8 @@ public class DocumentEquality {
 				}
 			}
 			if (found == null) {
+				logger.debug("Cannot find the following statement in the second document");
+				logger.debug(stmt1);
 				return false;
 			}
 			list2.remove(found);

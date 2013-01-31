@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.openprovenance.prov</groupId>
-    <artifactId>ProvToolbox</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <artifactId>Prov-Newcastle-Extensions</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
   </parent>
   <artifactId>prov-java</artifactId>
   <dependencies>
@@ -15,7 +15,7 @@
   	<dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-n</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>${provtoolbox.version}</version>
     </dependency>
   </dependencies>
 </project>

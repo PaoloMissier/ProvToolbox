@@ -1,11 +1,7 @@
 target/
 *~
-<<<<<<< HEAD
 .settings/
 .classpath
 .DSStore
-
-=======
 .classpath
 *.classpath
->>>>>>> upstream/master

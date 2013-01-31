@@ -13,16 +13,10 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBElement;
 //import org.w3c.dom.Element;
 
-<<<<<<< HEAD
-import org.antlr.runtime.tree.CommonTree;
-import org.openprovenance.prov.notation.Utility;
-=======
 import org.openprovenance.prov.xml.Attribute;
->>>>>>> upstream/master
 import org.openprovenance.prov.xml.Document;
 import org.openprovenance.prov.xml.Entity;
 import org.openprovenance.prov.xml.Activity;
-import org.openprovenance.prov.xml.ProvSerialiser;
 import org.openprovenance.prov.xml.Relation0;
 import org.openprovenance.prov.xml.Influence;
 import org.openprovenance.prov.xml.Agent;
@@ -47,6 +41,8 @@ import org.openprovenance.prov.xml.Identifiable;
 import org.openprovenance.prov.xml.ProvDeserialiser;
 import org.openprovenance.prov.xml.HasExtensibility;
 
+
+
 import org.openprovenance.prov.dot.ProvPrinterConfiguration;
 import org.openprovenance.prov.dot.AgentMapEntry;
 import org.openprovenance.prov.dot.AccountColorMapEntry;
@@ -55,19 +51,13 @@ import org.openprovenance.prov.dot.ActivityMapEntry;
 import org.openprovenance.prov.dot.RelationStyleMapEntry;
 import org.openprovenance.prov.dot.ProvPrinterConfigDeserialiser;
 
-import org.openprovenance.prov.notation.Utility;
-
 /** Serialisation of  Prov representation to DOT format. */
 public class ProvToDot {
     public final static String DEFAULT_CONFIGURATION_FILE="defaultConfig.xml";
     public final static String DEFAULT_CONFIGURATION_FILE_WITH_ROLE="defaultConfigWithRole.xml";
-<<<<<<< HEAD
-    public final static String USAGE="prov2dot provFile.provn out.dot out.pdf [configuration.xml]";
-=======
     public final static String DEFAULT_CONFIGURATION_FILE_WITH_ROLE_NO_LABEL="defaultConfigWithRoleNoLabel.xml";
 
     public final static String USAGE="prov2dot provFile.xml out.dot out.pdf [configuration.xml]";
->>>>>>> upstream/master
 
     ProvUtilities u=new ProvUtilities();
     ProvFactory of=new ProvFactory();
@@ -76,42 +66,22 @@ public class ProvToDot {
         return qName.getLocalPart();
     }
 
-<<<<<<< HEAD
-    public static void main(String [] args) 
-    throws java.io.FileNotFoundException,  java.io.IOException, JAXBException, Throwable {
-=======
     public enum Config { DEFAULT, ROLE, ROLE_NO_LABEL };
     
     public static void main(String [] args) throws Exception {
->>>>>>> upstream/master
         if ((args==null) || (args.length==0) || (args.length>4)) {
             System.out.println(USAGE);
             return;
         }
 
-        Utility u=new Utility();
-        
-        String asnFile=args[0];
+        String opmFile=args[0];
         String outDot=args[1];
         String outPdf=args[2];
-        String configFile=((args.length==4) ? args[3] : DEFAULT_CONFIGURATION_FILE_WITH_ROLE);
+        String configFile=((args.length==4) ? args[3] : null);
 
-        CommonTree tree = u.convertASNToTree(asnFile);
+        ProvToDot converter=((configFile==null) ? new ProvToDot() : new ProvToDot(configFile));
 
-        Document o= (Document) u.convertTreeToJavaBean(tree);
-
-        ProvSerialiser serial=ProvSerialiser.getThreadProvSerialiser();
-
-//        System.out.println(" " + o);
-
-        //serial.serialiseBundle(new File(xmlFile),o,true);
-
-        System.out.println("new ProvToDot with configFile "+ configFile);
-
-        ProvToDot toDot=new ProvToDot(configFile); 
-        
-        toDot.convert(o,outDot,outPdf);
-        
+        converter.convert(opmFile,outDot,outPdf);
     }
 
 
@@ -151,8 +121,7 @@ public class ProvToDot {
     }
 
     public ProvToDot(String configurationFile) {
-        //this();
-        System.out.println("init with config");
+        this();
         init(configurationFile);
     }
 
@@ -170,14 +139,12 @@ public class ProvToDot {
         try {
             ProvPrinterConfiguration opc=printerDeserial.deserialiseProvPrinterConfiguration(new File(configurationFile));
             init(opc);
-            System.out.println("ProvPrinterConfiguration initialised");
         } catch (JAXBException je) {
             je.printStackTrace();
         }
     }
 
     public void init(InputStream is) {
-    	System.out.println("init ProvPrinterConfiguration -- no config");
         ProvPrinterConfigDeserialiser printerDeserial=getDeserialiser();
         try {
             ProvPrinterConfiguration opc=printerDeserial.deserialiseProvPrinterConfiguration(is);

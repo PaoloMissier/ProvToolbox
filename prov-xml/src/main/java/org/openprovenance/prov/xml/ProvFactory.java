@@ -247,7 +247,7 @@ public class ProvFactory implements ModelConstructor, QNameExport {
 	to.getType().addAll(from.getType());
 	to.getLocation().addAll(from.getLocation());
 	to.getRole().addAll(from.getRole());
-	to.getAny().addAll(from.getAny());
+	to.getAny().addAll(from.getAny());	
 	return to;
     }
 
@@ -851,9 +851,11 @@ public class ProvFactory implements ModelConstructor, QNameExport {
     public HadMember newHadMember(QName c, Collection<QName> e) {
         EntityRef cid=(c==null)? null: newEntityRef(c);
         List<EntityRef> ll=new LinkedList<EntityRef>();
-        for (QName q: e) {
-            EntityRef eid=(e==null)? null: newEntityRef(q);
-            ll.add(eid);
+        if (e!=null) {
+            for (QName q: e) {
+        	EntityRef eid=newEntityRef(q);
+        	ll.add(eid);
+            }
         }
         HadMember res = of.createHadMember();
         res.setCollection(cid);
@@ -878,10 +880,18 @@ public class ProvFactory implements ModelConstructor, QNameExport {
     }
 
     public XMLGregorianCalendar newISOTime(String time) {
-	return newTime(javax.xml.bind.DatatypeConverter.parseDateTime(time)
-						       .getTime());
+        return newTime(javax.xml.bind.DatatypeConverter.parseDateTime(time)
+                                                       .getTime());
     }
 
+    public XMLGregorianCalendar newGYear(String year) {
+        XMLGregorianCalendar cal=dataFactory.newXMLGregorianCalendar();
+        cal.setYear(new Integer(year));
+        return cal;
+    }
+
+  
+    
     public MentionOf newMentionOf(Entity infra, Entity supra, Entity bundle) {
 	return newMentionOf((infra == null) ? null : newEntityRef(infra),
 			    (supra == null) ? null : newEntityRef(supra),
@@ -1556,6 +1566,7 @@ public class ProvFactory implements ModelConstructor, QNameExport {
 	u1.getLabel().addAll(u.getLabel());
 	u1.getLocation().addAll(u.getLocation());
 	u1.getAny().addAll(u.getAny());
+
 	return u1;
     }
 

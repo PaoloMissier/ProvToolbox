@@ -13,6 +13,8 @@ import org.openrdf.rio.RDFFormat;
 
 public class RoundTripFromJavaTest extends
 		org.openprovenance.prov.xml.RoundTripFromJavaTest {
+    
+    
 
 	public RoundTripFromJavaTest(String name)
 	{
@@ -78,55 +80,8 @@ public class RoundTripFromJavaTest extends
 		return true;
 	}
 
-	public void testInfluence1() throws JAXBException
-	{
-		// RDF Collector doesn't support Influence
-	}
-
-	public void testInfluence2() throws JAXBException
-	{
-		// RDF Collector doesn't support Influence
-	}
-
-	public void testInfluence3() throws JAXBException
-	{
-		// RDF Collector doesn't support Influence
-	}
-
-	public void testInfluence4() throws JAXBException
-	{
-		// RDF Collector doesn't support Influence
-	}
-
-	public void testInfluence5() throws JAXBException
-	{
-		// RDF Collector doesn't support Influence
-	}
-
-	public void testInfluence6() throws JAXBException
-	{
-		// RDF Collector doesn't support Influence
-	}
-
-	public void testInfluence7() throws JAXBException
-	{
-
-		// RDF Collector doesn't support Influence
-
-	}
-
-	public void testScruffyGeneration1()
-	{
-		// TODO: Unsupported
-
-	}
 
 	public void testScruffyGeneration2()
-	{
-		// TODO: Unsupported
-	}
-
-	public void testScruffyInvalidation1()
 	{
 		// TODO: Unsupported
 	}
@@ -136,17 +91,7 @@ public class RoundTripFromJavaTest extends
 		// TODO: Unsupported
 	}
 
-	public void testScruffyUsage1()
-	{
-		// TODO: Unsupported
-	}
-
 	public void testScruffyUsage2()
-	{
-		// TODO: Unsupported
-	}
-
-	public void testScruffyStart1()
 	{
 		// TODO: Unsupported
 	}
@@ -162,11 +107,6 @@ public class RoundTripFromJavaTest extends
 	}
 
 	public void testScruffyStart4()
-	{
-		// TODO: Unsupported
-	}
-
-	public void testScruffyEnd1()
 	{
 		// TODO: Unsupported
 	}

@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 import org.openprovenance.prov.xml.Document;
-import org.openprovenance.prov.xml.HasExtensibility;
 import org.openprovenance.prov.xml.UncheckedTestException;
 
 import com.google.gson.Gson;
@@ -17,6 +16,8 @@ import com.google.gson.GsonBuilder;
  */
 public class RoundTripFromJavaTest extends org.openprovenance.prov.xml.RoundTripFromJavaTest
 {
+
+    
 	private Gson gson = new GsonBuilder()
 							.registerTypeAdapter(Document.class, new ProvDocumentDeserializer())
 							.registerTypeAdapter(Document.class, new ProvDocumentSerializer())

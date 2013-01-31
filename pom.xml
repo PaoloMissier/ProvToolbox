@@ -3,34 +3,23 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.openprovenance.prov</groupId>
-  <artifactId>ProvToolbox</artifactId>
-  <name>W3C PROV Specifications</name>
+  <artifactId>Prov-Newcastle-Extensions</artifactId>
+  <name>Newcastle extensions to PROV toolbox</name>
   <version>0.1.3-SNAPSHOT</version>
-  <url>http://openprovenance.org/java/site/prov1_0</url>
   <packaging>pom</packaging>
-  <description>Some Java code related to the W3C PROV specifications.</description>
-
 
   <scm>
-    <connection>scm:git:git://github.com/lucmoreau/ProvToolbox.git</connection>
-<!--    <developerConnection>scm:git:git://github.com/lucmoreau/OpenProvenanceModel.git</developerConnection> -->
-    <developerConnection>scm:git:git@github.com:lucmoreau/ProvToolbox.git</developerConnection>
+    <connection>scm:git:git://github.com/PaoloMissier/ProvToolbox.git</connection>
+    <developerConnection>scm:git:git@github.com:PaoloMissier/ProvToolbox.git</developerConnection>
   </scm>   
 
 
 
   <modules>
-    <module>prov-xml</module>    
-    <module>prov-n</module>    
-    <module>prov-dot</module>    
-    <module>prov-json</module>
-
-    <module>prov-interop</module>    
-    <module>prov-rdf</module>    
-    <module>toolbox</module>    
     <module>prov-datalog</module>  
     <module>prov-java</module>
     <module>prov-gen</module>
+    <module>VDM</module>
   </modules>
 
 

@@ -1,5 +1,6 @@
 package org.openprovenance.prov.java;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class JProvTraversal {
 		this.jtc = jtc;
 	}
 
-	public Object convert(Bundle b) {
+	public Object convert(Bundle b, Map<Object, Object> namespaces) {
 		List<Object> lnkRecords = new LinkedList<Object>();
 		List<Object> aRecords = new LinkedList<Object>();
 		List<Object> eRecords = new LinkedList<Object>();
@@ -72,8 +73,15 @@ public class JProvTraversal {
 		}
 		System.out.println("all bundles converted");
 	
+		// converting namespaces into the proper output format: HACK
+		
+		StringBuffer hrNamespaces  = new StringBuffer();
+		for (Map.Entry<Object, Object> ns : namespaces.entrySet()) {
+			hrNamespaces.append(new String("prefix "+ns.getKey()+"  "+ns.getValue()+"\n"));
+		}
+		
 		if (b.getId() == null) {
-			return jtc.convertBundle(null, aRecords,
+			return jtc.convertBundle(hrNamespaces, aRecords,
 					eRecords, agRecords, lnkRecords, bRecords);
 		} else {
 			return jtc.convertNamedBundle(b.getId(),

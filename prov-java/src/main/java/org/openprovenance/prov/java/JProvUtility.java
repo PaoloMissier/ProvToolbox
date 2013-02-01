@@ -1,5 +1,7 @@
 package org.openprovenance.prov.java;
 
+import java.util.Map;
+
 import org.antlr.runtime.tree.CommonTree;
 import org.openprovenance.prov.java.component4.Bundle;
 import org.openprovenance.prov.notation.ASNConstructor;
@@ -8,23 +10,23 @@ import org.openprovenance.prov.notation.Utility;
 
 public class JProvUtility extends Utility {
 
-	public Bundle convertASNToJava(String file) throws java.io.IOException, Throwable { 
+	public NSBundle convertASNToJava(String file) throws java.io.IOException, Throwable { 
 		CommonTree tree = convertASNToTree(file);
-		Bundle b = convertTreeToJava(tree);
+		NSBundle b = convertTreeToJava(tree);
 		return b;
 	}
 	
-	public Bundle convertTreeToJava(CommonTree tree) {
-		Object o = new TreeTraversal(new JavaConstructor()).convert(tree);
-		return (Bundle) o;
+	public NSBundle convertTreeToJava(CommonTree tree) {
+		Object o = new NSTreeTraversal(new JavaConstructor()).convert(tree);
+		return (NSBundle) o;
 	}
 	
-	public String convertJavaToASN(Bundle b) {
+	public String convertJavaToASN(Bundle b, 	Map<Object, Object> namespaces) {
 		JProvTraversal jt = new JProvTraversal(new JProvTreeConstructor(new ASNConstructor()));
 		
 		System.out.println("traversal created for convertJavaToASN");
 		
-        Object o = jt.convert(b);
+        Object o = jt.convert(b,namespaces);
 
         System.out.println("conversion accomplished");
         

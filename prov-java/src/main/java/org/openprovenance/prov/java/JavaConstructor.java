@@ -1,5 +1,6 @@
 package org.openprovenance.prov.java;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,8 @@ public class JavaConstructor implements TreeConstructor {
 	Map<String, Entity> entities = new HashMap<String, Entity>();
 	Map<String, Activity> activities = new HashMap<String, Activity>();
 	Map<String, Agent> agents = new HashMap<String, Agent>();
+	
+	Map<Object, Object> namespaces = new HashMap<Object, Object>();
 	
 	// Put any relations with ids in here so we can get them later
 	Map<String, Relation> relations = new HashMap<String, Relation>();
@@ -942,7 +945,7 @@ public class JavaConstructor implements TreeConstructor {
 	@Override
 	public Object convertNamedBundle(Object id, Object nss, List<Object> records) {
 		
-		Bundle bundle = new Bundle();
+		NSBundle bundle = new NSBundle();
 		bundle.setId((String) id);
 		
 		for (Object o : records) {
@@ -1014,6 +1017,7 @@ public class JavaConstructor implements TreeConstructor {
 
 	@Override
 	public Object convertNamespace(Object pre, Object iri) {
+		namespaces.put(pre, iri);
 		return iri;
 	}
 
@@ -1024,14 +1028,14 @@ public class JavaConstructor implements TreeConstructor {
 
 	@Override
 	public Object convertNamespaces(List<Object> namespaces) {
-		// TODO Auto-generated method stub
-		return null;
+		return namespaces;
 	}
 
 	@Override
 	public Object convertBundle(Object nss, List<Object> records,
 			List<Object> bundles) {
-		Bundle bundle = new Bundle();
+		NSBundle bundle = new NSBundle();
+		bundle.setNamespaces(namespaces);
 		for (Object o : records) {
 			bundle.addRecord((Record) o);
 		}
@@ -1048,6 +1052,12 @@ public class JavaConstructor implements TreeConstructor {
 		} else {
 			return s;
 		}
+	}
+
+	@Override
+	public void startBundle(Object bundleId) {
+		// TODO Auto-generated method stub
+		
 	}
 
 //	@Override

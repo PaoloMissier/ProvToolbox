@@ -137,7 +137,7 @@ public class Generator {
 	// Recurse through bundles to get all the elements
 	private List<Element> getAllElements(Bundle bundle) {
 
-		List<Element> bundleElements = bundle.getRecords().getElements();
+		List<Element> bundleElements  = bundle.getRecords().getElements();
 		List<Element> nonLiveElements = new ArrayList<Element>();
 
 		nonLiveElements.addAll(bundleElements);

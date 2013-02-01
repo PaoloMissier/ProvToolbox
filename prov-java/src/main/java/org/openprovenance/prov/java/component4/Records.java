@@ -11,7 +11,7 @@ import org.openprovenance.prov.java.Relation;
 
 public class Records {
 
-	List<Element> elements = new ArrayList<Element>();
+	List<Element>  elements  = new ArrayList<Element>();
 	List<Relation> relations = new ArrayList<Relation>();
 	
 	public boolean addRecord(Record record) {

@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -27,6 +28,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.commons.io.FileUtils;
 import org.openprovenance.prov.java.JProvUtility;
+import org.openprovenance.prov.java.NSBundle;
 import org.openprovenance.prov.java.component4.Bundle;
 
 import uk.ac.ncl.prov.gen.generator.Generator;
@@ -66,6 +68,8 @@ public class GraphEditorFrame extends JFrame {
 	private GraphEditor editor;
 	private PresentationGraph presentationGraph;
 
+	private NSBundle bundle;
+	
 	public GraphEditorFrame() {
 
 		try {
@@ -255,7 +259,7 @@ public class GraphEditorFrame extends JFrame {
 
 			try {
 				JProvUtility u = new JProvUtility();
-				Bundle bundle = u.convertASNToJava(file.getAbsolutePath());
+				bundle = u.convertASNToJava(file.getAbsolutePath());
 
 				this.presentationGraph = new PresentationGraph(bundle);
 				this.editor = new GraphEditor(presentationGraph);
@@ -283,7 +287,7 @@ public class GraphEditorFrame extends JFrame {
 			File file = fc.getSelectedFile();
 
 			JProvUtility u = new JProvUtility();
-			String asn = u.convertJavaToASN(presentationGraph.getGraph());
+			String asn = u.convertJavaToASN(presentationGraph.getGraph(), bundle.getNamespaces());
 
 			try {
 				FileUtils.fileWrite(file.getAbsolutePath(), asn);
@@ -343,7 +347,7 @@ public class GraphEditorFrame extends JFrame {
 			Bundle newBundle = generator.expand();
 			
 			JProvUtility u = new JProvUtility();
-			String asn = u.convertJavaToASN(newBundle);
+			String asn = u.convertJavaToASN(newBundle, bundle.getNamespaces());
 
 			try {
 				FileUtils.fileWrite(file.getAbsolutePath(), asn);

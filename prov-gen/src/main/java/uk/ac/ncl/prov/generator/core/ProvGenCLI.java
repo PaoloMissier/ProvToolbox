@@ -11,6 +11,7 @@ import java.util.HashSet;
 import org.apache.commons.io.FileUtils;
 import org.openprovenance.prov.java.Element;
 import org.openprovenance.prov.java.JProvUtility;
+import org.openprovenance.prov.java.NSBundle;
 import org.openprovenance.prov.java.Record;
 import org.openprovenance.prov.java.Relation;
 import org.openprovenance.prov.java.component4.Bundle;
@@ -82,7 +83,7 @@ public class ProvGenCLI {
 		JProvUtility u = new JProvUtility();
 		File inputF = new File(inputGraphFileName);
 		File outputF = new File(outputGraphFileName);
-		Bundle bundle;
+		NSBundle bundle;
 		try {
 			
 		    long timein = System.currentTimeMillis();
@@ -106,7 +107,7 @@ public class ProvGenCLI {
 
 			System.out.println("expansion completed. Resulted in "+n+" nodes and "+e+" edges");
 
-			String asn = u.convertJavaToASN(newBundle);
+			String asn = u.convertJavaToASN(newBundle, bundle.getNamespaces());
 		    long timeout = System.currentTimeMillis();
 
 		    System.out.println("conversion completed. time:  "+(timeout-timein)+" ms");

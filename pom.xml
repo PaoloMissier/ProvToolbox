@@ -16,7 +16,7 @@
   <properties>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
- 	<provtoolbox.version>0.1.2</provtoolbox.version>
+ 	<provtoolbox.version>0.0.1</provtoolbox.version>
 
     <scm.version>1.3</scm.version> 
 

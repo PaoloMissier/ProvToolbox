@@ -66,8 +66,8 @@ public class TraversalTest
     public void testParsing() {
     	try {
 			JProvUtility u = new JProvUtility();
-			Bundle b = u.convertASNToJava("../prov-java/src/test/resources/prov/test.provn");
-			System.out.println(u.convertJavaToASN(b));
+			org.openprovenance.prov.java.NSBundle b = u.convertASNToJava("../prov-java/src/test/resources/prov/test.provn");
+			System.out.println(u.convertJavaToASN(b, b.getNamespaces()));
 		} catch (Exception e) { 
 			e.printStackTrace();
 		} catch (Throwable t) {

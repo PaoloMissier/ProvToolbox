@@ -1,5 +1,5 @@
-bundle
-prefix ex:  <http://example.org/>
+document 
+prefix ex  <http://example.org/>
 
 activity(ex:a10,-,-,[gen:maxCardinality="10", gen:minCardinality="1"])
 activity(ex:a11,-,-,[gen:maxCardinality="10", gen:minCardinality="1"])
@@ -46,4 +46,4 @@ used(ex:a10,ex:e41, 2012-06-18T11:10:00,[gen:maxSaturation="0.2", gen:minSaturat
 used(ex:a10,ex:e42, 2012-06-18T11:10:00,[gen:maxSaturation="0.2", gen:minSaturation="0.1"])
 used(ex:a10,ex:e43, 2012-06-18T11:10:00,[gen:maxSaturation="0.2", gen:minSaturation="0.1"])
 used(ex:a10,ex:e44, 2012-06-18T11:10:00,[gen:maxSaturation="0.2", gen:minSaturation="0.1"])
-endBundle
+endDocument

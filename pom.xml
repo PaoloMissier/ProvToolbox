@@ -36,7 +36,7 @@
     <module>prov-datalog</module>  
     <module>prov-java</module>
     <module>prov-gen</module>
-    <module>VDM</module>
+    <module>prov-neo4j</module>
   </modules>
 
 
@@ -405,4 +405,13 @@
 
 
 
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>org.openprovenance.prov</groupId>
+  			<artifactId>prov-n</artifactId>
+  			<version>${provtoolbox.version}</version>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
 </project>

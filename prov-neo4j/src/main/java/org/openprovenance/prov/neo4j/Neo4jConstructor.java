@@ -1083,6 +1083,44 @@ import java.lang.String;
         return null;
     }
 
+@Override
+public Object convertExtension(Object name, Object id, Object args,
+		Object dAttrs) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public Object convertDocument(Object nss, List<Object> records,
+		List<Object> bundles) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public Object convertBundle(Object id, Object nss, List<Object> records) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public void startBundle(Object bundleId) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public Object convertString(String s, String lang) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public Object convertHadMember(Object collection, Object entity) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
 
 
 }
